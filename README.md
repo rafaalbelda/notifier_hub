@@ -10,7 +10,7 @@ Conversión de la aplicación AppDaemon `Centro Notifiche / Notifier` a una inte
 - Notificaciones por servicios `notify.*`: Telegram, mobile_app, Pushover, Discord y otros servicios notify genéricos.
 - Alexa Media Player: TTS, announce, push, reproducción de contenido, volumen temporal y restauración de volumen.
 - Google/Cast: TTS mediante servicios `tts.*`, reproducción de contenido en `media_player`, volumen temporal y restauración de volumen.
-- Llamada telefónica por `hassio.addon_stdin` con DSS VoIP o `shell_command.telegram_call` para CallMeBot.
+- Llamada telefónica por `hassio.addon_stdin` con ha-sip.
 - Sensores propios:
   - `sensor.notifier_hub_debug`
   - `sensor.notifier_hub_last_message`
@@ -151,6 +151,43 @@ data:
   phone: true
   called_number: "+34600000000"
 ```
+
+### Llamadas VoIP/SIP y `sip_server_name`
+
+Las llamadas telefónicas se envían mediante el add-on ha-sip de [`arnonym/ha-plugins`](https://github.com/arnonym/ha-plugins). La integración no realiza la llamada SIP directamente: envía el destino y el texto al add-on de Home Assistant con el servicio `hassio.addon_stdin`.
+
+El add-on esperado es `ha-sip`, identificado internamente como:
+
+```text
+c7744bff_ha-sip
+```
+
+Notifier Hub construye una URI SIP con este formato:
+
+```text
+sip:<called_number>@<sip_server_name>
+```
+
+Por ejemplo, con:
+
+```yaml
+sip_server_name: fritz.box:5060
+called_number: "600123456"
+```
+
+se enviaría al add-on:
+
+```text
+command: dial
+number: sip:600123456@fritz.box:5060
+menu:
+  message: <mensaje>
+  post_action: hangup
+```
+
+El valor por defecto `fritz.box:5060` está pensado para un router FRITZ!Box usando el puerto SIP estándar `5060`.
+
+ha-sip como add-on requiere una instalación de Home Assistant con Supervisor y add-ons; en Home Assistant Core o Container sin Supervisor no estará disponible el servicio `hassio.addon_stdin`.
 
 ## Notas de migración
 

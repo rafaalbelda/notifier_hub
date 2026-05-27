@@ -8,7 +8,6 @@ CONF_GOOGLE_PLAYERS = "google_players"
 CONF_GOOGLE_TTS_SERVICE = "google_tts_service"
 CONF_GOOGLE_NOTIFY_SERVICE = "google_notify_service"
 CONF_SIP_SERVER_NAME = "sip_server_name"
-CONF_PHONE_NOTIFY = "phone_notify"
 CONF_DEFAULT_LANGUAGE = "default_language"
 CONF_DEFAULT_VOLUME = "default_volume"
 CONF_TTS_WAIT_TIME = "tts_wait_time"
@@ -21,6 +20,7 @@ DEFAULT_VOLUME = 0.30
 DEFAULT_TTS_WAIT_TIME = 3.0
 DEFAULT_GOOGLE_TTS_SERVICE = "google_translate_say"
 DEFAULT_GOOGLE_NOTIFY_SERVICE = "google_assistant"
+DEFAULT_HA_SIP_ADDON = "c7744bff_ha-sip"
 
 SERVICE_SEND = "send"
 SERVICE_SET_CONFIG = "set_config"

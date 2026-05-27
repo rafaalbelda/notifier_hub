@@ -1,0 +1,35 @@
+alias: Prueba Notifier Hub
+mode: single
+trigger:
+  - platform: state
+    entity_id: input_button.notifier_test
+condition: []
+action:
+  - action: notifier_hub.send
+    data:
+      title: "Prueba"
+      message: "Notifier Hub funciona correctamente"
+      notify: true
+      alexa:
+        media_player: media_player.echo_salon
+        type: tts
+        volume: 0.3
+
+
+---
+alias: Prueba Notifier Hub Google Cast
+mode: single
+trigger:
+  - platform: state
+    entity_id: input_button.notifier_test_google
+condition: []
+action:
+  - action: notifier_hub.send
+    data:
+      title: "Prueba Google"
+      message: "Notifier Hub funciona con Google Cast"
+      notify: false
+      google:
+        media_player: media_player.google_home_salon
+        volume: 0.3
+        tts_service: google_translate_say

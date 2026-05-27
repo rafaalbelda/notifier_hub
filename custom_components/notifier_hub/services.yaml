@@ -1,0 +1,83 @@
+send:
+  name: Enviar notificación
+  description: Envía una notificación de texto, persistente, Alexa y/o llamada telefónica. Compatible con parte del evento AppDaemon `notifier`.
+  fields:
+    title:
+      name: Título
+      selector:
+        text:
+      default: ""
+    message:
+      name: Mensaje
+      required: true
+      selector:
+        text:
+          multiline: true
+    notify:
+      name: Servicios notify
+      description: Lista o cadena separada por comas. Usa true/on para los servicios por defecto.
+      selector:
+        object:
+      default: true
+    no_show:
+      name: No mostrar persistente
+      selector:
+        boolean:
+      default: false
+    priority:
+      name: Prioridad
+      selector:
+        boolean:
+      default: false
+    alexa:
+      name: Alexa
+      description: true/on o diccionario con media_player, volume, type, method, voice, language, ssml, push, event_id, media_content_id...
+      selector:
+        object:
+      default: false
+    google:
+      name: Google / Cast
+      description: true/on o diccionario con media_player, volume, tts_service, language, mode, notify_service, media_content_id...
+      selector:
+        object:
+      default: false
+    phone:
+      name: Llamada telefónica
+      selector:
+        boolean:
+      default: false
+    called_number:
+      name: Número llamado
+      selector:
+        text:
+      default: ""
+    image:
+      name: Imagen
+      selector:
+        text:
+      default: ""
+    link:
+      name: Enlace
+      selector:
+        text:
+      default: ""
+    target:
+      name: Target
+      selector:
+        object:
+      default: ""
+    html:
+      name: HTML
+      selector:
+        boolean:
+      default: false
+
+set_config:
+  name: Actualizar configuración runtime
+  description: Actualiza opciones de la integración sin reiniciar Home Assistant.
+  fields:
+    config:
+      name: Configuración
+      required: true
+      selector:
+        object:

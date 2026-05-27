@@ -1,0 +1,10 @@
+{
+  "domain": "notifier_hub",
+  "name": "Notifier Hub",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://github.com/rafaalbelda/Package-Notification-HUB-AppDaemon",
+  "iot_class": "local_push",
+  "requirements": [],
+  "version": "0.2.0"
+}

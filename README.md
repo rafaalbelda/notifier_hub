@@ -65,6 +65,15 @@ El formulario de configuración de la UI está organizado en secciones:
 - Notifications
 - Auto Volume
 
+En la seccion `Auto Volume` puedes activar `install_dashboard`.
+Si esta opcion esta activada, la integracion copia automaticamente el dashboard a:
+
+```text
+/config/notifier_hub_dashboard.yaml
+```
+
+Tambien crea una notificacion persistente con el bloque `lovelace:` que debes anadir a `configuration.yaml` para mostrarlo en la barra lateral.
+
 ## Dashboard
 
 El archivo `notifier_hub_dashboard.yaml` incluye un panel Lovelace con estado, actividad TTS y botones de prueba.
@@ -195,6 +204,21 @@ La integracion nativa escucha esos eventos directamente:
 
 Activalo o desactivalo con `ha_event_notifications` o con `switch.notifier_hub_home_assistant_event_notifications`.
 Por defecto usa `notify_services`; si quieres separar esos avisos, define `ha_event_notify_services`.
+
+`notify_services` se usa para las notificaciones normales cuando un mensaje llega con `notify: true`.
+`ha_event_notify_services` se usa solo para los avisos internos de Home Assistant (`Start`, `Stop`, `Final Write`, `Close` y `Restart`).
+Esto permite enviar los eventos del sistema a un canal distinto, por ejemplo solo al movil:
+
+```yaml
+notify_services:
+  - notify.telegram
+  - notify.mobile_app_mi_telefono
+
+ha_event_notify_services:
+  - notify.mobile_app_mi_telefono
+```
+
+Si `ha_event_notify_services` esta vacio, Notifier Hub usa `notify_services` como fallback.
 
 ## Auto Volume
 

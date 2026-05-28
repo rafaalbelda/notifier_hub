@@ -28,6 +28,7 @@ from .const import (
     CONF_HA_EVENT_NOTIFY_SERVICES,
     CONF_AUTO_VOLUME,
     CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
+    CONF_INSTALL_DASHBOARD,
     CONF_DND_ENTITY,
     CONF_GUEST_MODE_ENTITY,
     CONF_PRIORITY_MESSAGE_ENTITY,
@@ -141,6 +142,10 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
 
     return vol.Schema(
         {
+            vol.Optional(
+                CONF_PERSONAL_ASSISTANT,
+                default=default(CONF_PERSONAL_ASSISTANT, DEFAULT_PERSONAL_ASSISTANT),
+            ): str,
             vol.Optional(SECTION_PERSONS): section(
                 vol.Schema(
                     {
@@ -173,13 +178,13 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
             vol.Optional(SECTION_ALEXA): section(
                 vol.Schema(
                     {
-                        vol.Optional(CONF_ALEXA_PLAYERS, default=default(CONF_ALEXA_PLAYERS, [])): selector.EntitySelector(
-                            selector.EntitySelectorConfig(domain="media_player", multiple=True)
-                        ),
                         vol.Optional(
                             CONF_ALEXA_NOTIFICATIONS,
                             default=default(CONF_ALEXA_NOTIFICATIONS, True),
                         ): selector.BooleanSelector(),
+                        vol.Optional(CONF_ALEXA_PLAYERS, default=default(CONF_ALEXA_PLAYERS, [])): selector.EntitySelector(
+                            selector.EntitySelectorConfig(domain="media_player", multiple=True)
+                        ),
                     }
                 ),
                 {"collapsed": False},
@@ -187,6 +192,10 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
             vol.Optional(SECTION_GOOGLE): section(
                 vol.Schema(
                     {
+                        vol.Optional(
+                            CONF_GOOGLE_NOTIFICATIONS,
+                            default=default(CONF_GOOGLE_NOTIFICATIONS, True),
+                        ): selector.BooleanSelector(),
                         vol.Optional(CONF_GOOGLE_PLAYERS, default=default(CONF_GOOGLE_PLAYERS, [])): selector.EntitySelector(
                             selector.EntitySelectorConfig(domain="media_player", multiple=True)
                         ),
@@ -198,10 +207,9 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                             CONF_GOOGLE_NOTIFY_SERVICE,
                             default=default(CONF_GOOGLE_NOTIFY_SERVICE, DEFAULT_GOOGLE_NOTIFY_SERVICE),
                         ): str,
-                        vol.Optional(
-                            CONF_GOOGLE_NOTIFICATIONS,
-                            default=default(CONF_GOOGLE_NOTIFICATIONS, True),
-                        ): selector.BooleanSelector(),
+                        vol.Optional(CONF_DEFAULT_LANGUAGE, default=default(CONF_DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)): str,
+                        vol.Optional(CONF_DEFAULT_VOLUME, default=default(CONF_DEFAULT_VOLUME, DEFAULT_VOLUME)): vol.Coerce(float),
+                        vol.Optional(CONF_TTS_WAIT_TIME, default=default(CONF_TTS_WAIT_TIME, DEFAULT_TTS_WAIT_TIME)): vol.Coerce(float),
                     }
                 ),
                 {"collapsed": False},
@@ -209,11 +217,11 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
             vol.Optional(SECTION_PHONE): section(
                 vol.Schema(
                     {
-                        vol.Optional(CONF_SIP_SERVER_NAME, default=default(CONF_SIP_SERVER_NAME, DEFAULT_SIP_SERVER_NAME)): str,
                         vol.Optional(
                             CONF_PHONE_NOTIFICATIONS,
                             default=default(CONF_PHONE_NOTIFICATIONS, False),
                         ): selector.BooleanSelector(),
+                        vol.Optional(CONF_SIP_SERVER_NAME, default=default(CONF_SIP_SERVER_NAME, DEFAULT_SIP_SERVER_NAME)): str,
                     }
                 ),
                 {"collapsed": False},
@@ -221,13 +229,6 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
             vol.Optional(SECTION_NOTIFICATIONS): section(
                 vol.Schema(
                     {
-                        vol.Optional(
-                            CONF_PERSONAL_ASSISTANT,
-                            default=default(CONF_PERSONAL_ASSISTANT, DEFAULT_PERSONAL_ASSISTANT),
-                        ): str,
-                        vol.Optional(CONF_DEFAULT_LANGUAGE, default=default(CONF_DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)): str,
-                        vol.Optional(CONF_DEFAULT_VOLUME, default=default(CONF_DEFAULT_VOLUME, DEFAULT_VOLUME)): vol.Coerce(float),
-                        vol.Optional(CONF_TTS_WAIT_TIME, default=default(CONF_TTS_WAIT_TIME, DEFAULT_TTS_WAIT_TIME)): vol.Coerce(float),
                         vol.Optional(
                             CONF_TEXT_NOTIFICATIONS,
                             default=default(CONF_TEXT_NOTIFICATIONS, True),
@@ -244,6 +245,24 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                             CONF_HA_EVENT_NOTIFICATIONS,
                             default=default(CONF_HA_EVENT_NOTIFICATIONS, True),
                         ): selector.BooleanSelector(),
+                    }
+                ),
+                {"collapsed": False},
+            ),
+            vol.Optional(SECTION_AUTO_VOLUME): section(
+                vol.Schema(
+                    {
+                        vol.Optional(CONF_AUTO_VOLUME, default=default(CONF_AUTO_VOLUME, False)): selector.BooleanSelector(),
+                        vol.Optional(
+                            CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
+                            default=_as_list(default(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, [])),
+                        ): selector.EntitySelector(
+                            selector.EntitySelectorConfig(domain="media_player", multiple=True)
+                        ),
+                        vol.Optional(
+                            CONF_INSTALL_DASHBOARD,
+                            default=default(CONF_INSTALL_DASHBOARD, True),
+                        ): selector.BooleanSelector(),
                         vol.Optional(CONF_DND_ENTITY, default=default(CONF_DND_ENTITY, DEFAULT_DND_ENTITY)): selector.EntitySelector(
                             selector.EntitySelectorConfig(domain=["input_boolean", "switch", "binary_sensor"])
                         ),
@@ -258,20 +277,6 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                             default=default(CONF_PRIORITY_MESSAGE_ENTITY, DEFAULT_PRIORITY_MESSAGE_ENTITY),
                         ): selector.EntitySelector(
                             selector.EntitySelectorConfig(domain=["input_boolean", "switch", "binary_sensor"])
-                        ),
-                    }
-                ),
-                {"collapsed": False},
-            ),
-            vol.Optional(SECTION_AUTO_VOLUME): section(
-                vol.Schema(
-                    {
-                        vol.Optional(CONF_AUTO_VOLUME, default=default(CONF_AUTO_VOLUME, False)): selector.BooleanSelector(),
-                        vol.Optional(
-                            CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
-                            default=_as_list(default(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, [])),
-                        ): selector.EntitySelector(
-                            selector.EntitySelectorConfig(domain="media_player", multiple=True)
                         ),
                     }
                 ),

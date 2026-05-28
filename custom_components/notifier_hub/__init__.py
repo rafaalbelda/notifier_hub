@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from pathlib import Path
+import shutil
 from datetime import datetime, time as dt_time, timedelta
 from typing import Any
 
@@ -33,6 +35,7 @@ from .const import (
     CONF_HA_EVENT_NOTIFY_SERVICES,
     CONF_AUTO_VOLUME,
     CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
+    CONF_INSTALL_DASHBOARD,
     CONF_DND_ENTITY,
     CONF_DND_MODE,
     CONF_GUEST_MODE,
@@ -93,6 +96,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_HA_EVENT_NOTIFY_SERVICES, default=[]): cv.ensure_list,
                 vol.Optional(CONF_AUTO_VOLUME, default=False): cv.boolean,
                 vol.Optional(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, default=[]): cv.ensure_list,
+                vol.Optional(CONF_INSTALL_DASHBOARD, default=True): cv.boolean,
                 vol.Optional(CONF_DND_ENTITY, default=DEFAULT_DND_ENTITY): cv.string,
                 vol.Optional(CONF_GUEST_MODE_ENTITY, default=DEFAULT_GUEST_MODE_ENTITY): cv.string,
                 vol.Optional(CONF_PRIORITY_MESSAGE_ENTITY, default=DEFAULT_PRIORITY_MESSAGE_ENTITY): cv.string,
@@ -206,6 +210,7 @@ class NotifierHub:
         data.setdefault(CONF_HA_EVENT_NOTIFY_SERVICES, [])
         data.setdefault(CONF_AUTO_VOLUME, False)
         data.setdefault(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, [])
+        data.setdefault(CONF_INSTALL_DASHBOARD, True)
         data.setdefault(CONF_DND_ENTITY, DEFAULT_DND_ENTITY)
         data.setdefault(CONF_GUEST_MODE_ENTITY, DEFAULT_GUEST_MODE_ENTITY)
         data.setdefault(CONF_PRIORITY_MESSAGE_ENTITY, DEFAULT_PRIORITY_MESSAGE_ENTITY)
@@ -227,6 +232,7 @@ class NotifierHub:
 
     async def async_setup(self) -> None:
         self._update_auto_volume_state()
+        await self.async_install_dashboard()
         self.hass.services.async_register(DOMAIN, SERVICE_SEND, self._handle_send, schema=SEND_SCHEMA)
         self.hass.services.async_register(DOMAIN, SERVICE_SET_CONFIG, self._handle_set_config, schema=SET_CONFIG_SCHEMA)
         self._remove_listener = self.hass.bus.async_listen(EVENT_NOTIFIER, self._handle_notifier_event)
@@ -244,6 +250,39 @@ class NotifierHub:
         )
         self.set_debug("on", {})
         await self.async_apply_auto_volume()
+
+    async def async_install_dashboard(self) -> None:
+        if not self.config.get(CONF_INSTALL_DASHBOARD, True):
+            return
+        source = Path(__file__).with_name("notifier_hub_dashboard.yaml")
+        if not source.exists():
+            _LOGGER.warning("Notifier Hub dashboard source not found: %s", source)
+            return
+        target = Path(self.hass.config.path("notifier_hub_dashboard.yaml"))
+        await self.hass.async_add_executor_job(shutil.copyfile, source, target)
+        await self.hass.services.async_call(
+            "persistent_notification",
+            "create",
+            {
+                "notification_id": "notifier_hub_dashboard_install",
+                "title": "Notifier Hub dashboard",
+                "message": (
+                    "El dashboard de Notifier Hub se ha copiado a `/config/notifier_hub_dashboard.yaml`.\n\n"
+                    "Para mostrarlo en la barra lateral, anade esto a `configuration.yaml` y reinicia Home Assistant:\n\n"
+                    "```yaml\n"
+                    "lovelace:\n"
+                    "  dashboards:\n"
+                    "    notifier-hub:\n"
+                    "      mode: yaml\n"
+                    "      title: Notifier Hub\n"
+                    "      icon: mdi:bell-ring\n"
+                    "      show_in_sidebar: true\n"
+                    "      filename: notifier_hub_dashboard.yaml\n"
+                    "```"
+                ),
+            },
+            blocking=False,
+        )
 
     async def async_unload(self) -> None:
         if self._remove_listener:

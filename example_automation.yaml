@@ -32,4 +32,4 @@ action:
       google:
         media_player: media_player.google_home_salon
         volume: 0.3
-        tts_service: google_translate_say
+        tts_service: tts.google_es_es

@@ -16,7 +16,6 @@ from .alexa_manager import AlexaManager
 from .google_manager import GoogleManager
 from .const import (
     CONF_ALEXA_PLAYERS,
-    CONF_ALEXA_SKILL_ID,
     CONF_GOOGLE_NOTIFY_SERVICE,
     CONF_GOOGLE_PLAYERS,
     CONF_GOOGLE_TTS_SERVICE,
@@ -25,6 +24,7 @@ from .const import (
     CONF_DEFAULT_VOLUME,
     CONF_NOTIFY_SERVICES,
     CONF_PERSONAL_ASSISTANT,
+    CONF_PERSONS,
     CONF_SIP_SERVER_NAME,
     CONF_TTS_WAIT_TIME,
     DEFAULT_LANGUAGE,
@@ -50,9 +50,9 @@ CONFIG_SCHEMA = vol.Schema(
         DOMAIN: vol.Schema(
             {
                 vol.Optional(CONF_PERSONAL_ASSISTANT, default=DEFAULT_PERSONAL_ASSISTANT): cv.string,
+                vol.Optional(CONF_PERSONS, default=[]): cv.ensure_list,
                 vol.Optional(CONF_NOTIFY_SERVICES, default=[]): cv.ensure_list,
                 vol.Optional(CONF_ALEXA_PLAYERS, default=[]): cv.ensure_list,
-                vol.Optional(CONF_ALEXA_SKILL_ID, default=""): cv.string,
                 vol.Optional(CONF_GOOGLE_PLAYERS, default=[]): cv.ensure_list,
                 vol.Optional(CONF_GOOGLE_TTS_SERVICE, default=DEFAULT_GOOGLE_TTS_SERVICE): cv.string,
                 vol.Optional(CONF_GOOGLE_NOTIFY_SERVICE, default=DEFAULT_GOOGLE_NOTIFY_SERVICE): cv.string,
@@ -153,6 +153,7 @@ class NotifierHub:
         data = dict(self.entry.data)
         data.update(dict(self.entry.options))
         data.setdefault(CONF_PERSONAL_ASSISTANT, DEFAULT_PERSONAL_ASSISTANT)
+        data.setdefault(CONF_PERSONS, [])
         data.setdefault(CONF_NOTIFY_SERVICES, [])
         data.setdefault(CONF_ALEXA_PLAYERS, [])
         data.setdefault(CONF_GOOGLE_PLAYERS, [])
@@ -241,6 +242,10 @@ class NotifierHub:
     def _check_location(self, requested: str) -> bool:
         if not requested:
             return True
+        persons = h.return_list(self.config.get(CONF_PERSONS, []))
+        if persons:
+            requested_location = requested.lower()
+            return any(self._state_value(person, "").lower() == requested_location for person in persons)
         tracker = self.config.get("location_tracker", "")
         if not tracker:
             return True

@@ -37,7 +37,7 @@ send:
       default: false
     google:
       name: Google / Cast
-      description: true/on o diccionario con media_player, volume, tts_service, language, mode, notify_service, media_content_id...
+      description: true/on o diccionario con media_player, volume, tts_service/tts_entity, language, mode, notify_service, media_content_id...
       selector:
         object:
       default: false

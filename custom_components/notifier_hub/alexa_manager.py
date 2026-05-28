@@ -208,14 +208,6 @@ class AlexaManager:
                     {"message": msg.strip(), "data": {"target": players, "data": alexa_data}},
                     blocking=False,
                 )
-                if event_id := data.get("event_id"):
-                    skill_id = self.hub.config.get("alexa_skill_id", "")
-                    if skill_id:
-                        await self.hass.services.async_call(
-                            "media_player", "play_media",
-                            {"entity_id": players[-1], "media_content_id": skill_id, "media_content_type": "skill"},
-                            blocking=False,
-                        )
                 await asyncio.sleep(h.estimate_speech_duration(msg, float(data.get("wait_time", self.hub.config.get("tts_wait_time", 3.0)))))
                 await self._restore_volume()
                 self.hub.set_debug("OK", {})

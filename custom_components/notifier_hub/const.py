@@ -1,9 +1,9 @@
 DOMAIN = "notifier_hub"
 
 CONF_PERSONAL_ASSISTANT = "personal_assistant"
+CONF_PERSONS = "persons"
 CONF_NOTIFY_SERVICES = "notify_services"
 CONF_ALEXA_PLAYERS = "alexa_players"
-CONF_ALEXA_SKILL_ID = "alexa_skill_id"
 CONF_GOOGLE_PLAYERS = "google_players"
 CONF_GOOGLE_TTS_SERVICE = "google_tts_service"
 CONF_GOOGLE_NOTIFY_SERVICE = "google_notify_service"

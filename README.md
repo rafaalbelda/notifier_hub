@@ -46,16 +46,18 @@ También puedes configurarla en `configuration.yaml`:
 ```yaml
 notifier_hub:
   personal_assistant: Jarvis
+  persons:
+    - person.ana
+    - person.carlos
   notify_services:
     - notify.mobile_app_mi_telefono
     - notify.telegram
   alexa_players:
     - media_player.echo_salon
     - media_player.echo_cocina
-  alexa_skill_id: ""
   google_players:
     - media_player.google_home_salon
-  google_tts_service: google_translate_say
+  google_tts_service: tts.google_es_es
   google_notify_service: google_assistant
   sip_server_name: fritz.box:5060
   default_language: es-ES
@@ -70,6 +72,10 @@ notifier_hub:
   priority_message_entity: input_boolean.notifier_priority_message
   location_tracker: group.notifier_location_tracker
 ```
+
+`persons` se puede configurar desde la UI con un selector de entidades `person.*`.
+Cuando hay personas configuradas, Notifier Hub las usa para comprobar la ubicación de los mensajes con `location`.
+Si `persons` está vacío, se mantiene la compatibilidad con `location_tracker`.
 
 ## Uso como servicio
 
@@ -112,8 +118,10 @@ data:
   google:
     media_player: media_player.google_home_salon
     volume: 0.35
-    tts_service: google_translate_say
+    tts_service: tts.google_es_es
 ```
+
+Para instalaciones recientes de Home Assistant, usa la entidad TTS creada por la integración Google Translate, por ejemplo `tts.google_es_es`. El servicio heredado `google_translate_say` sigue funcionando si tienes configurada la plataforma antigua en YAML; si existe la entidad moderna, Notifier Hub la usará automáticamente.
 
 También puedes reproducir contenido multimedia:
 

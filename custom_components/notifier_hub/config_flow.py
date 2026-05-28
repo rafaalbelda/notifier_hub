@@ -4,11 +4,11 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
+from homeassistant.core import callback
 from homeassistant.helpers import selector
 
 from .const import (
     CONF_ALEXA_PLAYERS,
-    CONF_ALEXA_SKILL_ID,
     CONF_GOOGLE_NOTIFY_SERVICE,
     CONF_GOOGLE_PLAYERS,
     CONF_GOOGLE_TTS_SERVICE,
@@ -16,6 +16,7 @@ from .const import (
     CONF_DEFAULT_VOLUME,
     CONF_NOTIFY_SERVICES,
     CONF_PERSONAL_ASSISTANT,
+    CONF_PERSONS,
     CONF_SIP_SERVER_NAME,
     CONF_TTS_WAIT_TIME,
     DEFAULT_LANGUAGE,
@@ -32,6 +33,11 @@ from .const import (
 class NotifierHubConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: config_entries.ConfigEntry):
+        return NotifierHubOptionsFlow(config_entry)
+
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
         if user_input is not None:
             await self.async_set_unique_id(DOMAIN)
@@ -45,24 +51,74 @@ class NotifierHubConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(title="Notifier Hub", data=user_input)
 
     def _schema(self):
-        return vol.Schema(
-            {
-                vol.Optional(CONF_PERSONAL_ASSISTANT, default=DEFAULT_PERSONAL_ASSISTANT): str,
-                vol.Optional(CONF_NOTIFY_SERVICES, default=[]): selector.SelectSelector(
-                    selector.SelectSelectorConfig(options=[], multiple=True, custom_value=True)
-                ),
-                vol.Optional(CONF_ALEXA_PLAYERS, default=[]): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain="media_player", multiple=True)
-                ),
-                vol.Optional(CONF_ALEXA_SKILL_ID, default=""): str,
-                vol.Optional(CONF_GOOGLE_PLAYERS, default=[]): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain="media_player", multiple=True)
-                ),
-                vol.Optional(CONF_GOOGLE_TTS_SERVICE, default=DEFAULT_GOOGLE_TTS_SERVICE): str,
-                vol.Optional(CONF_GOOGLE_NOTIFY_SERVICE, default=DEFAULT_GOOGLE_NOTIFY_SERVICE): str,
-                vol.Optional(CONF_SIP_SERVER_NAME, default=DEFAULT_SIP_SERVER_NAME): str,
-                vol.Optional(CONF_DEFAULT_LANGUAGE, default=DEFAULT_LANGUAGE): str,
-                vol.Optional(CONF_DEFAULT_VOLUME, default=DEFAULT_VOLUME): float,
-                vol.Optional(CONF_TTS_WAIT_TIME, default=DEFAULT_TTS_WAIT_TIME): float,
-            }
-        )
+        return _schema(self.hass)
+
+
+class NotifierHubOptionsFlow(config_entries.OptionsFlow):
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input: dict[str, Any] | None = None):
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        data = dict(self.config_entry.data)
+        data.update(dict(self.config_entry.options))
+        return self.async_show_form(step_id="init", data_schema=_schema(self.hass, data))
+
+
+def _notify_service_options(hass) -> list[str]:
+    services = hass.services.async_services().get("notify", {})
+    return [f"notify.{service}" for service in sorted(services)]
+
+
+def _as_list(value: Any) -> list[str]:
+    if value is None or value == "":
+        return []
+    if isinstance(value, list):
+        return [str(item) for item in value if str(item)]
+    if isinstance(value, (set, tuple)):
+        return [str(item) for item in value if str(item)]
+    return [item.strip() for item in str(value).split(",") if item.strip()]
+
+
+def _schema(hass, defaults: dict[str, Any] | None = None):
+    defaults = defaults or {}
+    notify_services = _as_list(defaults.get(CONF_NOTIFY_SERVICES, []))
+    notify_options = sorted(set(_notify_service_options(hass)) | set(notify_services))
+
+    def default(key: str, fallback: Any) -> Any:
+        return defaults.get(key, fallback)
+
+    return vol.Schema(
+        {
+            vol.Optional(
+                CONF_PERSONAL_ASSISTANT,
+                default=default(CONF_PERSONAL_ASSISTANT, DEFAULT_PERSONAL_ASSISTANT),
+            ): str,
+            vol.Optional(CONF_PERSONS, default=_as_list(default(CONF_PERSONS, []))): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="person", multiple=True)
+            ),
+            vol.Optional(CONF_NOTIFY_SERVICES, default=notify_services): selector.SelectSelector(
+                selector.SelectSelectorConfig(options=notify_options, multiple=True, custom_value=True)
+            ),
+            vol.Optional(CONF_ALEXA_PLAYERS, default=default(CONF_ALEXA_PLAYERS, [])): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="media_player", multiple=True)
+            ),
+            vol.Optional(CONF_GOOGLE_PLAYERS, default=default(CONF_GOOGLE_PLAYERS, [])): selector.EntitySelector(
+                selector.EntitySelectorConfig(domain="media_player", multiple=True)
+            ),
+            vol.Optional(
+                CONF_GOOGLE_TTS_SERVICE,
+                default=default(CONF_GOOGLE_TTS_SERVICE, DEFAULT_GOOGLE_TTS_SERVICE),
+            ): str,
+            vol.Optional(
+                CONF_GOOGLE_NOTIFY_SERVICE,
+                default=default(CONF_GOOGLE_NOTIFY_SERVICE, DEFAULT_GOOGLE_NOTIFY_SERVICE),
+            ): str,
+            vol.Optional(CONF_SIP_SERVER_NAME, default=default(CONF_SIP_SERVER_NAME, DEFAULT_SIP_SERVER_NAME)): str,
+            vol.Optional(CONF_DEFAULT_LANGUAGE, default=default(CONF_DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)): str,
+            vol.Optional(CONF_DEFAULT_VOLUME, default=default(CONF_DEFAULT_VOLUME, DEFAULT_VOLUME)): float,
+            vol.Optional(CONF_TTS_WAIT_TIME, default=default(CONF_TTS_WAIT_TIME, DEFAULT_TTS_WAIT_TIME)): float,
+        }
+    )

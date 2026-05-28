@@ -3,9 +3,10 @@
     "step": {
       "user": {
         "data": {
-          "personal_assistant": "Personal assistant"
+          "personal_assistant": "Personal assistant",
+          "install_dashboard": "Install dashboard"
         },
-        "section": {
+        "sections": {
           "persons_section": {
             "name": "Persons",
             "data": {
@@ -62,8 +63,7 @@
             "name": "Auto Volume",
             "data": {
               "auto_volume": "Auto volume",
-              "auto_volume_exclude_players": "Excluded media players",
-              "install_dashboard": "Install dashboard"
+              "auto_volume_exclude_players": "Excluded media players"
             }
           }
         }
@@ -74,9 +74,10 @@
     "step": {
       "init": {
         "data": {
-          "personal_assistant": "Personal assistant"
+          "personal_assistant": "Personal assistant",
+          "install_dashboard": "Install dashboard"
         },
-        "section": {
+        "sections": {
           "persons_section": {
             "name": "Persons",
             "data": {
@@ -133,8 +134,7 @@
             "name": "Auto Volume",
             "data": {
               "auto_volume": "Auto volume",
-              "auto_volume_exclude_players": "Excluded media players",
-              "install_dashboard": "Install dashboard"
+              "auto_volume_exclude_players": "Excluded media players"
             }
           }
         }

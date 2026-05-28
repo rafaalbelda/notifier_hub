@@ -259,10 +259,6 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                         ): selector.EntitySelector(
                             selector.EntitySelectorConfig(domain="media_player", multiple=True)
                         ),
-                        vol.Optional(
-                            CONF_INSTALL_DASHBOARD,
-                            default=default(CONF_INSTALL_DASHBOARD, True),
-                        ): selector.BooleanSelector(),
                         vol.Optional(CONF_DND_ENTITY, default=default(CONF_DND_ENTITY, DEFAULT_DND_ENTITY)): selector.EntitySelector(
                             selector.EntitySelectorConfig(domain=["input_boolean", "switch", "binary_sensor"])
                         ),
@@ -282,5 +278,9 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                 ),
                 {"collapsed": False},
             ),
+            vol.Optional(
+                CONF_INSTALL_DASHBOARD,
+                default=default(CONF_INSTALL_DASHBOARD, True),
+            ): selector.BooleanSelector(),
         }
     )

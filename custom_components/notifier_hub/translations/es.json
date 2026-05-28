@@ -1,0 +1,144 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "personal_assistant": "Asistente personal",
+          "install_dashboard": "Instalar dashboard"
+        },
+        "sections": {
+          "persons_section": {
+            "name": "Persons",
+            "data": {
+              "persons": "Personas",
+              "location_tracker": "Rastreador de ubicacion"
+            }
+          },
+          "notify_services_section": {
+            "name": "Notify Services",
+            "data": {
+              "notify_services": "Servicios de notificacion",
+              "ha_event_notify_services": "Servicios para eventos de Home Assistant"
+            }
+          },
+          "alexa_section": {
+            "name": "Alexa",
+            "data": {
+              "alexa_notifications": "Notificaciones de Alexa",
+              "alexa_players": "Reproductores Alexa"
+            }
+          },
+          "google_section": {
+            "name": "Google",
+            "data": {
+              "google_notifications": "Notificaciones de Google",
+              "google_players": "Reproductores Google",
+              "google_tts_service": "Servicio TTS de Google",
+              "google_notify_service": "Servicio notify de Google",
+              "default_language": "Idioma por defecto",
+              "default_volume": "Volumen por defecto",
+              "tts_wait_time": "Espera TTS"
+            }
+          },
+          "phone_section": {
+            "name": "Phone",
+            "data": {
+              "phone_notifications": "Notificaciones por telefono",
+              "sip_server_name": "Servidor SIP"
+            }
+          },
+          "notifications_section": {
+            "name": "Notifications",
+            "data": {
+              "text_notifications": "Notificaciones de texto",
+              "screen_notifications": "Notificaciones persistentes",
+              "speech_notifications": "Notificaciones de voz",
+              "ha_event_notifications": "Notificaciones de eventos de Home Assistant",
+              "dnd_entity": "Entidad de no molestar",
+              "guest_mode_entity": "Entidad de modo invitados",
+              "priority_message_entity": "Entidad de mensaje prioritario"
+            }
+          },
+          "auto_volume_section": {
+            "name": "Auto Volume",
+            "data": {
+              "auto_volume": "Volumen automatico",
+              "auto_volume_exclude_players": "Reproductores excluidos"
+            }
+          }
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "personal_assistant": "Asistente personal",
+          "install_dashboard": "Instalar dashboard"
+        },
+        "sections": {
+          "persons_section": {
+            "name": "Persons",
+            "data": {
+              "persons": "Personas",
+              "location_tracker": "Rastreador de ubicacion"
+            }
+          },
+          "notify_services_section": {
+            "name": "Notify Services",
+            "data": {
+              "notify_services": "Servicios de notificacion",
+              "ha_event_notify_services": "Servicios para eventos de Home Assistant"
+            }
+          },
+          "alexa_section": {
+            "name": "Alexa",
+            "data": {
+              "alexa_notifications": "Notificaciones de Alexa",
+              "alexa_players": "Reproductores Alexa"
+            }
+          },
+          "google_section": {
+            "name": "Google",
+            "data": {
+              "google_notifications": "Notificaciones de Google",
+              "google_players": "Reproductores Google",
+              "google_tts_service": "Servicio TTS de Google",
+              "google_notify_service": "Servicio notify de Google",
+              "default_language": "Idioma por defecto",
+              "default_volume": "Volumen por defecto",
+              "tts_wait_time": "Espera TTS"
+            }
+          },
+          "phone_section": {
+            "name": "Phone",
+            "data": {
+              "phone_notifications": "Notificaciones por telefono",
+              "sip_server_name": "Servidor SIP"
+            }
+          },
+          "notifications_section": {
+            "name": "Notifications",
+            "data": {
+              "text_notifications": "Notificaciones de texto",
+              "screen_notifications": "Notificaciones persistentes",
+              "speech_notifications": "Notificaciones de voz",
+              "ha_event_notifications": "Notificaciones de eventos de Home Assistant",
+              "dnd_entity": "Entidad de no molestar",
+              "guest_mode_entity": "Entidad de modo invitados",
+              "priority_message_entity": "Entidad de mensaje prioritario"
+            }
+          },
+          "auto_volume_section": {
+            "name": "Auto Volume",
+            "data": {
+              "auto_volume": "Volumen automatico",
+              "auto_volume_exclude_players": "Reproductores excluidos"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -9,6 +9,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
     entities = [
         NotifierHubSensor(hub, "debug_error", "Notifier Hub Debug", "debug"),
         NotifierHubSensor(hub, "last_message", "Notifier Hub Last Message", "last_message"),
+        NotifierHubSensor(hub, "day_period", "Notifier Hub Day Period", "day_period"),
+        NotifierHubSensor(hub, "day_period_volume", "Notifier Hub Day Period Volume", "day_period_volume"),
     ]
     hub.register_entities(entities)
     async_add_entities(entities)
@@ -27,4 +29,9 @@ class NotifierHubSensor(NotifierHubEntity, SensorEntity):
     def extra_state_attributes(self):
         if self.data_key == "debug":
             return self.coordinator.state.get("debug_attributes", {})
+        if self.data_key == "day_period_volume":
+            return {
+                "volume_level": self.coordinator.state.get("day_period_volume_level", 0.0),
+                "period": self.coordinator.state.get("day_period", ""),
+            }
         return None

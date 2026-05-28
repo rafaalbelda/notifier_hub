@@ -9,7 +9,6 @@ from homeassistant.core import HomeAssistant
 from . import helpers as h
 from .const import (
     CONF_DEFAULT_LANGUAGE,
-    CONF_DEFAULT_VOLUME,
     CONF_GOOGLE_NOTIFY_SERVICE,
     CONF_GOOGLE_PLAYERS,
     CONF_GOOGLE_TTS_SERVICE,
@@ -145,7 +144,7 @@ class GoogleManager:
             {
                 "message": h.replace_regular(message, SUB_VOICE),
                 "players": players,
-                "volume": float(google_data.get("volume", self.hub.config.get(CONF_DEFAULT_VOLUME, 0.3))),
+                "volume": float(google_data.get("volume", self.hub.current_tts_volume())),
                 "wait_time": float(google_data.get("wait_time", self.hub.config.get(CONF_TTS_WAIT_TIME, 3.0))),
                 "language": str(google_data.get("language", self.hub.config.get(CONF_DEFAULT_LANGUAGE, "es-ES"))),
                 "tts_entity": str(google_data.get("tts_entity", google_data.get("engine_id", ""))),

@@ -4,9 +4,13 @@ from homeassistant.components.switch import SwitchEntity
 
 from .const import (
     CONF_ALEXA_NOTIFICATIONS,
+    CONF_AUTO_VOLUME,
+    CONF_DND_MODE,
     CONF_GOOGLE_NOTIFICATIONS,
+    CONF_GUEST_MODE,
     CONF_HA_EVENT_NOTIFICATIONS,
     CONF_PHONE_NOTIFICATIONS,
+    CONF_PRIORITY_MESSAGE,
     CONF_SCREEN_NOTIFICATIONS,
     CONF_SPEECH_NOTIFICATIONS,
     CONF_TEXT_NOTIFICATIONS,
@@ -15,12 +19,16 @@ from .entity import NotifierHubEntity
 
 SWITCHES = [
     (CONF_TEXT_NOTIFICATIONS, "Notifier Hub Text Notifications", True, "mdi:message-text"),
-    (CONF_SCREEN_NOTIFICATIONS, "Notifier Hub Screen Notifications", True, "mdi:monitor-message"),
+    (CONF_SCREEN_NOTIFICATIONS, "Notifier Hub Screen Notifications", True, "mdi:message-badge"),
     (CONF_SPEECH_NOTIFICATIONS, "Notifier Hub Speech Notifications", True, "mdi:account-voice"),
-    (CONF_ALEXA_NOTIFICATIONS, "Notifier Hub Alexa Notifications", True, "mdi:amazon-alexa"),
+    (CONF_ALEXA_NOTIFICATIONS, "Notifier Hub Alexa Notifications", True, "mdi:speaker-message"),
     (CONF_GOOGLE_NOTIFICATIONS, "Notifier Hub Google Notifications", True, "mdi:google-assistant"),
     (CONF_PHONE_NOTIFICATIONS, "Notifier Hub Phone Notifications", False, "mdi:phone-message"),
     (CONF_HA_EVENT_NOTIFICATIONS, "Notifier Hub Home Assistant Event Notifications", True, "mdi:home-assistant"),
+    (CONF_AUTO_VOLUME, "Notifier Hub Auto Volume", False, "mdi:volume-high"),
+    (CONF_DND_MODE, "Notifier Hub DND", False, "mdi:bell-off"),
+    (CONF_GUEST_MODE, "Notifier Hub Guest Mode", False, "mdi:account-group"),
+    (CONF_PRIORITY_MESSAGE, "Notifier Hub Priority Message", False, "mdi:alert-circle"),
 ]
 
 
@@ -58,5 +66,6 @@ class NotifierHubSwitch(NotifierHubEntity, SwitchEntity):
             self.coordinator.entry,
             options=options,
         )
+        await self.coordinator.async_apply_auto_volume()
         self.coordinator.set_debug("config updated", {"config_keys": [self._key]})
         self.async_write_ha_state()

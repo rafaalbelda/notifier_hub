@@ -24,6 +24,11 @@ Conversión de la aplicación AppDaemon `Centro Notifiche / Notifier` a una inte
   - `switch.notifier_hub_google_notifications`
   - `switch.notifier_hub_phone_notifications`
   - `switch.notifier_hub_home_assistant_event_notifications`
+  - `switch.notifier_hub_auto_volume`
+  - `switch.notifier_hub_dnd`
+  - `switch.notifier_hub_guest_mode`
+  - `switch.notifier_hub_priority_message`
+- Auto volume nativo con horarios y volúmenes editables desde entidades `time.*` y `number.*`.
 
 ## Qué se ha eliminado
 
@@ -49,6 +54,16 @@ Reinicia Home Assistant y añade la integración desde:
 ```text
 Ajustes > Dispositivos y servicios > Añadir integración > Notifier Hub
 ```
+
+El formulario de configuración de la UI está organizado en secciones:
+
+- Persons
+- Notify Services
+- Alexa
+- Google
+- Phone
+- Notifications
+- Auto Volume
 
 ## Dashboard
 
@@ -98,15 +113,56 @@ notifier_hub:
   ha_event_notifications: true
   ha_event_notify_services:
     - notify.mobile_app_mi_telefono
-  dnd_entity: binary_sensor.notifier_dnd
-  guest_mode_entity: input_boolean.notifier_guest_mode
-  priority_message_entity: input_boolean.notifier_priority_message
+  auto_volume: true
+  auto_volume_exclude_players:
+    - media_player.echo_dormitorio
+  dnd_entity: switch.notifier_hub_dnd
+  guest_mode_entity: switch.notifier_hub_guest_mode
+  priority_message_entity: switch.notifier_hub_priority_message
   location_tracker: group.notifier_location_tracker
 ```
 
 `persons` se puede configurar desde la UI con un selector de entidades `person.*`.
 Cuando hay personas configuradas, Notifier Hub las usa para comprobar la ubicación de los mensajes con `location`.
 Si `persons` está vacío, se mantiene la compatibilidad con `location_tracker`.
+
+## Ubicacion
+
+`location_tracker` permite filtrar mensajes segun una ubicacion.
+Se compara el valor enviado en `location` con el estado de la entidad configurada:
+
+```yaml
+location_tracker: group.notifier_location_tracker
+```
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Aviso casa"
+  message: "Movimiento detectado"
+  location: home
+  alexa: true
+```
+
+En este ejemplo, el mensaje pasa si `group.notifier_location_tracker` esta en estado `home`.
+Si el mensaje no incluye `location`, no se aplica filtro de ubicacion.
+
+La configuracion moderna recomendada es usar `persons`:
+
+```yaml
+persons:
+  - person.ana
+  - person.carlos
+```
+
+Si `persons` tiene entidades, Notifier Hub las usa primero y `location_tracker` queda como fallback.
+Con `location: home`, el mensaje pasa si alguna de esas personas esta en `home`.
+
+Notas:
+
+- `priority: true` puede saltarse el filtro de ubicacion.
+- `guest_mode_entity` en `on` permite voz aunque no coincida la ubicacion.
+- `dnd_entity` sigue bloqueando voz y telefono salvo mensajes prioritarios.
 
 ## Controles de canales
 
@@ -121,6 +177,7 @@ Notifier Hub crea interruptores para activar y desactivar canales desde la UI, a
 | `switch.notifier_hub_google_notifications` | `google_notifications` | TTS o notify de Google/Cast |
 | `switch.notifier_hub_phone_notifications` | `phone_notifications` | Llamadas telefonicas |
 | `switch.notifier_hub_home_assistant_event_notifications` | `ha_event_notifications` | Eventos de ciclo de vida de Home Assistant |
+| `switch.notifier_hub_auto_volume` | `auto_volume` | Ajuste automatico de volumen por periodo del dia |
 
 `speech_notifications` debe estar activado para permitir voz normal en Alexa y Google.
 Los mensajes con `priority: true` o prioridad especifica de Alexa/Google pueden saltarse los interruptores, igual que en la app original.
@@ -138,6 +195,112 @@ La integracion nativa escucha esos eventos directamente:
 
 Activalo o desactivalo con `ha_event_notifications` o con `switch.notifier_hub_home_assistant_event_notifications`.
 Por defecto usa `notify_services`; si quieres separar esos avisos, define `ha_event_notify_services`.
+
+## Auto Volume
+
+Auto Volume ajusta los reproductores de Alexa y Google configurados en funcion del periodo del dia.
+El dashboard incluye una tarjeta `Auto Volume` con:
+
+- `sensor.notifier_hub_day_period`
+- `sensor.notifier_hub_day_period_volume`
+- entidades `time.notifier_hub_*_start` para fijar el inicio de cada periodo
+- entidades `number.notifier_hub_*_volume` para fijar el volumen de cada periodo en porcentaje
+
+Periodos por defecto:
+
+| Periodo | Inicio | Volumen |
+|---|---:|---:|
+| Altas horas | `01:00` | `10%` |
+| Primera hora | `05:00` | `20%` |
+| Manana | `07:00` | `30%` |
+| Tarde | `12:00` | `40%` |
+| Atardecer | `18:00` | `30%` |
+| Noche | `22:00` | `20%` |
+
+Cuando `auto_volume` esta activo, los mensajes Alexa/Google sin `volume` explicito usan el volumen del periodo actual.
+La integracion tambien actualiza periodicamente el volumen de los reproductores configurados.
+Usa `auto_volume_exclude_players` para excluir reproductores concretos.
+
+## No molestar
+
+`dnd_entity` permite usar una entidad booleana como modo no molestar.
+La integracion crea y asigna por defecto este switch:
+
+```yaml
+dnd_entity: switch.notifier_hub_dnd
+```
+
+Cuando esa entidad esta en `on`, Notifier Hub bloquea los canales que pueden molestar:
+
+- Alexa
+- Google/Cast
+- llamadas telefonicas
+
+Las notificaciones de texto `notify.*` y las notificaciones persistentes siguen funcionando.
+Los mensajes con `priority: true` pueden saltarse el modo no molestar.
+
+## Modo invitados
+
+`guest_mode_entity` permite que los avisos de voz sigan funcionando aunque las personas configuradas no esten en casa.
+La integracion crea y asigna por defecto este switch:
+
+```yaml
+guest_mode_entity: switch.notifier_hub_guest_mode
+```
+
+Si esta entidad esta en `on`, Alexa y Google/Cast pueden hablar aunque la comprobacion de `persons` o `location_tracker` no coincida con la `location` del mensaje.
+Es util cuando hay invitados en casa o quieres mantener los avisos domesticos aunque tu ubicacion no sea `home`.
+
+Ejemplo:
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Puerta"
+  message: "Se ha abierto la puerta"
+  location: home
+  alexa: true
+```
+
+Si no hay ninguna persona configurada en `home`, normalmente la voz no saldria.
+Con `guest_mode_entity` en `on`, la voz puede salir igualmente.
+`dnd_entity` sigue teniendo prioridad: si el modo no molestar esta activo, bloquea voz y telefono salvo mensajes prioritarios.
+
+## Mensajes prioritarios
+
+`priority_message_entity` permite usar una entidad booleana para forzar el siguiente mensaje como prioritario.
+La integracion crea y asigna por defecto este switch:
+
+```yaml
+priority_message_entity: switch.notifier_hub_priority_message
+```
+
+Cuando esa entidad esta en `on`, Notifier Hub trata el mensaje como si llevara:
+
+```yaml
+priority: true
+```
+
+Un mensaje prioritario puede saltarse interruptores de canales, comprobacion de ubicacion y modo no molestar.
+Despues de procesar el mensaje, Notifier Hub apaga automaticamente `priority_message_entity`.
+
+Ejemplo:
+
+```yaml
+action: switch.turn_on
+target:
+  entity_id: switch.notifier_hub_priority_message
+```
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Alarma"
+  message: "Alarma activada"
+  notify: true
+  alexa: true
+  phone: true
+```
 
 ## Uso como servicio
 
@@ -184,6 +347,38 @@ data:
 ```
 
 Para instalaciones recientes de Home Assistant, usa la entidad TTS creada por la integración Google Translate, por ejemplo `tts.google_es_es`. El servicio heredado `google_translate_say` sigue funcionando si tienes configurada la plataforma antigua en YAML; si existe la entidad moderna, Notifier Hub la usará automáticamente.
+
+### `google_tts_service`
+
+`google_tts_service` define el motor TTS usado por defecto para los mensajes Google/Cast.
+En instalaciones recientes de Home Assistant se recomienda usar una entidad `tts.*`:
+
+```yaml
+google_tts_service: tts.google_es_es
+```
+
+Cuando envias:
+
+```yaml
+action: notifier_hub.send
+data:
+  message: "Prueba de voz"
+  google: true
+```
+
+Notifier Hub genera el audio con `google_tts_service` y lo reproduce en los `google_players` configurados.
+Tambien puedes sobrescribirlo por mensaje:
+
+```yaml
+action: notifier_hub.send
+data:
+  message: "Prueba con otro TTS"
+  google:
+    media_player: media_player.google_home_salon
+    tts_service: tts.google_es_es
+```
+
+El valor legacy `google_translate_say` sigue soportado si usas el servicio antiguo `tts.google_translate_say`.
 
 También puedes reproducir contenido multimedia:
 

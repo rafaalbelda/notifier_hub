@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from datetime import datetime, time as dt_time, timedelta
 from typing import Any
 
 import voluptuous as vol
@@ -9,6 +10,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME, Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.typing import ConfigType
 
 from . import helpers as h
@@ -29,7 +31,15 @@ from .const import (
     CONF_GOOGLE_NOTIFICATIONS,
     CONF_HA_EVENT_NOTIFICATIONS,
     CONF_HA_EVENT_NOTIFY_SERVICES,
+    CONF_AUTO_VOLUME,
+    CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
+    CONF_DND_ENTITY,
+    CONF_DND_MODE,
+    CONF_GUEST_MODE,
+    CONF_GUEST_MODE_ENTITY,
     CONF_PHONE_NOTIFICATIONS,
+    CONF_PRIORITY_MESSAGE,
+    CONF_PRIORITY_MESSAGE_ENTITY,
     CONF_SCREEN_NOTIFICATIONS,
     CONF_SPEECH_NOTIFICATIONS,
     CONF_TEXT_NOTIFICATIONS,
@@ -46,12 +56,16 @@ from .const import (
     EVENT_NOTIFIER,
     SERVICE_SEND,
     SERVICE_SET_CONFIG,
+    AUTO_VOLUME_PERIODS,
+    DEFAULT_DND_ENTITY,
+    DEFAULT_GUEST_MODE_ENTITY,
+    DEFAULT_PRIORITY_MESSAGE_ENTITY,
 )
 from .notification_manager import NotificationManager
 from .phone_manager import PhoneManager
 
 _LOGGER = logging.getLogger(__name__)
-PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SWITCH]
+PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SWITCH, Platform.NUMBER, Platform.TIME]
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -77,9 +91,11 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_PHONE_NOTIFICATIONS, default=False): cv.boolean,
                 vol.Optional(CONF_HA_EVENT_NOTIFICATIONS, default=True): cv.boolean,
                 vol.Optional(CONF_HA_EVENT_NOTIFY_SERVICES, default=[]): cv.ensure_list,
-                vol.Optional("dnd_entity", default=""): cv.string,
-                vol.Optional("guest_mode_entity", default=""): cv.string,
-                vol.Optional("priority_message_entity", default=""): cv.string,
+                vol.Optional(CONF_AUTO_VOLUME, default=False): cv.boolean,
+                vol.Optional(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, default=[]): cv.ensure_list,
+                vol.Optional(CONF_DND_ENTITY, default=DEFAULT_DND_ENTITY): cv.string,
+                vol.Optional(CONF_GUEST_MODE_ENTITY, default=DEFAULT_GUEST_MODE_ENTITY): cv.string,
+                vol.Optional(CONF_PRIORITY_MESSAGE_ENTITY, default=DEFAULT_PRIORITY_MESSAGE_ENTITY): cv.string,
                 vol.Optional("location_tracker", default=""): cv.string,
                 vol.Optional("wrap_text", default=False): cv.boolean,
             },
@@ -153,6 +169,9 @@ class NotifierHub:
             "alexa_attributes": {},
             "google_speak": False,
             "google_attributes": {},
+            "day_period": "",
+            "day_period_volume": 0,
+            "day_period_volume_level": 0.0,
         }
         self.entities: list[Any] = []
         self.notification_manager = NotificationManager(hass, self)
@@ -161,6 +180,7 @@ class NotifierHub:
         self.google_manager = GoogleManager(hass, self)
         self._remove_listener = None
         self._remove_ha_event_listeners: list[Any] = []
+        self._remove_auto_volume_listener = None
 
     def _merged_config(self) -> dict[str, Any]:
         data = dict(self.entry.data)
@@ -184,9 +204,29 @@ class NotifierHub:
         data.setdefault(CONF_PHONE_NOTIFICATIONS, False)
         data.setdefault(CONF_HA_EVENT_NOTIFICATIONS, True)
         data.setdefault(CONF_HA_EVENT_NOTIFY_SERVICES, [])
+        data.setdefault(CONF_AUTO_VOLUME, False)
+        data.setdefault(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, [])
+        data.setdefault(CONF_DND_ENTITY, DEFAULT_DND_ENTITY)
+        data.setdefault(CONF_GUEST_MODE_ENTITY, DEFAULT_GUEST_MODE_ENTITY)
+        data.setdefault(CONF_PRIORITY_MESSAGE_ENTITY, DEFAULT_PRIORITY_MESSAGE_ENTITY)
+        legacy_entities = {
+            CONF_DND_ENTITY: ("input_boolean.notifier_dnd", DEFAULT_DND_ENTITY),
+            CONF_GUEST_MODE_ENTITY: ("input_boolean.notifier_guest_mode", DEFAULT_GUEST_MODE_ENTITY),
+            CONF_PRIORITY_MESSAGE_ENTITY: ("input_boolean.notifier_priority_message", DEFAULT_PRIORITY_MESSAGE_ENTITY),
+        }
+        for key, (legacy_entity, default_entity) in legacy_entities.items():
+            if data.get(key) in ("", legacy_entity):
+                data[key] = default_entity
+        data.setdefault(CONF_DND_MODE, False)
+        data.setdefault(CONF_GUEST_MODE, False)
+        data.setdefault(CONF_PRIORITY_MESSAGE, False)
+        for key, (_, default_time, default_volume) in AUTO_VOLUME_PERIODS.items():
+            data.setdefault(f"auto_volume_{key}_time", default_time)
+            data.setdefault(f"auto_volume_{key}_volume", default_volume)
         return data
 
     async def async_setup(self) -> None:
+        self._update_auto_volume_state()
         self.hass.services.async_register(DOMAIN, SERVICE_SEND, self._handle_send, schema=SEND_SCHEMA)
         self.hass.services.async_register(DOMAIN, SERVICE_SET_CONFIG, self._handle_set_config, schema=SET_CONFIG_SCHEMA)
         self._remove_listener = self.hass.bus.async_listen(EVENT_NOTIFIER, self._handle_notifier_event)
@@ -197,7 +237,13 @@ class NotifierHub:
             self.hass.bus.async_listen("homeassistant_close", self._handle_ha_close),
             self.hass.bus.async_listen("call_service", self._handle_ha_call_service),
         ]
+        self._remove_auto_volume_listener = async_track_time_interval(
+            self.hass,
+            self._handle_auto_volume_interval,
+            timedelta(minutes=5),
+        )
         self.set_debug("on", {})
+        await self.async_apply_auto_volume()
 
     async def async_unload(self) -> None:
         if self._remove_listener:
@@ -205,6 +251,9 @@ class NotifierHub:
         for remove_listener in self._remove_ha_event_listeners:
             remove_listener()
         self._remove_ha_event_listeners = []
+        if self._remove_auto_volume_listener:
+            self._remove_auto_volume_listener()
+            self._remove_auto_volume_listener = None
         if self.hass.services.has_service(DOMAIN, SERVICE_SEND):
             self.hass.services.async_remove(DOMAIN, SERVICE_SEND)
         if self.hass.services.has_service(DOMAIN, SERVICE_SET_CONFIG):
@@ -239,9 +288,79 @@ class NotifierHub:
         self.state["google_attributes"] = attributes
         self._refresh_entities()
 
+    def _parse_time(self, value: Any, fallback: str) -> dt_time:
+        try:
+            parts = [int(part) for part in str(value).split(":")[:3]]
+            parts += [0] * (3 - len(parts))
+            return dt_time(parts[0], parts[1], parts[2])
+        except (TypeError, ValueError):
+            hour, minute, second = [int(part) for part in fallback.split(":")]
+            return dt_time(hour, minute, second)
+
+    def _current_auto_volume(self) -> tuple[str, int, float]:
+        now_time = datetime.now().time()
+        configured = []
+        for key, (label, default_time, default_volume) in AUTO_VOLUME_PERIODS.items():
+            start = self._parse_time(self.config.get(f"auto_volume_{key}_time"), default_time)
+            volume = int(float(self.config.get(f"auto_volume_{key}_volume", default_volume)))
+            configured.append((start, label, max(0, min(100, volume))))
+        configured.sort(key=lambda item: item[0])
+        current = configured[-1]
+        for item in configured:
+            if item[0] <= now_time:
+                current = item
+        _, label, volume = current
+        return label, volume, volume / 100
+
+    def _update_auto_volume_state(self) -> None:
+        period, volume, volume_level = self._current_auto_volume()
+        self.state["day_period"] = period
+        self.state["day_period_volume"] = volume
+        self.state["day_period_volume_level"] = volume_level
+
+    def current_tts_volume(self) -> float:
+        self._update_auto_volume_state()
+        if self.config.get(CONF_AUTO_VOLUME, False):
+            return float(self.state["day_period_volume_level"])
+        return float(self.config.get(CONF_DEFAULT_VOLUME, DEFAULT_VOLUME))
+
+    def auto_volume_players(self) -> list[str]:
+        players = self.alexa_manager._resolve_players(self.config.get(CONF_ALEXA_PLAYERS, []))
+        players.extend(self.google_manager._players(self.config.get(CONF_GOOGLE_PLAYERS, [])))
+        excluded = set(h.return_list(self.config.get(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, [])))
+        return sorted({player for player in players if player.startswith("media_player.") and player not in excluded})
+
+    async def async_apply_auto_volume(self) -> None:
+        self._update_auto_volume_state()
+        self._refresh_entities()
+        if not self.config.get(CONF_AUTO_VOLUME, False):
+            return
+        players = self.auto_volume_players()
+        if not players:
+            return
+        await self.hass.services.async_call(
+            "media_player",
+            "volume_set",
+            {"entity_id": players, "volume_level": self.state["day_period_volume_level"]},
+            blocking=False,
+        )
+
+    async def _handle_auto_volume_interval(self, now) -> None:
+        previous = self.state.get("day_period")
+        await self.async_apply_auto_volume()
+        if previous != self.state.get("day_period"):
+            self.set_debug(
+                "auto volume updated",
+                {
+                    "period": self.state["day_period"],
+                    "volume": self.state["day_period_volume"],
+                },
+            )
+
     async def _handle_set_config(self, call: ServiceCall) -> None:
         self.config.update(call.data.get("config", {}))
         self.set_debug("config updated", {"config_keys": sorted(call.data.get("config", {}).keys())})
+        await self.async_apply_auto_volume()
 
     async def _handle_notifier_event(self, event) -> None:
         data = dict(event.data or {})
@@ -328,9 +447,9 @@ class NotifierHub:
         data.setdefault("called_number", "")
 
         message = str(data.get("message", ""))
-        priority = h.check_bool(data.get("priority")) or self._state_is_on(self.config.get("priority_message_entity", ""))
-        dnd = self._state_value(self.config.get("dnd_entity", ""), "off") == "on"
-        guest = self._state_value(self.config.get("guest_mode_entity", ""), "off") == "on"
+        priority = h.check_bool(data.get("priority")) or self._state_is_on(self.config.get(CONF_PRIORITY_MESSAGE_ENTITY, ""))
+        dnd = self._state_value(self.config.get(CONF_DND_ENTITY, ""), "off") == "on"
+        guest = self._state_value(self.config.get(CONF_GUEST_MODE_ENTITY, ""), "off") == "on"
         location_ok = self._check_location(str(data.get("location", "")))
 
         defaults = h.return_list(self.config.get(CONF_NOTIFY_SERVICES, [])) or ["persistent_notification"]
@@ -363,7 +482,7 @@ class NotifierHub:
             _LOGGER.exception("Notifier Hub dispatch error")
             self.set_debug("Dispatch Error", {"dispatch_error": str(err)})
         finally:
-            if self._state_is_on(self.config.get("priority_message_entity", "")):
+            if self._state_is_on(self.config.get(CONF_PRIORITY_MESSAGE_ENTITY, "")):
                 await self.hass.services.async_call(
-                    "input_boolean", "turn_off", {"entity_id": self.config.get("priority_message_entity")}, blocking=False
+                    "homeassistant", "turn_off", {"entity_id": self.config.get(CONF_PRIORITY_MESSAGE_ENTITY)}, blocking=False
                 )

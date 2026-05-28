@@ -37,6 +37,52 @@ views:
             name: Telefono
           - entity: switch.notifier_hub_home_assistant_event_notifications
             name: Eventos HA
+          - entity: switch.notifier_hub_auto_volume
+            name: Auto volume
+
+      - type: entities
+        title: Modos
+        show_header_toggle: false
+        entities:
+          - entity: switch.notifier_hub_dnd
+            name: No molestar
+          - entity: switch.notifier_hub_guest_mode
+            name: Invitados
+          - entity: switch.notifier_hub_priority_message
+            name: Prioridad siguiente mensaje
+
+      - type: entities
+        title: Auto Volume
+        show_header_toggle: false
+        entities:
+          - entity: sensor.notifier_hub_day_period
+            name: Periodo actual
+          - entity: sensor.notifier_hub_day_period_volume
+            name: Volumen actual
+          - entity: time.notifier_hub_altas_horas_start
+            name: Altas horas inicio
+          - entity: number.notifier_hub_altas_horas_volume
+            name: Altas horas volumen
+          - entity: time.notifier_hub_primera_hora_start
+            name: Primera hora inicio
+          - entity: number.notifier_hub_primera_hora_volume
+            name: Primera hora volumen
+          - entity: time.notifier_hub_manana_start
+            name: Manana inicio
+          - entity: number.notifier_hub_manana_volume
+            name: Manana volumen
+          - entity: time.notifier_hub_tarde_start
+            name: Tarde inicio
+          - entity: number.notifier_hub_tarde_volume
+            name: Tarde volumen
+          - entity: time.notifier_hub_atardecer_start
+            name: Atardecer inicio
+          - entity: number.notifier_hub_atardecer_volume
+            name: Atardecer volumen
+          - entity: time.notifier_hub_noche_start
+            name: Noche inicio
+          - entity: number.notifier_hub_noche_volume
+            name: Noche volumen
 
       - type: history-graph
         title: Actividad TTS
@@ -83,7 +129,7 @@ views:
             cards:
               - type: button
                 name: Alexa
-                icon: mdi:amazon-alexa
+                icon: mdi:speaker-message
                 tap_action:
                   action: call-service
                   service: notifier_hub.send

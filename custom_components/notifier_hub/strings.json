@@ -1,0 +1,60 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "sections": {
+          "persons_section": {
+            "name": "Persons"
+          },
+          "notify_services_section": {
+            "name": "Notify Services"
+          },
+          "alexa_section": {
+            "name": "Alexa"
+          },
+          "google_section": {
+            "name": "Google"
+          },
+          "phone_section": {
+            "name": "Phone"
+          },
+          "notifications_section": {
+            "name": "Notifications"
+          },
+          "auto_volume_section": {
+            "name": "Auto Volume"
+          }
+        }
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "sections": {
+          "persons_section": {
+            "name": "Persons"
+          },
+          "notify_services_section": {
+            "name": "Notify Services"
+          },
+          "alexa_section": {
+            "name": "Alexa"
+          },
+          "google_section": {
+            "name": "Google"
+          },
+          "phone_section": {
+            "name": "Phone"
+          },
+          "notifications_section": {
+            "name": "Notifications"
+          },
+          "auto_volume_section": {
+            "name": "Auto Volume"
+          }
+        }
+      }
+    }
+  }
+}

@@ -20,6 +20,27 @@ CONF_GOOGLE_NOTIFICATIONS = "google_notifications"
 CONF_PHONE_NOTIFICATIONS = "phone_notifications"
 CONF_HA_EVENT_NOTIFICATIONS = "ha_event_notifications"
 CONF_HA_EVENT_NOTIFY_SERVICES = "ha_event_notify_services"
+CONF_AUTO_VOLUME = "auto_volume"
+CONF_AUTO_VOLUME_EXCLUDE_PLAYERS = "auto_volume_exclude_players"
+CONF_DND_ENTITY = "dnd_entity"
+CONF_GUEST_MODE_ENTITY = "guest_mode_entity"
+CONF_PRIORITY_MESSAGE_ENTITY = "priority_message_entity"
+CONF_DND_MODE = "dnd_mode"
+CONF_GUEST_MODE = "guest_mode"
+CONF_PRIORITY_MESSAGE = "priority_message"
+
+DEFAULT_DND_ENTITY = "switch.notifier_hub_dnd"
+DEFAULT_GUEST_MODE_ENTITY = "switch.notifier_hub_guest_mode"
+DEFAULT_PRIORITY_MESSAGE_ENTITY = "switch.notifier_hub_priority_message"
+
+AUTO_VOLUME_PERIODS = {
+    "late_night": ("Altas horas", "01:00:00", 10),
+    "early_morning": ("Primera hora", "05:00:00", 20),
+    "morning": ("Manana", "07:00:00", 30),
+    "afternoon": ("Tarde", "12:00:00", 40),
+    "evening": ("Atardecer", "18:00:00", 30),
+    "night": ("Noche", "22:00:00", 20),
+}
 
 DEFAULT_PERSONAL_ASSISTANT = "Assistant"
 DEFAULT_SIP_SERVER_NAME = "fritz.box:5060"

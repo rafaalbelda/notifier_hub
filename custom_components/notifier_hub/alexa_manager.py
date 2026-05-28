@@ -132,7 +132,7 @@ class AlexaManager:
             alexa = {}
         if not isinstance(alexa, dict):
             return
-        default_volume = float(self.hub.config.get("default_volume", 0.30))
+        default_volume = float(self.hub.current_tts_volume())
         volume = float(alexa.get("volume", default_volume))
         auto_volumes = h.check_bool(alexa.get("auto_volumes", False))
         if volume == 0.0 and not auto_volumes:

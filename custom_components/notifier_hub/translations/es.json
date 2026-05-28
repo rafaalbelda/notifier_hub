@@ -4,21 +4,95 @@
       "user": {
         "data": {
           "personal_assistant": "Asistente personal",
+          "persons_section": "Presencia",
+          "persons": "Personas",
+          "location_tracker": "Rastreador de ubicacion",
+          "notify_services_section": "Notificaciones",
+          "notify_services": "Servicios de notificacion",
+          "ha_event_notify_services": "Servicios para eventos de Home Assistant",
+          "alexa_section": "Alexa",
+          "alexa_notifications": "Notificaciones de Alexa",
+          "alexa_players": "Reproductores Alexa",
+          "google_section": "Google",
+          "google_notifications": "Notificaciones de Google",
+          "google_players": "Reproductores Google",
+          "google_tts_service": "Servicio TTS de Google",
+          "google_notify_service": "Servicio notify de Google",
+          "default_language": "Idioma por defecto",
+          "default_volume": "Volumen por defecto",
+          "tts_wait_time": "Espera TTS",
+          "phone_section": "Teléfono",
+          "phone_notifications": "Notificaciones por telefono",
+          "sip_server_name": "Servidor SIP",
+          "notifications_section": "Notificaciones",
+          "text_notifications": "Notificaciones de texto",
+          "screen_notifications": "Notificaciones persistentes",
+          "speech_notifications": "Notificaciones de voz",
+          "ha_event_notifications": "Notificaciones de eventos de Home Assistant",
+          "dnd_entity": "Entidad de no molestar",
+          "guest_mode_entity": "Entidad de modo invitados",
+          "priority_message_entity": "Entidad de mensaje prioritario",
+          "auto_volume_section": "Auto Volumen",
+          "auto_volume": "Volumen automatico",
+          "auto_volume_exclude_players": "Reproductores excluidos",
           "install_dashboard": "Instalar dashboard"
+        },
+        "data_description": {
+          "personal_assistant": "Nombre usado en los mensajes generados cuando se menciona al asistente.",
+          "persons_section": "Configuracion de presencia usada para decidir quien recibe notificaciones.",
+          "persons": "Personas usadas para decidir el envio de notificaciones segun presencia.",
+          "location_tracker": "Entidad alternativa para decidir si se deben enviar notificaciones cuando no hay personas seleccionadas.",
+          "notify_services_section": "Servicios usados para enviar notificaciones de texto.",
+          "notify_services": "Servicios notify usados por defecto para notificaciones de texto normales.",
+          "ha_event_notify_services": "Servicios notify usados solo para eventos del ciclo de vida de Home Assistant.",
+          "alexa_section": "Configuracion de avisos por Alexa.",
+          "alexa_notifications": "Activa o desactiva los anuncios de Alexa desde Notifier Hub.",
+          "alexa_players": "Reproductores Alexa que pueden recibir avisos por voz.",
+          "google_section": "Configuracion de avisos por Google o Cast.",
+          "google_notifications": "Activa o desactiva los anuncios de Google/Cast desde Notifier Hub.",
+          "google_players": "Reproductores Google o Cast que pueden recibir avisos por voz.",
+          "google_tts_service": "Servicio TTS usado para generar los avisos de voz de Google.",
+          "google_notify_service": "Servicio notify usado para notificaciones tipo Google Assistant.",
+          "default_language": "Codigo de idioma usado cuando el mensaje no indica uno.",
+          "default_volume": "Volumen por defecto usado para avisos de voz.",
+          "tts_wait_time": "Tiempo extra anadido al estimar cuanto dura la reproduccion de voz.",
+          "phone_section": "Configuracion de llamadas telefonicas.",
+          "phone_notifications": "Activa o desactiva las notificaciones por llamada telefonica.",
+          "sip_server_name": "Servidor SIP usado por el sistema de llamadas.",
+          "notifications_section": "Interruptores y entidades que controlan el enrutado de notificaciones.",
+          "text_notifications": "Permite mensajes normales mediante servicios notify.",
+          "screen_notifications": "Permite notificaciones persistentes en Home Assistant.",
+          "speech_notifications": "Permite notificaciones de voz por Alexa o Google.",
+          "ha_event_notifications": "Envia notificaciones para arranque, parada, reinicio y eventos relacionados de Home Assistant.",
+          "dnd_entity": "Entidad que bloquea voz y telefono cuando esta activada.",
+          "guest_mode_entity": "Entidad que permite notificaciones aunque la comprobacion de presencia las bloquearia.",
+          "priority_message_entity": "Entidad que permite que los mensajes prioritarios ignoren los interruptores de notificacion.",
+          "auto_volume_section": "Configuracion de volumen automatico por periodo del dia.",
+          "auto_volume": "Ajusta automaticamente el volumen TTS segun el periodo actual del dia.",
+          "auto_volume_exclude_players": "Reproductores que no deben ser controlados por el volumen automatico.",
+          "install_dashboard": "Copia el YAML del dashboard de Notifier Hub y muestra las instrucciones de configuracion."
         },
         "sections": {
           "persons_section": {
-            "name": "Persons",
+            "name": "Presencia",
             "data": {
               "persons": "Personas",
               "location_tracker": "Rastreador de ubicacion"
+            },
+            "data_description": {
+              "persons": "Personas usadas para decidir el envio de notificaciones segun presencia.",
+              "location_tracker": "Entidad alternativa para decidir si se deben enviar notificaciones cuando no hay personas seleccionadas."
             }
           },
           "notify_services_section": {
-            "name": "Notify Services",
+            "name": "Notificaciones",
             "data": {
               "notify_services": "Servicios de notificacion",
               "ha_event_notify_services": "Servicios para eventos de Home Assistant"
+            },
+            "data_description": {
+              "notify_services": "Servicios notify usados por defecto para notificaciones de texto normales.",
+              "ha_event_notify_services": "Servicios notify usados solo para eventos del ciclo de vida de Home Assistant."
             }
           },
           "alexa_section": {
@@ -26,6 +100,10 @@
             "data": {
               "alexa_notifications": "Notificaciones de Alexa",
               "alexa_players": "Reproductores Alexa"
+            },
+            "data_description": {
+              "alexa_notifications": "Activa o desactiva los anuncios de Alexa desde Notifier Hub.",
+              "alexa_players": "Reproductores Alexa que pueden recibir avisos por voz."
             }
           },
           "google_section": {
@@ -38,13 +116,26 @@
               "default_language": "Idioma por defecto",
               "default_volume": "Volumen por defecto",
               "tts_wait_time": "Espera TTS"
+            },
+            "data_description": {
+              "google_notifications": "Activa o desactiva los anuncios de Google/Cast desde Notifier Hub.",
+              "google_players": "Reproductores Google o Cast que pueden recibir avisos por voz.",
+              "google_tts_service": "Servicio TTS usado para generar los avisos de voz de Google.",
+              "google_notify_service": "Servicio notify usado para notificaciones tipo Google Assistant.",
+              "default_language": "Codigo de idioma usado cuando el mensaje no indica uno.",
+              "default_volume": "Volumen por defecto usado para avisos de voz.",
+              "tts_wait_time": "Tiempo extra anadido al estimar cuanto dura la reproduccion de voz."
             }
           },
           "phone_section": {
-            "name": "Phone",
+            "name": "Teléfono",
             "data": {
               "phone_notifications": "Notificaciones por telefono",
               "sip_server_name": "Servidor SIP"
+            },
+            "data_description": {
+              "phone_notifications": "Activa o desactiva las notificaciones por llamada telefonica.",
+              "sip_server_name": "Servidor SIP usado por el sistema de llamadas."
             }
           },
           "notifications_section": {
@@ -57,13 +148,26 @@
               "dnd_entity": "Entidad de no molestar",
               "guest_mode_entity": "Entidad de modo invitados",
               "priority_message_entity": "Entidad de mensaje prioritario"
+            },
+            "data_description": {
+              "text_notifications": "Permite mensajes normales mediante servicios notify.",
+              "screen_notifications": "Permite notificaciones persistentes en Home Assistant.",
+              "speech_notifications": "Permite notificaciones de voz por Alexa o Google.",
+              "ha_event_notifications": "Envia notificaciones para arranque, parada, reinicio y eventos relacionados de Home Assistant.",
+              "dnd_entity": "Entidad que bloquea voz y telefono cuando esta activada.",
+              "guest_mode_entity": "Entidad que permite notificaciones aunque la comprobacion de presencia las bloquearia.",
+              "priority_message_entity": "Entidad que permite que los mensajes prioritarios ignoren los interruptores de notificacion."
             }
           },
           "auto_volume_section": {
-            "name": "Auto Volume",
+            "name": "Auto Volumen",
             "data": {
               "auto_volume": "Volumen automatico",
               "auto_volume_exclude_players": "Reproductores excluidos"
+            },
+            "data_description": {
+              "auto_volume": "Ajusta automaticamente el volumen TTS segun el periodo actual del dia.",
+              "auto_volume_exclude_players": "Reproductores que no deben ser controlados por el volumen automatico."
             }
           }
         }
@@ -75,21 +179,95 @@
       "init": {
         "data": {
           "personal_assistant": "Asistente personal",
+          "persons_section": "Presencia",
+          "persons": "Personas",
+          "location_tracker": "Rastreador de ubicacion",
+          "notify_services_section": "Notificaciones",
+          "notify_services": "Servicios de notificacion",
+          "ha_event_notify_services": "Servicios para eventos de Home Assistant",
+          "alexa_section": "Alexa",
+          "alexa_notifications": "Notificaciones de Alexa",
+          "alexa_players": "Reproductores Alexa",
+          "google_section": "Google",
+          "google_notifications": "Notificaciones de Google",
+          "google_players": "Reproductores Google",
+          "google_tts_service": "Servicio TTS de Google",
+          "google_notify_service": "Servicio notify de Google",
+          "default_language": "Idioma por defecto",
+          "default_volume": "Volumen por defecto",
+          "tts_wait_time": "Espera TTS",
+          "phone_section": "Teléfono",
+          "phone_notifications": "Notificaciones por telefono",
+          "sip_server_name": "Servidor SIP",
+          "notifications_section": "Notificaciones",
+          "text_notifications": "Notificaciones de texto",
+          "screen_notifications": "Notificaciones persistentes",
+          "speech_notifications": "Notificaciones de voz",
+          "ha_event_notifications": "Notificaciones de eventos de Home Assistant",
+          "dnd_entity": "Entidad de no molestar",
+          "guest_mode_entity": "Entidad de modo invitados",
+          "priority_message_entity": "Entidad de mensaje prioritario",
+          "auto_volume_section": "Auto Volume",
+          "auto_volume": "Volumen automatico",
+          "auto_volume_exclude_players": "Reproductores excluidos",
           "install_dashboard": "Instalar dashboard"
+        },
+        "data_description": {
+          "personal_assistant": "Nombre usado en los mensajes generados cuando se menciona al asistente.",
+          "persons_section": "Configuracion de presencia usada para decidir quien recibe notificaciones.",
+          "persons": "Personas usadas para decidir el envio de notificaciones segun presencia.",
+          "location_tracker": "Entidad alternativa para decidir si se deben enviar notificaciones cuando no hay personas seleccionadas.",
+          "notify_services_section": "Servicios usados para enviar notificaciones de texto.",
+          "notify_services": "Servicios notify usados por defecto para notificaciones de texto normales.",
+          "ha_event_notify_services": "Servicios notify usados solo para eventos del ciclo de vida de Home Assistant.",
+          "alexa_section": "Configuracion de avisos por Alexa.",
+          "alexa_notifications": "Activa o desactiva los anuncios de Alexa desde Notifier Hub.",
+          "alexa_players": "Reproductores Alexa que pueden recibir avisos por voz.",
+          "google_section": "Configuracion de avisos por Google o Cast.",
+          "google_notifications": "Activa o desactiva los anuncios de Google/Cast desde Notifier Hub.",
+          "google_players": "Reproductores Google o Cast que pueden recibir avisos por voz.",
+          "google_tts_service": "Servicio TTS usado para generar los avisos de voz de Google.",
+          "google_notify_service": "Servicio notify usado para notificaciones tipo Google Assistant.",
+          "default_language": "Codigo de idioma usado cuando el mensaje no indica uno.",
+          "default_volume": "Volumen por defecto usado para avisos de voz.",
+          "tts_wait_time": "Tiempo extra anadido al estimar cuanto dura la reproduccion de voz.",
+          "phone_section": "Configuracion de llamadas telefonicas.",
+          "phone_notifications": "Activa o desactiva las notificaciones por llamada telefonica.",
+          "sip_server_name": "Servidor SIP usado por el sistema de llamadas.",
+          "notifications_section": "Interruptores y entidades que controlan el enrutado de notificaciones.",
+          "text_notifications": "Permite mensajes normales mediante servicios notify.",
+          "screen_notifications": "Permite notificaciones persistentes en Home Assistant.",
+          "speech_notifications": "Permite notificaciones de voz por Alexa o Google.",
+          "ha_event_notifications": "Envia notificaciones para arranque, parada, reinicio y eventos relacionados de Home Assistant.",
+          "dnd_entity": "Entidad que bloquea voz y telefono cuando esta activada.",
+          "guest_mode_entity": "Entidad que permite notificaciones aunque la comprobacion de presencia las bloquearia.",
+          "priority_message_entity": "Entidad que permite que los mensajes prioritarios ignoren los interruptores de notificacion.",
+          "auto_volume_section": "Configuracion de volumen automatico por periodo del dia.",
+          "auto_volume": "Ajusta automaticamente el volumen TTS segun el periodo actual del dia.",
+          "auto_volume_exclude_players": "Reproductores que no deben ser controlados por el volumen automatico.",
+          "install_dashboard": "Copia el YAML del dashboard de Notifier Hub y muestra las instrucciones de configuracion."
         },
         "sections": {
           "persons_section": {
-            "name": "Persons",
+            "name": "Presencia",
             "data": {
               "persons": "Personas",
               "location_tracker": "Rastreador de ubicacion"
+            },
+            "data_description": {
+              "persons": "Personas usadas para decidir el envio de notificaciones segun presencia.",
+              "location_tracker": "Entidad alternativa para decidir si se deben enviar notificaciones cuando no hay personas seleccionadas."
             }
           },
           "notify_services_section": {
-            "name": "Notify Services",
+            "name": "Notificaciones",
             "data": {
               "notify_services": "Servicios de notificacion",
               "ha_event_notify_services": "Servicios para eventos de Home Assistant"
+            },
+            "data_description": {
+              "notify_services": "Servicios notify usados por defecto para notificaciones de texto normales.",
+              "ha_event_notify_services": "Servicios notify usados solo para eventos del ciclo de vida de Home Assistant."
             }
           },
           "alexa_section": {
@@ -97,6 +275,10 @@
             "data": {
               "alexa_notifications": "Notificaciones de Alexa",
               "alexa_players": "Reproductores Alexa"
+            },
+            "data_description": {
+              "alexa_notifications": "Activa o desactiva los anuncios de Alexa desde Notifier Hub.",
+              "alexa_players": "Reproductores Alexa que pueden recibir avisos por voz."
             }
           },
           "google_section": {
@@ -109,32 +291,58 @@
               "default_language": "Idioma por defecto",
               "default_volume": "Volumen por defecto",
               "tts_wait_time": "Espera TTS"
+            },
+            "data_description": {
+              "google_notifications": "Activa o desactiva los anuncios de Google/Cast desde Notifier Hub.",
+              "google_players": "Reproductores Google o Cast que pueden recibir avisos por voz.",
+              "google_tts_service": "Servicio TTS usado para generar los avisos de voz de Google.",
+              "google_notify_service": "Servicio notify usado para notificaciones tipo Google Assistant.",
+              "default_language": "Codigo de idioma usado cuando el mensaje no indica uno.",
+              "default_volume": "Volumen por defecto usado para avisos de voz.",
+              "tts_wait_time": "Tiempo extra anadido al estimar cuanto dura la reproduccion de voz."
             }
           },
           "phone_section": {
-            "name": "Phone",
+            "name": "Teléfono",
             "data": {
-              "phone_notifications": "Notificaciones por telefono",
+              "phone_notifications": "Notificaciones por teléfono",
               "sip_server_name": "Servidor SIP"
+            },
+            "data_description": {
+              "phone_notifications": "Activa o desactiva las notificaciones por llamada telefonica.",
+              "sip_server_name": "Servidor SIP usado por el sistema de llamadas."
             }
           },
           "notifications_section": {
-            "name": "Notifications",
+            "name": "Notificaciones",
             "data": {
               "text_notifications": "Notificaciones de texto",
               "screen_notifications": "Notificaciones persistentes",
               "speech_notifications": "Notificaciones de voz",
-              "ha_event_notifications": "Notificaciones de eventos de Home Assistant",
-              "dnd_entity": "Entidad de no molestar",
-              "guest_mode_entity": "Entidad de modo invitados",
-              "priority_message_entity": "Entidad de mensaje prioritario"
+              "ha_event_notifications": "Notificaciones de eventos de Home Assistant"
+            },
+            "data_description": {
+              "text_notifications": "Permite mensajes normales mediante servicios notify.",
+              "screen_notifications": "Permite notificaciones persistentes en Home Assistant.",
+              "speech_notifications": "Permite notificaciones de voz por Alexa o Google.",
+              "ha_event_notifications": "Envia notificaciones para arranque, parada, reinicio y eventos relacionados de Home Assistant."
             }
           },
           "auto_volume_section": {
-            "name": "Auto Volume",
+            "name": "Auto Volumen",
             "data": {
               "auto_volume": "Volumen automatico",
-              "auto_volume_exclude_players": "Reproductores excluidos"
+              "auto_volume_exclude_players": "Reproductores excluidos",
+              "dnd_entity": "Entidad de no molestar",
+              "guest_mode_entity": "Entidad de modo invitados",
+              "priority_message_entity": "Entidad de mensaje prioritario"
+            },
+            "data_description": {
+              "auto_volume": "Ajusta automaticamente el volumen TTS segun el periodo actual del dia.",
+              "auto_volume_exclude_players": "Reproductores que no deben ser controlados por el volumen automatico.",
+              "dnd_entity": "Entidad que bloquea voz y telefono cuando esta activada.",
+              "guest_mode_entity": "Entidad que permite notificaciones aunque la comprobacion de presencia las bloquearia.",
+              "priority_message_entity": "Entidad que permite que los mensajes prioritarios ignoren los interruptores de notificacion."
             }
           }
         }

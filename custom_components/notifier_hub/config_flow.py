@@ -136,9 +136,16 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
     defaults = defaults or {}
     notify_services = _as_list(defaults.get(CONF_NOTIFY_SERVICES, []))
     notify_options = sorted(set(_notify_service_options(hass)) | set(notify_services))
+    location_tracker = defaults.get("location_tracker", "")
 
     def default(key: str, fallback: Any) -> Any:
         return defaults.get(key, fallback)
+
+    location_tracker_key = (
+        vol.Optional("location_tracker", default=location_tracker)
+        if location_tracker
+        else vol.Optional("location_tracker")
+    )
 
     return vol.Schema(
         {
@@ -152,7 +159,7 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                         vol.Optional(CONF_PERSONS, default=_as_list(default(CONF_PERSONS, []))): selector.EntitySelector(
                             selector.EntitySelectorConfig(domain="person", multiple=True)
                         ),
-                        vol.Optional("location_tracker", default=default("location_tracker", "")): selector.EntitySelector(
+                        location_tracker_key: selector.EntitySelector(
                             selector.EntitySelectorConfig(domain=["group", "person", "device_tracker", "sensor"])
                         ),
                     }
@@ -212,7 +219,7 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                         vol.Optional(CONF_TTS_WAIT_TIME, default=default(CONF_TTS_WAIT_TIME, DEFAULT_TTS_WAIT_TIME)): vol.Coerce(float),
                     }
                 ),
-                {"collapsed": False},
+                {"collapsed": True},
             ),
             vol.Optional(SECTION_PHONE): section(
                 vol.Schema(
@@ -224,7 +231,7 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                         vol.Optional(CONF_SIP_SERVER_NAME, default=default(CONF_SIP_SERVER_NAME, DEFAULT_SIP_SERVER_NAME)): str,
                     }
                 ),
-                {"collapsed": False},
+                {"collapsed": True},
             ),
             vol.Optional(SECTION_NOTIFICATIONS): section(
                 vol.Schema(

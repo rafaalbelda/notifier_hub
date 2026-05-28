@@ -4,14 +4,84 @@
       "user": {
         "data": {
           "personal_assistant": "Personal assistant",
+          "persons_section": "Presence",
+          "persons": "Persons",
+          "location_tracker": "Location tracker",
+          "notify_services_section": "Notify Services",
+          "notify_services": "Notify services",
+          "ha_event_notify_services": "Home Assistant event notify services",
+          "alexa_section": "Alexa",
+          "alexa_notifications": "Alexa notifications",
+          "alexa_players": "Alexa players",
+          "google_section": "Google",
+          "google_notifications": "Google notifications",
+          "google_players": "Google players",
+          "google_tts_service": "Google TTS service",
+          "google_notify_service": "Google notify service",
+          "default_language": "Default language",
+          "default_volume": "Default volume",
+          "tts_wait_time": "TTS wait time",
+          "phone_section": "Phone",
+          "phone_notifications": "Phone notifications",
+          "sip_server_name": "SIP server name",
+          "notifications_section": "Notifications",
+          "text_notifications": "Text notifications",
+          "screen_notifications": "Persistent notifications",
+          "speech_notifications": "Speech notifications",
+          "ha_event_notifications": "Home Assistant event notifications",
+          "dnd_entity": "Do not disturb entity",
+          "guest_mode_entity": "Guest mode entity",
+          "priority_message_entity": "Priority message entity",
+          "auto_volume_section": "Auto Volume",
+          "auto_volume": "Auto volume",
+          "auto_volume_exclude_players": "Excluded media players",
           "install_dashboard": "Install dashboard"
+        },
+        "data_description": {
+          "personal_assistant": "Name used in generated messages when the assistant is mentioned.",
+          "persons_section": "Presence configuration used to decide who receives notifications.",
+          "persons": "People considered for presence-aware notification routing.",
+          "location_tracker": "Fallback entity used to decide if notifications should be sent when no persons are selected.",
+          "notify_services_section": "Services used to send text notifications.",
+          "notify_services": "Default notify services used for normal text notifications.",
+          "ha_event_notify_services": "Notify services used only for Home Assistant lifecycle events.",
+          "alexa_section": "Alexa announcement configuration.",
+          "alexa_notifications": "Enables or disables Alexa announcements from Notifier Hub.",
+          "alexa_players": "Alexa media players that can receive voice announcements.",
+          "google_section": "Google or Cast announcement configuration.",
+          "google_notifications": "Enables or disables Google/Cast announcements from Notifier Hub.",
+          "google_players": "Google or Cast media players that can receive voice announcements.",
+          "google_tts_service": "TTS service used to generate Google voice announcements.",
+          "google_notify_service": "Notify service used for Google Assistant style notifications.",
+          "default_language": "Language code used when a message does not specify one.",
+          "default_volume": "Default volume used for voice announcements.",
+          "tts_wait_time": "Extra wait time added while estimating how long speech playback takes.",
+          "phone_section": "Phone call notification configuration.",
+          "phone_notifications": "Enables or disables phone call notifications.",
+          "sip_server_name": "SIP server used by the phone call backend.",
+          "notifications_section": "Toggles and entities that control notification routing.",
+          "text_notifications": "Allows normal notify service messages.",
+          "screen_notifications": "Allows persistent notifications in Home Assistant.",
+          "speech_notifications": "Allows voice notifications through Alexa or Google.",
+          "ha_event_notifications": "Sends notifications for Home Assistant start, stop, restart and related events.",
+          "dnd_entity": "Entity that blocks voice and phone notifications when turned on.",
+          "guest_mode_entity": "Entity that allows notifications even when presence checks would block them.",
+          "priority_message_entity": "Entity that allows priority messages to bypass notification toggles.",
+          "auto_volume_section": "Automatic volume configuration by day period.",
+          "auto_volume": "Automatically adjusts TTS volume based on the current day period.",
+          "auto_volume_exclude_players": "Media players that should not be controlled by auto volume.",
+          "install_dashboard": "Copies the Notifier Hub dashboard YAML and shows the setup instructions."
         },
         "sections": {
           "persons_section": {
-            "name": "Persons",
+            "name": "Presence",
             "data": {
               "persons": "Persons",
               "location_tracker": "Location tracker"
+            },
+            "data_description": {
+              "persons": "People considered for presence-aware notification routing.",
+              "location_tracker": "Fallback entity used to decide if notifications should be sent when no persons are selected."
             }
           },
           "notify_services_section": {
@@ -19,6 +89,10 @@
             "data": {
               "notify_services": "Notify services",
               "ha_event_notify_services": "Home Assistant event notify services"
+            },
+            "data_description": {
+              "notify_services": "Default notify services used for normal text notifications.",
+              "ha_event_notify_services": "Notify services used only for Home Assistant lifecycle events."
             }
           },
           "alexa_section": {
@@ -26,6 +100,10 @@
             "data": {
               "alexa_notifications": "Alexa notifications",
               "alexa_players": "Alexa players"
+            },
+            "data_description": {
+              "alexa_notifications": "Enables or disables Alexa announcements from Notifier Hub.",
+              "alexa_players": "Alexa media players that can receive voice announcements."
             }
           },
           "google_section": {
@@ -38,6 +116,15 @@
               "default_language": "Default language",
               "default_volume": "Default volume",
               "tts_wait_time": "TTS wait time"
+            },
+            "data_description": {
+              "google_notifications": "Enables or disables Google/Cast announcements from Notifier Hub.",
+              "google_players": "Google or Cast media players that can receive voice announcements.",
+              "google_tts_service": "TTS service used to generate Google voice announcements.",
+              "google_notify_service": "Notify service used for Google Assistant style notifications.",
+              "default_language": "Language code used when a message does not specify one.",
+              "default_volume": "Default volume used for voice announcements.",
+              "tts_wait_time": "Extra wait time added while estimating how long speech playback takes."
             }
           },
           "phone_section": {
@@ -45,6 +132,10 @@
             "data": {
               "phone_notifications": "Phone notifications",
               "sip_server_name": "SIP server name"
+            },
+            "data_description": {
+              "phone_notifications": "Enables or disables phone call notifications.",
+              "sip_server_name": "SIP server used by the phone call backend."
             }
           },
           "notifications_section": {
@@ -57,6 +148,15 @@
               "dnd_entity": "Do not disturb entity",
               "guest_mode_entity": "Guest mode entity",
               "priority_message_entity": "Priority message entity"
+            },
+            "data_description": {
+              "text_notifications": "Allows normal notify service messages.",
+              "screen_notifications": "Allows persistent notifications in Home Assistant.",
+              "speech_notifications": "Allows voice notifications through Alexa or Google.",
+              "ha_event_notifications": "Sends notifications for Home Assistant start, stop, restart and related events.",
+              "dnd_entity": "Entity that blocks voice and phone notifications when turned on.",
+              "guest_mode_entity": "Entity that allows notifications even when presence checks would block them.",
+              "priority_message_entity": "Entity that allows priority messages to bypass notification toggles."
             }
           },
           "auto_volume_section": {
@@ -64,6 +164,10 @@
             "data": {
               "auto_volume": "Auto volume",
               "auto_volume_exclude_players": "Excluded media players"
+            },
+            "data_description": {
+              "auto_volume": "Automatically adjusts TTS volume based on the current day period.",
+              "auto_volume_exclude_players": "Media players that should not be controlled by auto volume."
             }
           }
         }
@@ -75,14 +179,84 @@
       "init": {
         "data": {
           "personal_assistant": "Personal assistant",
+          "persons_section": "Presence",
+          "persons": "Persons",
+          "location_tracker": "Location tracker",
+          "notify_services_section": "Notify Services",
+          "notify_services": "Notify services",
+          "ha_event_notify_services": "Home Assistant event notify services",
+          "alexa_section": "Alexa",
+          "alexa_notifications": "Alexa notifications",
+          "alexa_players": "Alexa players",
+          "google_section": "Google",
+          "google_notifications": "Google notifications",
+          "google_players": "Google players",
+          "google_tts_service": "Google TTS service",
+          "google_notify_service": "Google notify service",
+          "default_language": "Default language",
+          "default_volume": "Default volume",
+          "tts_wait_time": "TTS wait time",
+          "phone_section": "Phone",
+          "phone_notifications": "Phone notifications",
+          "sip_server_name": "SIP server name",
+          "notifications_section": "Notifications",
+          "text_notifications": "Text notifications",
+          "screen_notifications": "Persistent notifications",
+          "speech_notifications": "Speech notifications",
+          "ha_event_notifications": "Home Assistant event notifications",
+          "dnd_entity": "Do not disturb entity",
+          "guest_mode_entity": "Guest mode entity",
+          "priority_message_entity": "Priority message entity",
+          "auto_volume_section": "Auto Volume",
+          "auto_volume": "Auto volume",
+          "auto_volume_exclude_players": "Excluded media players",
           "install_dashboard": "Install dashboard"
+        },
+        "data_description": {
+          "personal_assistant": "Name used in generated messages when the assistant is mentioned.",
+          "persons_section": "Presence configuration used to decide who receives notifications.",
+          "persons": "People considered for presence-aware notification routing.",
+          "location_tracker": "Fallback entity used to decide if notifications should be sent when no persons are selected.",
+          "notify_services_section": "Services used to send text notifications.",
+          "notify_services": "Default notify services used for normal text notifications.",
+          "ha_event_notify_services": "Notify services used only for Home Assistant lifecycle events.",
+          "alexa_section": "Alexa announcement configuration.",
+          "alexa_notifications": "Enables or disables Alexa announcements from Notifier Hub.",
+          "alexa_players": "Alexa media players that can receive voice announcements.",
+          "google_section": "Google or Cast announcement configuration.",
+          "google_notifications": "Enables or disables Google/Cast announcements from Notifier Hub.",
+          "google_players": "Google or Cast media players that can receive voice announcements.",
+          "google_tts_service": "TTS service used to generate Google voice announcements.",
+          "google_notify_service": "Notify service used for Google Assistant style notifications.",
+          "default_language": "Language code used when a message does not specify one.",
+          "default_volume": "Default volume used for voice announcements.",
+          "tts_wait_time": "Extra wait time added while estimating how long speech playback takes.",
+          "phone_section": "Phone call notification configuration.",
+          "phone_notifications": "Enables or disables phone call notifications.",
+          "sip_server_name": "SIP server used by the phone call backend.",
+          "notifications_section": "Toggles and entities that control notification routing.",
+          "text_notifications": "Allows normal notify service messages.",
+          "screen_notifications": "Allows persistent notifications in Home Assistant.",
+          "speech_notifications": "Allows voice notifications through Alexa or Google.",
+          "ha_event_notifications": "Sends notifications for Home Assistant start, stop, restart and related events.",
+          "dnd_entity": "Entity that blocks voice and phone notifications when turned on.",
+          "guest_mode_entity": "Entity that allows notifications even when presence checks would block them.",
+          "priority_message_entity": "Entity that allows priority messages to bypass notification toggles.",
+          "auto_volume_section": "Automatic volume configuration by day period.",
+          "auto_volume": "Automatically adjusts TTS volume based on the current day period.",
+          "auto_volume_exclude_players": "Media players that should not be controlled by auto volume.",
+          "install_dashboard": "Copies the Notifier Hub dashboard YAML and shows the setup instructions."
         },
         "sections": {
           "persons_section": {
-            "name": "Persons",
+            "name": "Presence",
             "data": {
               "persons": "Persons",
               "location_tracker": "Location tracker"
+            },
+            "data_description": {
+              "persons": "People considered for presence-aware notification routing.",
+              "location_tracker": "Fallback entity used to decide if notifications should be sent when no persons are selected."
             }
           },
           "notify_services_section": {
@@ -90,6 +264,10 @@
             "data": {
               "notify_services": "Notify services",
               "ha_event_notify_services": "Home Assistant event notify services"
+            },
+            "data_description": {
+              "notify_services": "Default notify services used for normal text notifications.",
+              "ha_event_notify_services": "Notify services used only for Home Assistant lifecycle events."
             }
           },
           "alexa_section": {
@@ -97,6 +275,10 @@
             "data": {
               "alexa_notifications": "Alexa notifications",
               "alexa_players": "Alexa players"
+            },
+            "data_description": {
+              "alexa_notifications": "Enables or disables Alexa announcements from Notifier Hub.",
+              "alexa_players": "Alexa media players that can receive voice announcements."
             }
           },
           "google_section": {
@@ -109,6 +291,15 @@
               "default_language": "Default language",
               "default_volume": "Default volume",
               "tts_wait_time": "TTS wait time"
+            },
+            "data_description": {
+              "google_notifications": "Enables or disables Google/Cast announcements from Notifier Hub.",
+              "google_players": "Google or Cast media players that can receive voice announcements.",
+              "google_tts_service": "TTS service used to generate Google voice announcements.",
+              "google_notify_service": "Notify service used for Google Assistant style notifications.",
+              "default_language": "Language code used when a message does not specify one.",
+              "default_volume": "Default volume used for voice announcements.",
+              "tts_wait_time": "Extra wait time added while estimating how long speech playback takes."
             }
           },
           "phone_section": {
@@ -116,6 +307,10 @@
             "data": {
               "phone_notifications": "Phone notifications",
               "sip_server_name": "SIP server name"
+            },
+            "data_description": {
+              "phone_notifications": "Enables or disables phone call notifications.",
+              "sip_server_name": "SIP server used by the phone call backend."
             }
           },
           "notifications_section": {
@@ -128,6 +323,15 @@
               "dnd_entity": "Do not disturb entity",
               "guest_mode_entity": "Guest mode entity",
               "priority_message_entity": "Priority message entity"
+            },
+            "data_description": {
+              "text_notifications": "Allows normal notify service messages.",
+              "screen_notifications": "Allows persistent notifications in Home Assistant.",
+              "speech_notifications": "Allows voice notifications through Alexa or Google.",
+              "ha_event_notifications": "Sends notifications for Home Assistant start, stop, restart and related events.",
+              "dnd_entity": "Entity that blocks voice and phone notifications when turned on.",
+              "guest_mode_entity": "Entity that allows notifications even when presence checks would block them.",
+              "priority_message_entity": "Entity that allows priority messages to bypass notification toggles."
             }
           },
           "auto_volume_section": {
@@ -135,6 +339,10 @@
             "data": {
               "auto_volume": "Auto volume",
               "auto_volume_exclude_players": "Excluded media players"
+            },
+            "data_description": {
+              "auto_volume": "Automatically adjusts TTS volume based on the current day period.",
+              "auto_volume_exclude_players": "Media players that should not be controlled by auto volume."
             }
           }
         }

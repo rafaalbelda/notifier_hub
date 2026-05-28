@@ -25,6 +25,12 @@ from .const import (
     CONF_NOTIFY_SERVICES,
     CONF_PERSONAL_ASSISTANT,
     CONF_PERSONS,
+    CONF_ALEXA_NOTIFICATIONS,
+    CONF_GOOGLE_NOTIFICATIONS,
+    CONF_PHONE_NOTIFICATIONS,
+    CONF_SCREEN_NOTIFICATIONS,
+    CONF_SPEECH_NOTIFICATIONS,
+    CONF_TEXT_NOTIFICATIONS,
     CONF_SIP_SERVER_NAME,
     CONF_TTS_WAIT_TIME,
     DEFAULT_LANGUAGE,
@@ -43,7 +49,7 @@ from .notification_manager import NotificationManager
 from .phone_manager import PhoneManager
 
 _LOGGER = logging.getLogger(__name__)
-PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR]
+PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SWITCH]
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -61,10 +67,12 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_DEFAULT_VOLUME, default=DEFAULT_VOLUME): vol.Coerce(float),
                 vol.Optional(CONF_TTS_WAIT_TIME, default=DEFAULT_TTS_WAIT_TIME): vol.Coerce(float),
                 vol.Optional(CONF_DEBUG, default=False): cv.boolean,
-                vol.Optional("text_notifications", default=True): cv.boolean,
-                vol.Optional("screen_notifications", default=True): cv.boolean,
-                vol.Optional("speech_notifications", default=True): cv.boolean,
-                vol.Optional("phone_notifications", default=False): cv.boolean,
+                vol.Optional(CONF_TEXT_NOTIFICATIONS, default=True): cv.boolean,
+                vol.Optional(CONF_SCREEN_NOTIFICATIONS, default=True): cv.boolean,
+                vol.Optional(CONF_SPEECH_NOTIFICATIONS, default=True): cv.boolean,
+                vol.Optional(CONF_ALEXA_NOTIFICATIONS, default=True): cv.boolean,
+                vol.Optional(CONF_GOOGLE_NOTIFICATIONS, default=True): cv.boolean,
+                vol.Optional(CONF_PHONE_NOTIFICATIONS, default=False): cv.boolean,
                 vol.Optional("dnd_entity", default=""): cv.string,
                 vol.Optional("guest_mode_entity", default=""): cv.string,
                 vol.Optional("priority_message_entity", default=""): cv.string,
@@ -163,10 +171,12 @@ class NotifierHub:
         data.setdefault(CONF_DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)
         data.setdefault(CONF_DEFAULT_VOLUME, DEFAULT_VOLUME)
         data.setdefault(CONF_TTS_WAIT_TIME, DEFAULT_TTS_WAIT_TIME)
-        data.setdefault("text_notifications", True)
-        data.setdefault("screen_notifications", True)
-        data.setdefault("speech_notifications", True)
-        data.setdefault("phone_notifications", False)
+        data.setdefault(CONF_TEXT_NOTIFICATIONS, True)
+        data.setdefault(CONF_SCREEN_NOTIFICATIONS, True)
+        data.setdefault(CONF_SPEECH_NOTIFICATIONS, True)
+        data.setdefault(CONF_ALEXA_NOTIFICATIONS, True)
+        data.setdefault(CONF_GOOGLE_NOTIFICATIONS, True)
+        data.setdefault(CONF_PHONE_NOTIFICATIONS, False)
         return data
 
     async def async_setup(self) -> None:
@@ -272,10 +282,10 @@ class NotifierHub:
         defaults = h.return_list(self.config.get(CONF_NOTIFY_SERVICES, [])) or ["persistent_notification"]
         notify_services = h.normalize_notify_list(data.get("notify", True), defaults)
 
-        use_notification = priority or (self.config.get("text_notifications", True) and bool(message) and h.check_notify(data.get("notify")) and location_ok)
-        use_persistent = priority or (self.config.get("screen_notifications", True) and bool(message) and not h.check_bool(data.get("no_show")))
-        use_tts = priority or (self.config.get("speech_notifications", True) and not dnd and (location_ok or guest))
-        use_phone = priority or (self.config.get("phone_notifications", False) and bool(message) and not dnd and h.check_bool(data.get("phone", False)))
+        use_notification = priority or (self.config.get(CONF_TEXT_NOTIFICATIONS, True) and bool(message) and h.check_notify(data.get("notify")) and location_ok)
+        use_persistent = priority or (self.config.get(CONF_SCREEN_NOTIFICATIONS, True) and bool(message) and not h.check_bool(data.get("no_show")))
+        use_speech = self.config.get(CONF_SPEECH_NOTIFICATIONS, True) and not dnd and (location_ok or guest)
+        use_phone = priority or (self.config.get(CONF_PHONE_NOTIFICATIONS, False) and bool(message) and not dnd and h.check_bool(data.get("phone", False)))
 
         self.set_debug("OK", {})
         try:
@@ -287,11 +297,13 @@ class NotifierHub:
                 await self.phone_manager.send_voice_call(data)
             alexa = data.get("alexa", False)
             alexa_priority = isinstance(alexa, dict) and h.check_bool(alexa.get("priority", False))
-            if (use_tts or alexa_priority) and h.check_notify(alexa):
+            use_alexa = priority or alexa_priority or (use_speech and self.config.get(CONF_ALEXA_NOTIFICATIONS, True))
+            if use_alexa and h.check_notify(alexa):
                 await self.alexa_manager.speak(alexa, data)
             google = data.get("google", False)
             google_priority = isinstance(google, dict) and h.check_bool(google.get("priority", False))
-            if (use_tts or google_priority) and h.check_notify(google):
+            use_google = priority or google_priority or (use_speech and self.config.get(CONF_GOOGLE_NOTIFICATIONS, True))
+            if use_google and h.check_notify(google):
                 await self.google_manager.speak(google, data)
         except Exception as err:  # noqa: BLE001
             _LOGGER.exception("Notifier Hub dispatch error")

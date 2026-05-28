@@ -41,6 +41,22 @@ Reinicia Home Assistant y añade la integración desde:
 Ajustes > Dispositivos y servicios > Añadir integración > Notifier Hub
 ```
 
+## Dashboard
+
+El archivo `notifier_hub_dashboard.yaml` incluye un panel Lovelace con estado, actividad TTS y botones de prueba.
+Copialo a `/config/notifier_hub_dashboard.yaml` y registra el dashboard en `configuration.yaml`:
+
+```yaml
+lovelace:
+  dashboards:
+    notifier-hub:
+      mode: yaml
+      title: Notifier Hub
+      icon: mdi:bell-ring
+      show_in_sidebar: true
+      filename: notifier_hub_dashboard.yaml
+```
+
 También puedes configurarla en `configuration.yaml`:
 
 ```yaml
@@ -66,6 +82,8 @@ notifier_hub:
   text_notifications: true
   screen_notifications: true
   speech_notifications: true
+  alexa_notifications: true
+  google_notifications: true
   phone_notifications: false
   dnd_entity: binary_sensor.notifier_dnd
   guest_mode_entity: input_boolean.notifier_guest_mode

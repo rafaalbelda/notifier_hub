@@ -52,18 +52,23 @@ class AlexaManager:
             if state.attributes.get("friendly_name")
         }
 
+    def _auto_alexa_players(self) -> list[str]:
+        return [s.entity_id for s in self.hass.states.async_all("media_player") if "alexa" in s.entity_id.lower()]
+
     def _alexa_players_from_notify_services(self) -> list[str]:
         # La API pública de HA no lista servicios aquí de forma estable en todas las versiones.
         # Se usa la lista configurada y, si está vacía, todos los media_player con integración Alexa conocidos por nombre.
         configured = h.return_list(self.hub.config.get("alexa_players", []))
         if configured:
-            return self._resolve_players(configured)
-        return [s.entity_id for s in self.hass.states.async_all("media_player") if "alexa" in s.entity_id.lower()]
+            resolved = self._resolve_players(configured, fallback=False)
+            if resolved:
+                return resolved
+        return self._auto_alexa_players()
 
-    def _resolve_players(self, raw_players: Any) -> list[str]:
+    def _resolve_players(self, raw_players: Any, fallback: bool = True) -> list[str]:
         players = h.return_list(raw_players)
         if not players or players == ["all"]:
-            return self._alexa_players_from_notify_services()
+            return self._alexa_players_from_notify_services() if fallback else self._auto_alexa_players()
         name2entity = self._friendly_name_map()
         resolved: list[str] = []
         for player in players:
@@ -78,7 +83,7 @@ class AlexaManager:
                 resolved.append(p)
             elif p in name2entity:
                 resolved.append(name2entity[p])
-        if not resolved:
+        if not resolved and fallback:
             resolved = self._alexa_players_from_notify_services()
         return sorted(set(resolved))
 
@@ -205,7 +210,7 @@ class AlexaManager:
                 await self.hass.services.async_call(
                     "notify",
                     str(data.get("notifier", ALEXA_SERVICE)),
-                    {"message": msg.strip(), "data": {"target": players, "data": alexa_data}},
+                    {"message": msg.strip(), "target": players, "data": alexa_data},
                     blocking=False,
                 )
                 await asyncio.sleep(h.estimate_speech_duration(msg, float(data.get("wait_time", self.hub.config.get("tts_wait_time", 3.0)))))

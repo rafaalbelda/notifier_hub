@@ -18,6 +18,8 @@ CONF_SPEECH_NOTIFICATIONS = "speech_notifications"
 CONF_ALEXA_NOTIFICATIONS = "alexa_notifications"
 CONF_GOOGLE_NOTIFICATIONS = "google_notifications"
 CONF_PHONE_NOTIFICATIONS = "phone_notifications"
+CONF_HA_EVENT_NOTIFICATIONS = "ha_event_notifications"
+CONF_HA_EVENT_NOTIFY_SERVICES = "ha_event_notify_services"
 
 DEFAULT_PERSONAL_ASSISTANT = "Assistant"
 DEFAULT_SIP_SERVER_NAME = "fritz.box:5060"

@@ -15,6 +15,15 @@ Conversión de la aplicación AppDaemon `Centro Notifiche / Notifier` a una inte
   - `sensor.notifier_hub_debug`
   - `sensor.notifier_hub_last_message`
   - `binary_sensor.notifier_hub_alexa_speak`
+  - `binary_sensor.notifier_hub_google_speak`
+- Interruptores propios para activar o desactivar canales:
+  - `switch.notifier_hub_text_notifications`
+  - `switch.notifier_hub_screen_notifications`
+  - `switch.notifier_hub_speech_notifications`
+  - `switch.notifier_hub_alexa_notifications`
+  - `switch.notifier_hub_google_notifications`
+  - `switch.notifier_hub_phone_notifications`
+  - `switch.notifier_hub_home_assistant_event_notifications`
 
 ## Qué se ha eliminado
 
@@ -44,6 +53,7 @@ Ajustes > Dispositivos y servicios > Añadir integración > Notifier Hub
 ## Dashboard
 
 El archivo `notifier_hub_dashboard.yaml` incluye un panel Lovelace con estado, actividad TTS y botones de prueba.
+Tambien incluye una tarjeta `Canales` con los interruptores de texto, persistente, voz, Alexa, Google y telefono.
 Copialo a `/config/notifier_hub_dashboard.yaml` y registra el dashboard en `configuration.yaml`:
 
 ```yaml
@@ -85,6 +95,9 @@ notifier_hub:
   alexa_notifications: true
   google_notifications: true
   phone_notifications: false
+  ha_event_notifications: true
+  ha_event_notify_services:
+    - notify.mobile_app_mi_telefono
   dnd_entity: binary_sensor.notifier_dnd
   guest_mode_entity: input_boolean.notifier_guest_mode
   priority_message_entity: input_boolean.notifier_priority_message
@@ -94,6 +107,37 @@ notifier_hub:
 `persons` se puede configurar desde la UI con un selector de entidades `person.*`.
 Cuando hay personas configuradas, Notifier Hub las usa para comprobar la ubicación de los mensajes con `location`.
 Si `persons` está vacío, se mantiene la compatibilidad con `location_tracker`.
+
+## Controles de canales
+
+Notifier Hub crea interruptores para activar y desactivar canales desde la UI, automatizaciones o el dashboard:
+
+| Entidad | Configuración | Uso |
+|---|---|---|
+| `switch.notifier_hub_text_notifications` | `text_notifications` | Notificaciones por servicios `notify.*` |
+| `switch.notifier_hub_screen_notifications` | `screen_notifications` | Notificaciones persistentes en Home Assistant |
+| `switch.notifier_hub_speech_notifications` | `speech_notifications` | Interruptor maestro de voz/TTS |
+| `switch.notifier_hub_alexa_notifications` | `alexa_notifications` | TTS/announce/push de Alexa |
+| `switch.notifier_hub_google_notifications` | `google_notifications` | TTS o notify de Google/Cast |
+| `switch.notifier_hub_phone_notifications` | `phone_notifications` | Llamadas telefonicas |
+| `switch.notifier_hub_home_assistant_event_notifications` | `ha_event_notifications` | Eventos de ciclo de vida de Home Assistant |
+
+`speech_notifications` debe estar activado para permitir voz normal en Alexa y Google.
+Los mensajes con `priority: true` o prioridad especifica de Alexa/Google pueden saltarse los interruptores, igual que en la app original.
+
+## Eventos de Home Assistant
+
+La app original podia avisar de eventos `Start`, `Final Write`, `Close`, `Stop` y `Restart`.
+La integracion nativa escucha esos eventos directamente:
+
+- `homeassistant_started`
+- `homeassistant_final_write`
+- `homeassistant_close`
+- `homeassistant_stop`
+- llamada al servicio `homeassistant.restart`
+
+Activalo o desactivalo con `ha_event_notifications` o con `switch.notifier_hub_home_assistant_event_notifications`.
+Por defecto usa `notify_services`; si quieres separar esos avisos, define `ha_event_notify_services`.
 
 ## Uso como servicio
 

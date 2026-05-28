@@ -23,6 +23,8 @@ from .const import (
     CONF_SCREEN_NOTIFICATIONS,
     CONF_SPEECH_NOTIFICATIONS,
     CONF_TEXT_NOTIFICATIONS,
+    CONF_HA_EVENT_NOTIFICATIONS,
+    CONF_HA_EVENT_NOTIFY_SERVICES,
     CONF_SIP_SERVER_NAME,
     CONF_TTS_WAIT_TIME,
     DEFAULT_LANGUAGE,
@@ -132,5 +134,12 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
             vol.Optional(CONF_ALEXA_NOTIFICATIONS, default=default(CONF_ALEXA_NOTIFICATIONS, True)): selector.BooleanSelector(),
             vol.Optional(CONF_GOOGLE_NOTIFICATIONS, default=default(CONF_GOOGLE_NOTIFICATIONS, True)): selector.BooleanSelector(),
             vol.Optional(CONF_PHONE_NOTIFICATIONS, default=default(CONF_PHONE_NOTIFICATIONS, False)): selector.BooleanSelector(),
+            vol.Optional(CONF_HA_EVENT_NOTIFICATIONS, default=default(CONF_HA_EVENT_NOTIFICATIONS, True)): selector.BooleanSelector(),
+            vol.Optional(
+                CONF_HA_EVENT_NOTIFY_SERVICES,
+                default=_as_list(default(CONF_HA_EVENT_NOTIFY_SERVICES, [])),
+            ): selector.SelectSelector(
+                selector.SelectSelectorConfig(options=notify_options, multiple=True, custom_value=True)
+            ),
         }
     )

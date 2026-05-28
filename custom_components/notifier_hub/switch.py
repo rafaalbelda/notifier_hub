@@ -5,8 +5,10 @@ from homeassistant.components.switch import SwitchEntity
 from .const import (
     CONF_ALEXA_NOTIFICATIONS,
     CONF_GOOGLE_NOTIFICATIONS,
+    CONF_HA_EVENT_NOTIFICATIONS,
     CONF_PHONE_NOTIFICATIONS,
     CONF_SCREEN_NOTIFICATIONS,
+    CONF_SPEECH_NOTIFICATIONS,
     CONF_TEXT_NOTIFICATIONS,
 )
 from .entity import NotifierHubEntity
@@ -14,9 +16,11 @@ from .entity import NotifierHubEntity
 SWITCHES = [
     (CONF_TEXT_NOTIFICATIONS, "Notifier Hub Text Notifications", True, "mdi:message-text"),
     (CONF_SCREEN_NOTIFICATIONS, "Notifier Hub Screen Notifications", True, "mdi:monitor-message"),
+    (CONF_SPEECH_NOTIFICATIONS, "Notifier Hub Speech Notifications", True, "mdi:account-voice"),
     (CONF_ALEXA_NOTIFICATIONS, "Notifier Hub Alexa Notifications", True, "mdi:amazon-alexa"),
     (CONF_GOOGLE_NOTIFICATIONS, "Notifier Hub Google Notifications", True, "mdi:google-assistant"),
     (CONF_PHONE_NOTIFICATIONS, "Notifier Hub Phone Notifications", False, "mdi:phone-message"),
+    (CONF_HA_EVENT_NOTIFICATIONS, "Notifier Hub Home Assistant Event Notifications", True, "mdi:home-assistant"),
 ]
 
 

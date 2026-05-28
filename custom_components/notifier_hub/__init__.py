@@ -27,6 +27,8 @@ from .const import (
     CONF_PERSONS,
     CONF_ALEXA_NOTIFICATIONS,
     CONF_GOOGLE_NOTIFICATIONS,
+    CONF_HA_EVENT_NOTIFICATIONS,
+    CONF_HA_EVENT_NOTIFY_SERVICES,
     CONF_PHONE_NOTIFICATIONS,
     CONF_SCREEN_NOTIFICATIONS,
     CONF_SPEECH_NOTIFICATIONS,
@@ -73,6 +75,8 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_ALEXA_NOTIFICATIONS, default=True): cv.boolean,
                 vol.Optional(CONF_GOOGLE_NOTIFICATIONS, default=True): cv.boolean,
                 vol.Optional(CONF_PHONE_NOTIFICATIONS, default=False): cv.boolean,
+                vol.Optional(CONF_HA_EVENT_NOTIFICATIONS, default=True): cv.boolean,
+                vol.Optional(CONF_HA_EVENT_NOTIFY_SERVICES, default=[]): cv.ensure_list,
                 vol.Optional("dnd_entity", default=""): cv.string,
                 vol.Optional("guest_mode_entity", default=""): cv.string,
                 vol.Optional("priority_message_entity", default=""): cv.string,
@@ -156,6 +160,7 @@ class NotifierHub:
         self.alexa_manager = AlexaManager(hass, self)
         self.google_manager = GoogleManager(hass, self)
         self._remove_listener = None
+        self._remove_ha_event_listeners: list[Any] = []
 
     def _merged_config(self) -> dict[str, Any]:
         data = dict(self.entry.data)
@@ -177,17 +182,29 @@ class NotifierHub:
         data.setdefault(CONF_ALEXA_NOTIFICATIONS, True)
         data.setdefault(CONF_GOOGLE_NOTIFICATIONS, True)
         data.setdefault(CONF_PHONE_NOTIFICATIONS, False)
+        data.setdefault(CONF_HA_EVENT_NOTIFICATIONS, True)
+        data.setdefault(CONF_HA_EVENT_NOTIFY_SERVICES, [])
         return data
 
     async def async_setup(self) -> None:
         self.hass.services.async_register(DOMAIN, SERVICE_SEND, self._handle_send, schema=SEND_SCHEMA)
         self.hass.services.async_register(DOMAIN, SERVICE_SET_CONFIG, self._handle_set_config, schema=SET_CONFIG_SCHEMA)
         self._remove_listener = self.hass.bus.async_listen(EVENT_NOTIFIER, self._handle_notifier_event)
+        self._remove_ha_event_listeners = [
+            self.hass.bus.async_listen("homeassistant_started", self._handle_ha_started),
+            self.hass.bus.async_listen("homeassistant_stop", self._handle_ha_stop),
+            self.hass.bus.async_listen("homeassistant_final_write", self._handle_ha_final_write),
+            self.hass.bus.async_listen("homeassistant_close", self._handle_ha_close),
+            self.hass.bus.async_listen("call_service", self._handle_ha_call_service),
+        ]
         self.set_debug("on", {})
 
     async def async_unload(self) -> None:
         if self._remove_listener:
             self._remove_listener()
+        for remove_listener in self._remove_ha_event_listeners:
+            remove_listener()
+        self._remove_ha_event_listeners = []
         if self.hass.services.has_service(DOMAIN, SERVICE_SEND):
             self.hass.services.async_remove(DOMAIN, SERVICE_SEND)
         if self.hass.services.has_service(DOMAIN, SERVICE_SET_CONFIG):
@@ -233,6 +250,43 @@ class NotifierHub:
             self.set_debug("ad command ignored", {"command": data["ad"].get("command")})
             return
         await self.dispatch(data)
+
+    async def _handle_ha_started(self, event) -> None:
+        await self._send_ha_event_notification("HomeAssistant Start!", "Home Assistant esta operativo.")
+
+    async def _handle_ha_stop(self, event) -> None:
+        await self._send_ha_event_notification("HomeAssistant Stop!", "Home Assistant se esta deteniendo.")
+
+    async def _handle_ha_final_write(self, event) -> None:
+        await self._send_ha_event_notification("HomeAssistant Final Write!", "Home Assistant ha completado la escritura final.")
+
+    async def _handle_ha_close(self, event) -> None:
+        await self._send_ha_event_notification("HomeAssistant Close!", "Home Assistant esta cerrando.")
+
+    async def _handle_ha_call_service(self, event) -> None:
+        data = event.data or {}
+        if data.get("domain") != "homeassistant":
+            return
+        service = data.get("service", data.get("action", ""))
+        if service == "restart":
+            await self._send_ha_event_notification("HomeAssistant Restart!", "Reinicio manual de Home Assistant solicitado.")
+
+    async def _send_ha_event_notification(self, title: str, message: str) -> None:
+        if not self.config.get(CONF_HA_EVENT_NOTIFICATIONS, True):
+            return
+        notify_services = h.return_list(self.config.get(CONF_HA_EVENT_NOTIFY_SERVICES, []))
+        if not notify_services:
+            notify_services = h.return_list(self.config.get(CONF_NOTIFY_SERVICES, [])) or ["persistent_notification"]
+        await self.notification_manager.send_notify(
+            {
+                "title": title,
+                "message": message,
+                "notify": notify_services,
+                "priority": False,
+                "html": False,
+            },
+            notify_services,
+        )
 
     async def _handle_send(self, call: ServiceCall) -> None:
         await self.dispatch(dict(call.data))

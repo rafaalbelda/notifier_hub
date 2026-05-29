@@ -9,8 +9,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
     entities = [
         NotifierHubSensor(hub, "debug_error", "Notifier Hub Debug", "debug"),
         NotifierHubSensor(hub, "last_message", "Notifier Hub Last Message", "last_message"),
+        NotifierHubPersonalAssistantSensor(hub),
         NotifierHubSensor(hub, "day_period", "Notifier Hub Day Period", "day_period"),
         NotifierHubSensor(hub, "day_period_volume", "Notifier Hub Day Period Volume", "day_period_volume"),
+        NotifierHubHomePeopleSensor(hub),
     ]
     hub.register_entities(entities)
     async_add_entities(entities)
@@ -35,3 +37,41 @@ class NotifierHubSensor(NotifierHubEntity, SensorEntity):
                 "period": self.coordinator.state.get("day_period", ""),
             }
         return None
+
+
+class NotifierHubPersonalAssistantSensor(NotifierHubEntity, SensorEntity):
+    _attr_icon = "mdi:account-voice"
+
+    def __init__(self, coordinator) -> None:
+        super().__init__(coordinator, "personal_assistant", "Notifier Hub Personal Assistant")
+
+    @property
+    def native_value(self):
+        return self.coordinator.config.get("personal_assistant", "Assistant")
+
+
+class NotifierHubHomePeopleSensor(NotifierHubEntity, SensorEntity):
+    _attr_icon = "mdi:account-multiple-check"
+
+    def __init__(self, coordinator) -> None:
+        super().__init__(coordinator, "home_people", "Notifier Hub Home People")
+
+    @property
+    def native_value(self):
+        return self.coordinator.presence_summary()["home_count"]
+
+    @property
+    def extra_state_attributes(self):
+        summary = self.coordinator.presence_summary()
+        return {
+            "total_count": summary["total_count"],
+            "away_count": summary["away_count"],
+            "is_home": summary["is_home"],
+            "home_persons": summary["home_persons"],
+            "home_person_names": summary["home_person_names"],
+            "home_person_details": summary["home_person_details"],
+            "away_persons": summary["away_persons"],
+            "away_person_names": summary["away_person_names"],
+            "away_person_details": summary["away_person_details"],
+            "persons": summary["persons"],
+        }

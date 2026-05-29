@@ -14,8 +14,11 @@ Conversión de la aplicación AppDaemon `Centro Notifiche / Notifier` a una inte
 - Sensores propios:
   - `sensor.notifier_hub_debug`
   - `sensor.notifier_hub_last_message`
+  - `sensor.notifier_hub_personal_assistant`
+  - `sensor.notifier_hub_home_people`
   - `binary_sensor.notifier_hub_alexa_speak`
   - `binary_sensor.notifier_hub_google_speak`
+  - `binary_sensor.notifier_hub_home_occupied`
 - Interruptores propios para activar o desactivar canales:
   - `switch.notifier_hub_text_notifications`
   - `switch.notifier_hub_screen_notifications`
@@ -65,7 +68,7 @@ El formulario de configuración de la UI está organizado en secciones:
 - Notifications
 - Auto Volume
 
-En la seccion `Auto Volume` puedes activar `install_dashboard`.
+En la Configuración puedes activar `install_dashboard`.
 Si esta opcion esta activada, la integracion copia automaticamente el dashboard a:
 
 ```text
@@ -73,23 +76,6 @@ Si esta opcion esta activada, la integracion copia automaticamente el dashboard 
 ```
 
 Tambien crea una notificacion persistente con el bloque `lovelace:` que debes anadir a `configuration.yaml` para mostrarlo en la barra lateral.
-
-## Dashboard
-
-El archivo `notifier_hub_dashboard.yaml` incluye un panel Lovelace con estado, actividad TTS y botones de prueba.
-Tambien incluye una tarjeta `Canales` con los interruptores de texto, persistente, voz, Alexa, Google y telefono.
-Copialo a `/config/notifier_hub_dashboard.yaml` y registra el dashboard en `configuration.yaml`:
-
-```yaml
-lovelace:
-  dashboards:
-    notifier-hub:
-      mode: yaml
-      title: Notifier Hub
-      icon: mdi:bell-ring
-      show_in_sidebar: true
-      filename: notifier_hub_dashboard.yaml
-```
 
 También puedes configurarla en `configuration.yaml`:
 
@@ -131,11 +117,28 @@ notifier_hub:
   location_tracker: group.notifier_location_tracker
 ```
 
+## Dashboard
+
+El archivo `notifier_hub_dashboard.yaml` incluye un panel Lovelace con estado, actividad TTS y botones de prueba.
+Tambien incluye una tarjeta `Canales` con los interruptores de texto, persistente, voz, Alexa, Google y telefono.
+Copialo a `/config/notifier_hub_dashboard.yaml` y registra el dashboard en `configuration.yaml`:
+
+```yaml
+lovelace:
+  dashboards:
+    notifier-hub:
+      mode: yaml
+      title: Notifier Hub
+      icon: mdi:bell-ring
+      show_in_sidebar: true
+      filename: notifier_hub_dashboard.yaml
+```
+
+## Ubicacion
+
 `persons` se puede configurar desde la UI con un selector de entidades `person.*`.
 Cuando hay personas configuradas, Notifier Hub las usa para comprobar la ubicación de los mensajes con `location`.
 Si `persons` está vacío, se mantiene la compatibilidad con `location_tracker`.
-
-## Ubicacion
 
 `location_tracker` permite filtrar mensajes segun una ubicacion.
 Se compara el valor enviado en `location` con el estado de la entidad configurada:
@@ -166,6 +169,16 @@ persons:
 
 Si `persons` tiene entidades, Notifier Hub las usa primero y `location_tracker` queda como fallback.
 Con `location: home`, el mensaje pasa si alguna de esas personas esta en `home`.
+
+Notifier Hub tambien crea entidades agregadas de presencia:
+
+| Entidad | Estado | Atributos utiles |
+|---|---|---|
+| `sensor.notifier_hub_home_people` | Numero de personas configuradas que estan en `home` | `total_count`, `away_count`, `is_home`, `home_persons`, `home_person_names`, `home_person_details`, `away_persons`, `away_person_names`, `away_person_details`, `persons` |
+| `binary_sensor.notifier_hub_home_occupied` | `on` si hay al menos una persona en `home` | `home_count`, `total_count`, `home_persons`, `home_person_names`, `home_person_details`, `away_persons`, `away_person_names`, `away_person_details` |
+
+Para mostrar personas en el mapa, usa las entidades `person.*` originales en una tarjeta `map`.
+Las entidades agregadas de Notifier Hub resumen la presencia, pero no representan una posicion unica.
 
 Notas:
 

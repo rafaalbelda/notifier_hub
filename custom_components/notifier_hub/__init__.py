@@ -12,7 +12,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME, Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.event import async_track_state_change_event, async_track_time_interval
 from homeassistant.helpers.typing import ConfigType
 
 from . import helpers as h
@@ -149,8 +149,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hub = NotifierHub(hass, entry)
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = hub
     await hub.async_setup()
+    entry.async_on_unload(entry.add_update_listener(async_update_entry))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
+
+
+async def async_update_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    hub: NotifierHub | None = hass.data.get(DOMAIN, {}).get(entry.entry_id)
+    if hub is None:
+        return
+    await hub.async_update_config()
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -185,6 +193,7 @@ class NotifierHub:
         self._remove_listener = None
         self._remove_ha_event_listeners: list[Any] = []
         self._remove_auto_volume_listener = None
+        self._remove_presence_listener = None
 
     def _merged_config(self) -> dict[str, Any]:
         data = dict(self.entry.data)
@@ -248,6 +257,7 @@ class NotifierHub:
             self._handle_auto_volume_interval,
             timedelta(minutes=5),
         )
+        self._async_update_presence_listener()
         self.set_debug("on", {})
         await self.async_apply_auto_volume()
 
@@ -293,6 +303,9 @@ class NotifierHub:
         if self._remove_auto_volume_listener:
             self._remove_auto_volume_listener()
             self._remove_auto_volume_listener = None
+        if self._remove_presence_listener:
+            self._remove_presence_listener()
+            self._remove_presence_listener = None
         if self.hass.services.has_service(DOMAIN, SERVICE_SEND):
             self.hass.services.async_remove(DOMAIN, SERVICE_SEND)
         if self.hass.services.has_service(DOMAIN, SERVICE_SET_CONFIG):
@@ -307,6 +320,59 @@ class NotifierHub:
         for entity in list(self.entities):
             if entity.hass is not None:
                 entity.async_write_ha_state()
+
+    def presence_summary(self) -> dict[str, Any]:
+        persons = h.return_list(self.config.get(CONF_PERSONS, []))
+        summary: dict[str, Any] = {
+            "total_count": len(persons),
+            "home_count": 0,
+            "away_count": 0,
+            "home_persons": [],
+            "home_person_names": [],
+            "home_person_details": [],
+            "away_persons": [],
+            "away_person_names": [],
+            "away_person_details": [],
+            "persons": [],
+        }
+        for entity_id in persons:
+            state = self.hass.states.get(entity_id)
+            value = state.state if state is not None else "unknown"
+            name = state.name if state is not None else entity_id
+            item = {
+                "entity_id": entity_id,
+                "name": name,
+                "state": value,
+            }
+            summary["persons"].append(item)
+            if value == "home":
+                summary["home_count"] += 1
+                summary["home_persons"].append(entity_id)
+                summary["home_person_names"].append(name)
+                summary["home_person_details"].append(item)
+            else:
+                summary["away_count"] += 1
+                summary["away_persons"].append(entity_id)
+                summary["away_person_names"].append(name)
+                summary["away_person_details"].append(item)
+        summary["is_home"] = summary["home_count"] > 0
+        return summary
+
+    def _async_update_presence_listener(self) -> None:
+        if self._remove_presence_listener:
+            self._remove_presence_listener()
+            self._remove_presence_listener = None
+        persons = h.return_list(self.config.get(CONF_PERSONS, []))
+        if not persons:
+            return
+        self._remove_presence_listener = async_track_state_change_event(
+            self.hass,
+            persons,
+            self._handle_presence_change,
+        )
+
+    async def _handle_presence_change(self, event) -> None:
+        self._refresh_entities()
 
     def set_debug(self, state: str, attributes: dict[str, Any]) -> None:
         self.state["debug"] = state
@@ -398,7 +464,16 @@ class NotifierHub:
 
     async def _handle_set_config(self, call: ServiceCall) -> None:
         self.config.update(call.data.get("config", {}))
+        self._async_update_presence_listener()
+        self._refresh_entities()
         self.set_debug("config updated", {"config_keys": sorted(call.data.get("config", {}).keys())})
+        await self.async_apply_auto_volume()
+
+    async def async_update_config(self) -> None:
+        self.config = self._merged_config()
+        self._async_update_presence_listener()
+        self._refresh_entities()
+        self.set_debug("config options updated", {"config_keys": sorted(self.config.keys())})
         await self.async_apply_auto_volume()
 
     async def _handle_notifier_event(self, event) -> None:

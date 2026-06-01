@@ -38,6 +38,23 @@ Es la conversion nativa de la aplicacion AppDaemon `Centro Notifiche / Notifier`
 
 ## Instalacion
 
+### HACS
+
+Puedes instalar Notifier Hub desde HACS como repositorio personalizado:
+
+1. Abre HACS en Home Assistant.
+2. Pulsa los tres puntos de la esquina superior derecha y entra en **Repositorios personalizados**.
+3. Añade `https://github.com/rafaalbelda/notifier_hub`.
+4. Selecciona la categoria **Integracion**.
+5. Instala **Notifier Hub** y reinicia Home Assistant.
+6. Añade la integracion desde:
+
+```text
+Ajustes > Dispositivos y servicios > Añadir integracion > Notifier Hub
+```
+
+### Instalacion manual
+
 Copia la carpeta:
 
 ```text

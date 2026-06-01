@@ -68,7 +68,7 @@ class NotificationManager:
 
             if "telegram" in service:
                 payload = dict(telegram) if isinstance(telegram, dict) else {}
-                if link:
+                if link and image:
                     prepared_message = f"{prepared_message} {link}"
                 if image:
                     key = "url" if image.startswith("http") else "file"

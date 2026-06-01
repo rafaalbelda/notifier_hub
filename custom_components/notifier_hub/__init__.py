@@ -4,7 +4,7 @@ import asyncio
 import logging
 from pathlib import Path
 import shutil
-from datetime import datetime, time as dt_time, timedelta
+from datetime import time as dt_time, timedelta
 from typing import Any
 
 import voluptuous as vol
@@ -14,6 +14,7 @@ from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.event import async_track_state_change_event, async_track_time_interval
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.util import dt as dt_util
 
 from . import helpers as h
 from .alexa_manager import AlexaManager
@@ -403,7 +404,7 @@ class NotifierHub:
             return dt_time(hour, minute, second)
 
     def _current_auto_volume(self) -> tuple[str, int, float]:
-        now_time = datetime.now().time()
+        now_time = dt_util.now().time()
         configured = []
         for key, (label, default_time, default_volume) in AUTO_VOLUME_PERIODS.items():
             start = self._parse_time(self.config.get(f"auto_volume_{key}_time"), default_time)
@@ -442,6 +443,16 @@ class NotifierHub:
             return
         players = self.auto_volume_players()
         if not players:
+            self.set_debug(
+                "auto volume players not found",
+                {
+                    "period": self.state["day_period"],
+                    "volume": self.state["day_period_volume"],
+                    "alexa_players": h.return_list(self.config.get(CONF_ALEXA_PLAYERS, [])),
+                    "google_players": h.return_list(self.config.get(CONF_GOOGLE_PLAYERS, [])),
+                    "excluded_players": h.return_list(self.config.get(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, [])),
+                },
+            )
             return
         await self.hass.services.async_call(
             "media_player",
@@ -449,18 +460,18 @@ class NotifierHub:
             {"entity_id": players, "volume_level": self.state["day_period_volume_level"]},
             blocking=False,
         )
+        self.set_debug(
+            "auto volume applied",
+            {
+                "period": self.state["day_period"],
+                "volume": self.state["day_period_volume"],
+                "volume_level": self.state["day_period_volume_level"],
+                "players": players,
+            },
+        )
 
     async def _handle_auto_volume_interval(self, now) -> None:
-        previous = self.state.get("day_period")
         await self.async_apply_auto_volume()
-        if previous != self.state.get("day_period"):
-            self.set_debug(
-                "auto volume updated",
-                {
-                    "period": self.state["day_period"],
-                    "volume": self.state["day_period_volume"],
-                },
-            )
 
     async def _handle_set_config(self, call: ServiceCall) -> None:
         self.config.update(call.data.get("config", {}))

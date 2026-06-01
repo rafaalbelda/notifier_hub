@@ -1,0 +1,43 @@
+alias: "ALARM : Notify if the door is open"
+description: ""
+triggers:
+  - type: opened
+    device_id: 1f0c9f55e15a4aa7b75cdc451b649371
+    entity_id: binary_sensor.aq_sensor_magnet_contact
+    domain: binary_sensor
+    for:
+      hours: 0
+      minutes: 0
+      seconds: 5
+    trigger: device
+conditions: []
+actions:
+  - repeat:
+      while:
+        - type: is_open
+          condition: device
+          device_id: 1f0c9f55e15a4aa7b75cdc451b649371
+          entity_id: binary_sensor.aq_sensor_magnet_contact
+          domain: binary_sensor
+      sequence:
+        - action: script.my_notify
+          data:
+            message: La puerta está abierta
+          enabled: false
+        - action: notifier_hub.send
+          metadata: {}
+          data:
+            notify: true
+            no_show: false
+            priority: false
+            alexa: true
+            message: La puerta está abierta
+            title: Notifier Hub
+        - wait_for_trigger:
+            - type: not_opened
+              device_id: 1f0c9f55e15a4aa7b75cdc451b649371
+              entity_id: binary_sensor.aq_sensor_magnet_contact
+              domain: binary_sensor
+              trigger: device
+          timeout: "00:00:30"
+mode: single

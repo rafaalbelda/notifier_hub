@@ -152,6 +152,7 @@ notifier_hub:
   text_notifications: true
   screen_notifications: true
   speech_notifications: true
+  speech_home_only: false
   alexa_notifications: true
   google_notifications: true
   phone_notifications: false
@@ -208,6 +209,8 @@ Estos cambios permanecen en memoria hasta que se recargue la configuracion o se 
 
 `sip_server_name` solo se configura globalmente: no se puede sobrescribir por mensaje.
 
+Si `speech_home_only` esta activo, los mensajes de voz sin `location` explicito se comportan como si incluyeran `location: home`. Un valor `location` enviado con el mensaje tiene prioridad.
+
 ## Como se decide cada envio
 
 Los interruptores globales no son simples valores por defecto. Actuan como permisos para cada canal.
@@ -235,6 +238,20 @@ data:
 ```
 
 Alexa solo habla si los interruptores de voz y Alexa estan activados, no hay DND y la ubicacion coincide, salvo que se active alguna excepcion de prioridad o modo invitados.
+
+### Voz solo si hay alguien en casa
+
+Activa `speech_home_only` o el switch:
+
+```text
+switch.notifier_hub_speech_home_only
+```
+
+Cuando esta activo, Alexa y Google/Cast asumen `location: home` si una accion no incluye `location`. De este modo puedes silenciar globalmente la voz cuando no hay nadie en casa sin repetir `location: home` en cada automatizacion.
+
+Un `location` explicito en el mensaje tiene prioridad. Por ejemplo, `location: oficina` sigue comprobando `oficina`.
+
+Este filtro solo afecta a voz. No filtra notificaciones de texto, persistentes ni llamadas telefonicas.
 
 ### No molestar
 
@@ -554,6 +571,7 @@ Notifier Hub crea interruptores que puedes usar desde la UI, el dashboard o auto
 | `switch.notifier_hub_text_notifications` | `text_notifications` | Notificaciones mediante `notify.*`. |
 | `switch.notifier_hub_screen_notifications` | `screen_notifications` | Notificaciones persistentes. |
 | `switch.notifier_hub_speech_notifications` | `speech_notifications` | Interruptor maestro de voz. |
+| `switch.notifier_hub_speech_home_only` | `speech_home_only` | Si una accion no incluye `location`, permite voz solo cuando alguien esta en `home`. |
 | `switch.notifier_hub_alexa_notifications` | `alexa_notifications` | Alexa TTS, announce y push. |
 | `switch.notifier_hub_google_notifications` | `google_notifications` | Google/Cast TTS o notify. |
 | `switch.notifier_hub_phone_notifications` | `phone_notifications` | Llamadas telefonicas. |

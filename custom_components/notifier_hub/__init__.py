@@ -45,6 +45,7 @@ from .const import (
     CONF_PRIORITY_MESSAGE,
     CONF_PRIORITY_MESSAGE_ENTITY,
     CONF_SCREEN_NOTIFICATIONS,
+    CONF_SPEECH_HOME_ONLY,
     CONF_SPEECH_NOTIFICATIONS,
     CONF_TEXT_NOTIFICATIONS,
     CONF_SIP_SERVER_NAME,
@@ -90,6 +91,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_TEXT_NOTIFICATIONS, default=True): cv.boolean,
                 vol.Optional(CONF_SCREEN_NOTIFICATIONS, default=True): cv.boolean,
                 vol.Optional(CONF_SPEECH_NOTIFICATIONS, default=True): cv.boolean,
+                vol.Optional(CONF_SPEECH_HOME_ONLY, default=False): cv.boolean,
                 vol.Optional(CONF_ALEXA_NOTIFICATIONS, default=True): cv.boolean,
                 vol.Optional(CONF_GOOGLE_NOTIFICATIONS, default=True): cv.boolean,
                 vol.Optional(CONF_PHONE_NOTIFICATIONS, default=False): cv.boolean,
@@ -213,6 +215,7 @@ class NotifierHub:
         data.setdefault(CONF_TEXT_NOTIFICATIONS, True)
         data.setdefault(CONF_SCREEN_NOTIFICATIONS, True)
         data.setdefault(CONF_SPEECH_NOTIFICATIONS, True)
+        data.setdefault(CONF_SPEECH_HOME_ONLY, False)
         data.setdefault(CONF_ALEXA_NOTIFICATIONS, True)
         data.setdefault(CONF_GOOGLE_NOTIFICATIONS, True)
         data.setdefault(CONF_PHONE_NOTIFICATIONS, False)
@@ -575,14 +578,17 @@ class NotifierHub:
         priority = h.check_bool(data.get("priority")) or self._state_is_on(self.config.get(CONF_PRIORITY_MESSAGE_ENTITY, ""))
         dnd = self._state_value(self.config.get(CONF_DND_ENTITY, ""), "off") == "on"
         guest = self._state_value(self.config.get(CONF_GUEST_MODE_ENTITY, ""), "off") == "on"
-        location_ok = self._check_location(str(data.get("location", "")))
+        requested_location = str(data.get("location", ""))
+        location_ok = self._check_location(requested_location)
+        speech_location = requested_location or ("home" if self.config.get(CONF_SPEECH_HOME_ONLY, False) else "")
+        speech_location_ok = self._check_location(speech_location)
 
         defaults = h.return_list(self.config.get(CONF_NOTIFY_SERVICES, [])) or ["persistent_notification"]
         notify_services = h.normalize_notify_list(data.get("notify", True), defaults)
 
         use_notification = priority or (self.config.get(CONF_TEXT_NOTIFICATIONS, True) and bool(message) and h.check_notify(data.get("notify")) and location_ok)
         use_persistent = priority or (self.config.get(CONF_SCREEN_NOTIFICATIONS, True) and bool(message) and not h.check_bool(data.get("no_show")))
-        use_speech = self.config.get(CONF_SPEECH_NOTIFICATIONS, True) and not dnd and (location_ok or guest)
+        use_speech = self.config.get(CONF_SPEECH_NOTIFICATIONS, True) and not dnd and (speech_location_ok or guest)
         use_phone = priority or (self.config.get(CONF_PHONE_NOTIFICATIONS, False) and bool(message) and not dnd and h.check_bool(data.get("phone", False)))
 
         self.set_debug("OK", {})

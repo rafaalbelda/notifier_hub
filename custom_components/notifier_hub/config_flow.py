@@ -22,6 +22,7 @@ from .const import (
     CONF_GOOGLE_NOTIFICATIONS,
     CONF_PHONE_NOTIFICATIONS,
     CONF_SCREEN_NOTIFICATIONS,
+    CONF_SPEECH_HOME_ONLY,
     CONF_SPEECH_NOTIFICATIONS,
     CONF_TEXT_NOTIFICATIONS,
     CONF_HA_EVENT_NOTIFICATIONS,
@@ -247,6 +248,10 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                         vol.Optional(
                             CONF_SPEECH_NOTIFICATIONS,
                             default=default(CONF_SPEECH_NOTIFICATIONS, True),
+                        ): selector.BooleanSelector(),
+                        vol.Optional(
+                            CONF_SPEECH_HOME_ONLY,
+                            default=default(CONF_SPEECH_HOME_ONLY, False),
                         ): selector.BooleanSelector(),
                         vol.Optional(
                             CONF_HA_EVENT_NOTIFICATIONS,

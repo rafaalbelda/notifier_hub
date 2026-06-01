@@ -29,6 +29,8 @@ views:
             name: Persistente
           - entity: switch.notifier_hub_speech_notifications
             name: Voz
+          - entity: switch.notifier_hub_speech_home_only
+            name: Voz solo si hay alguien en casa
           - entity: switch.notifier_hub_alexa_notifications
             name: Alexa
           - entity: switch.notifier_hub_google_notifications

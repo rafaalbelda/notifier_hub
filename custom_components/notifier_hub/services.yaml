@@ -29,6 +29,12 @@ send:
       selector:
         boolean:
       default: false
+    # location:
+    #   name: Ubicación
+    #   description: Estado requerido para los canales sujetos a ubicación, por ejemplo home. Déjalo vacío para filtro global.
+    #   selector:
+    #     text:
+    #   default: "home"
     alexa:
       name: Alexa
       description: true/on o diccionario con media_player, volume, type, method, voice, language, ssml, push, event_id, media_content_id...
@@ -53,24 +59,58 @@ send:
       default: ""
     image:
       name: Imagen
+      description: Ruta local o URL de una imagen para Telegram, Pushover, Discord o mobile_app.
       selector:
         text:
       default: ""
-    link:
-      name: Enlace
-      selector:
-        text:
-      default: ""
-    target:
-      name: Target
-      selector:
-        object:
-      default: ""
-    html:
-      name: HTML
-      selector:
-        boolean:
-      default: false
+    # caption:
+    #   name: Pie de foto
+    #   description: Pie de foto para Telegram. Si está vacío, se genera a partir del título y el mensaje.
+    #   selector:
+    #     text:
+    #   default: ""
+    # link:
+    #   name: Enlace
+    #   description: URL añadida al mensaje o utilizada como enlace del contenido embebido de Discord.
+    #   selector:
+    #     text:
+    #   default: ""
+    # target:
+    #   name: Target
+    #   description: Destinatario o lista de destinatarios para el servicio notify, por ejemplo identificadores de chat de Telegram.
+    #   selector:
+    #     object:
+    #   default: ""
+    # html:
+    #   name: HTML
+    #   description: Activa el formato HTML para Telegram.
+    #   selector:
+    #     boolean:
+    #   default: false
+    # telegram:
+    #   name: Opciones de Telegram
+    #   description: Diccionario con opciones adicionales enviadas al servicio notify de Telegram.
+    #   selector:
+    #     object:
+    #   default: ""
+    # pushover:
+    #   name: Opciones de Pushover
+    #   description: Diccionario con opciones adicionales enviadas al servicio notify de Pushover.
+    #   selector:
+    #     object:
+    #   default: ""
+    # mobile:
+    #   name: Opciones de mobile_app
+    #   description: Diccionario con opciones adicionales para notify.mobile_app_*. Usa tts true para enviar tts_text.
+    #   selector:
+    #     object:
+    #   default: ""
+    # discord:
+    #   name: Opciones de Discord
+    #   description: Diccionario con opciones adicionales para Discord. Incluye la clave embed para generar contenido embebido.
+    #   selector:
+    #     object:
+    #   default: ""
 
 set_config:
   name: Actualizar configuración runtime

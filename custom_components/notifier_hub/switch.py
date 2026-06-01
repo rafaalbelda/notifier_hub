@@ -12,6 +12,7 @@ from .const import (
     CONF_PHONE_NOTIFICATIONS,
     CONF_PRIORITY_MESSAGE,
     CONF_SCREEN_NOTIFICATIONS,
+    CONF_SPEECH_HOME_ONLY,
     CONF_SPEECH_NOTIFICATIONS,
     CONF_TEXT_NOTIFICATIONS,
 )
@@ -21,6 +22,7 @@ SWITCHES = [
     (CONF_TEXT_NOTIFICATIONS, "Notifier Hub Text Notifications", True, "mdi:message-text"),
     (CONF_SCREEN_NOTIFICATIONS, "Notifier Hub Screen Notifications", True, "mdi:message-badge"),
     (CONF_SPEECH_NOTIFICATIONS, "Notifier Hub Speech Notifications", True, "mdi:account-voice"),
+    (CONF_SPEECH_HOME_ONLY, "Notifier Hub Speech Home Only", False, "mdi:home-account"),
     (CONF_ALEXA_NOTIFICATIONS, "Notifier Hub Alexa Notifications", True, "mdi:speaker-message"),
     (CONF_GOOGLE_NOTIFICATIONS, "Notifier Hub Google Notifications", True, "mdi:google-assistant"),
     (CONF_PHONE_NOTIFICATIONS, "Notifier Hub Phone Notifications", False, "mdi:phone-message"),

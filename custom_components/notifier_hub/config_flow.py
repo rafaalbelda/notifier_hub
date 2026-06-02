@@ -30,9 +30,6 @@ from .const import (
     CONF_AUTO_VOLUME,
     CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
     CONF_INSTALL_DASHBOARD,
-    CONF_DND_ENTITY,
-    CONF_GUEST_MODE_ENTITY,
-    CONF_PRIORITY_MESSAGE_ENTITY,
     CONF_SIP_SERVER_NAME,
     CONF_TTS_WAIT_TIME,
     DEFAULT_LANGUAGE,
@@ -42,18 +39,16 @@ from .const import (
     DEFAULT_VOLUME,
     DEFAULT_GOOGLE_NOTIFY_SERVICE,
     DEFAULT_GOOGLE_TTS_SERVICE,
-    DEFAULT_DND_ENTITY,
-    DEFAULT_GUEST_MODE_ENTITY,
-    DEFAULT_PRIORITY_MESSAGE_ENTITY,
     DOMAIN,
 )
 
+SECTION_GENERAL = "general_section"
 SECTION_PERSONS = "persons_section"
-SECTION_NOTIFY_SERVICES = "notify_services_section"
+SECTION_TEXT_EVENTS = "text_events_section"
+SECTION_VOICE = "voice_section"
 SECTION_ALEXA = "alexa_section"
 SECTION_GOOGLE = "google_section"
 SECTION_PHONE = "phone_section"
-SECTION_NOTIFICATIONS = "notifications_section"
 SECTION_AUTO_VOLUME = "auto_volume_section"
 
 
@@ -93,7 +88,6 @@ class NotifierHubOptionsFlow(config_entries.OptionsFlow):
 
         data = dict(self._config_entry.data)
         data.update(dict(self._config_entry.options))
-        _normalize_legacy_entities(data)
         return self.async_show_form(step_id="init", data_schema=_schema(self.hass, data))
 
 
@@ -110,17 +104,6 @@ def _as_list(value: Any) -> list[str]:
     if isinstance(value, (set, tuple)):
         return [str(item) for item in value if str(item)]
     return [item.strip() for item in str(value).split(",") if item.strip()]
-
-
-def _normalize_legacy_entities(data: dict[str, Any]) -> None:
-    legacy_entities = {
-        CONF_DND_ENTITY: ("input_boolean.notifier_dnd", DEFAULT_DND_ENTITY),
-        CONF_GUEST_MODE_ENTITY: ("input_boolean.notifier_guest_mode", DEFAULT_GUEST_MODE_ENTITY),
-        CONF_PRIORITY_MESSAGE_ENTITY: ("input_boolean.notifier_priority_message", DEFAULT_PRIORITY_MESSAGE_ENTITY),
-    }
-    for key, (legacy_entity, default_entity) in legacy_entities.items():
-        if data.get(key) in ("", legacy_entity):
-            data[key] = default_entity
 
 
 def _flatten_sections(data: dict[str, Any]) -> dict[str, Any]:
@@ -150,10 +133,21 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
 
     return vol.Schema(
         {
-            vol.Optional(
-                CONF_PERSONAL_ASSISTANT,
-                default=default(CONF_PERSONAL_ASSISTANT, DEFAULT_PERSONAL_ASSISTANT),
-            ): str,
+            vol.Optional(SECTION_GENERAL): section(
+                vol.Schema(
+                    {
+                        vol.Optional(
+                            CONF_PERSONAL_ASSISTANT,
+                            default=default(CONF_PERSONAL_ASSISTANT, DEFAULT_PERSONAL_ASSISTANT),
+                        ): str,
+                        vol.Optional(
+                            CONF_INSTALL_DASHBOARD,
+                            default=default(CONF_INSTALL_DASHBOARD, True),
+                        ): selector.BooleanSelector(),
+                    }
+                ),
+                {"collapsed": False},
+            ),
             vol.Optional(SECTION_PERSONS): section(
                 vol.Schema(
                     {
@@ -167,18 +161,48 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                 ),
                 {"collapsed": False},
             ),
-            vol.Optional(SECTION_NOTIFY_SERVICES): section(
+            vol.Optional(SECTION_TEXT_EVENTS): section(
                 vol.Schema(
                     {
+                        vol.Optional(
+                            CONF_TEXT_NOTIFICATIONS,
+                            default=default(CONF_TEXT_NOTIFICATIONS, True),
+                        ): selector.BooleanSelector(),
+                        vol.Optional(
+                            CONF_SCREEN_NOTIFICATIONS,
+                            default=default(CONF_SCREEN_NOTIFICATIONS, True),
+                        ): selector.BooleanSelector(),
                         vol.Optional(CONF_NOTIFY_SERVICES, default=notify_services): selector.SelectSelector(
                             selector.SelectSelectorConfig(options=notify_options, multiple=True, custom_value=True)
                         ),
+                        vol.Optional(
+                            CONF_HA_EVENT_NOTIFICATIONS,
+                            default=default(CONF_HA_EVENT_NOTIFICATIONS, True),
+                        ): selector.BooleanSelector(),
                         vol.Optional(
                             CONF_HA_EVENT_NOTIFY_SERVICES,
                             default=_as_list(default(CONF_HA_EVENT_NOTIFY_SERVICES, [])),
                         ): selector.SelectSelector(
                             selector.SelectSelectorConfig(options=notify_options, multiple=True, custom_value=True)
                         ),
+                    }
+                ),
+                {"collapsed": False},
+            ),
+            vol.Optional(SECTION_VOICE): section(
+                vol.Schema(
+                    {
+                        vol.Optional(
+                            CONF_SPEECH_NOTIFICATIONS,
+                            default=default(CONF_SPEECH_NOTIFICATIONS, True),
+                        ): selector.BooleanSelector(),
+                        vol.Optional(
+                            CONF_SPEECH_HOME_ONLY,
+                            default=default(CONF_SPEECH_HOME_ONLY, False),
+                        ): selector.BooleanSelector(),
+                        vol.Optional(CONF_DEFAULT_LANGUAGE, default=default(CONF_DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)): str,
+                        vol.Optional(CONF_DEFAULT_VOLUME, default=default(CONF_DEFAULT_VOLUME, DEFAULT_VOLUME)): vol.Coerce(float),
+                        vol.Optional(CONF_TTS_WAIT_TIME, default=default(CONF_TTS_WAIT_TIME, DEFAULT_TTS_WAIT_TIME)): vol.Coerce(float),
                     }
                 ),
                 {"collapsed": False},
@@ -208,16 +232,13 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                             selector.EntitySelectorConfig(domain="media_player", multiple=True)
                         ),
                         vol.Optional(
-                            CONF_GOOGLE_TTS_SERVICE,
-                            default=default(CONF_GOOGLE_TTS_SERVICE, DEFAULT_GOOGLE_TTS_SERVICE),
-                        ): str,
-                        vol.Optional(
                             CONF_GOOGLE_NOTIFY_SERVICE,
                             default=default(CONF_GOOGLE_NOTIFY_SERVICE, DEFAULT_GOOGLE_NOTIFY_SERVICE),
                         ): str,
-                        vol.Optional(CONF_DEFAULT_LANGUAGE, default=default(CONF_DEFAULT_LANGUAGE, DEFAULT_LANGUAGE)): str,
-                        vol.Optional(CONF_DEFAULT_VOLUME, default=default(CONF_DEFAULT_VOLUME, DEFAULT_VOLUME)): vol.Coerce(float),
-                        vol.Optional(CONF_TTS_WAIT_TIME, default=default(CONF_TTS_WAIT_TIME, DEFAULT_TTS_WAIT_TIME)): vol.Coerce(float),
+                        vol.Optional(
+                            CONF_GOOGLE_TTS_SERVICE,
+                            default=default(CONF_GOOGLE_TTS_SERVICE, DEFAULT_GOOGLE_TTS_SERVICE),
+                        ): str,
                     }
                 ),
                 {"collapsed": True},
@@ -234,33 +255,6 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                 ),
                 {"collapsed": True},
             ),
-            vol.Optional(SECTION_NOTIFICATIONS): section(
-                vol.Schema(
-                    {
-                        vol.Optional(
-                            CONF_TEXT_NOTIFICATIONS,
-                            default=default(CONF_TEXT_NOTIFICATIONS, True),
-                        ): selector.BooleanSelector(),
-                        vol.Optional(
-                            CONF_SCREEN_NOTIFICATIONS,
-                            default=default(CONF_SCREEN_NOTIFICATIONS, True),
-                        ): selector.BooleanSelector(),
-                        vol.Optional(
-                            CONF_SPEECH_NOTIFICATIONS,
-                            default=default(CONF_SPEECH_NOTIFICATIONS, True),
-                        ): selector.BooleanSelector(),
-                        vol.Optional(
-                            CONF_SPEECH_HOME_ONLY,
-                            default=default(CONF_SPEECH_HOME_ONLY, False),
-                        ): selector.BooleanSelector(),
-                        vol.Optional(
-                            CONF_HA_EVENT_NOTIFICATIONS,
-                            default=default(CONF_HA_EVENT_NOTIFICATIONS, True),
-                        ): selector.BooleanSelector(),
-                    }
-                ),
-                {"collapsed": False},
-            ),
             vol.Optional(SECTION_AUTO_VOLUME): section(
                 vol.Schema(
                     {
@@ -271,28 +265,9 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                         ): selector.EntitySelector(
                             selector.EntitySelectorConfig(domain="media_player", multiple=True)
                         ),
-                        vol.Optional(CONF_DND_ENTITY, default=default(CONF_DND_ENTITY, DEFAULT_DND_ENTITY)): selector.EntitySelector(
-                            selector.EntitySelectorConfig(domain=["input_boolean", "switch", "binary_sensor"])
-                        ),
-                        vol.Optional(
-                            CONF_GUEST_MODE_ENTITY,
-                            default=default(CONF_GUEST_MODE_ENTITY, DEFAULT_GUEST_MODE_ENTITY),
-                        ): selector.EntitySelector(
-                            selector.EntitySelectorConfig(domain=["input_boolean", "switch", "binary_sensor"])
-                        ),
-                        vol.Optional(
-                            CONF_PRIORITY_MESSAGE_ENTITY,
-                            default=default(CONF_PRIORITY_MESSAGE_ENTITY, DEFAULT_PRIORITY_MESSAGE_ENTITY),
-                        ): selector.EntitySelector(
-                            selector.EntitySelectorConfig(domain=["input_boolean", "switch", "binary_sensor"])
-                        ),
                     }
                 ),
                 {"collapsed": False},
             ),
-            vol.Optional(
-                CONF_INSTALL_DASHBOARD,
-                default=default(CONF_INSTALL_DASHBOARD, True),
-            ): selector.BooleanSelector(),
         }
     )

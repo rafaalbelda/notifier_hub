@@ -1,3 +1,4 @@
 {
-  "name": "Notifier Hub"
+  "name": "Notifier Hub",
+  "render_readme": true
 }

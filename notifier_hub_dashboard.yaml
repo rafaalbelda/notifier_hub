@@ -6,14 +6,29 @@ views:
     type: masonry
     badges: []
     cards:
+      - type: markdown
+        content: |
+          # {{ states('sensor.notifier_hub_personal_assistant') }}
+
       - type: entities
         title: Estado
         show_header_toggle: false
+        state_color: true
         entities:
           - entity: sensor.notifier_hub_debug
             name: Debug
           - entity: sensor.notifier_hub_last_message
             name: Ultimo mensaje
+          - entity: sensor.notifier_hub_personal_assistant
+            name: Asistente
+          - entity: sensor.notifier_hub_home_people
+            name: Personas en casa
+          - type: attribute
+            entity: sensor.notifier_hub_home_people
+            attribute: home_person_names
+            name: Quien esta en casa
+          - entity: binary_sensor.notifier_hub_home_occupied
+            name: Casa ocupada
           - entity: binary_sensor.notifier_hub_alexa_speak
             name: Alexa hablando
           - entity: binary_sensor.notifier_hub_google_speak
@@ -22,6 +37,7 @@ views:
       - type: entities
         title: Canales
         show_header_toggle: false
+        state_color: true
         entities:
           - entity: switch.notifier_hub_text_notifications
             name: Texto
@@ -45,6 +61,7 @@ views:
       - type: entities
         title: Modos
         show_header_toggle: false
+        state_color: true
         entities:
           - entity: switch.notifier_hub_dnd
             name: No molestar
@@ -100,7 +117,16 @@ views:
           - type: markdown
             content: |
               ## Pruebas rapidas
-              Estos botones llaman al servicio `notifier_hub.send`.
+              Escribe un mensaje libre o usa los botones de prueba.
+
+          - type: entities
+            title: Enviar mensaje
+            show_header_toggle: false
+            entities:
+              - entity: text.notifier_hub_dashboard_message
+                name: Mensaje
+              - entity: button.notifier_hub_send_dashboard_message
+                name: Enviar
 
           - type: horizontal-stack
             cards:
@@ -159,22 +185,8 @@ views:
         entities:
           - sensor.notifier_hub_debug
           - sensor.notifier_hub_last_message
+          - sensor.notifier_hub_personal_assistant
+          - sensor.notifier_hub_home_people
+          - binary_sensor.notifier_hub_home_occupied
           - binary_sensor.notifier_hub_alexa_speak
           - binary_sensor.notifier_hub_google_speak
-
-      - type: markdown
-        content: |
-          ## Registro YAML
-
-          Para mostrar este panel en la barra lateral, anade esto a `configuration.yaml`:
-
-          ```yaml
-          lovelace:
-            dashboards:
-              notifier-hub:
-                mode: yaml
-                title: Notifier Hub
-                icon: mdi:bell-ring
-                show_in_sidebar: true
-                filename: notifier_hub_dashboard.yaml
-          ```

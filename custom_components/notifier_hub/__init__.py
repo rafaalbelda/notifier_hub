@@ -65,12 +65,21 @@ from .const import (
     DEFAULT_DND_ENTITY,
     DEFAULT_GUEST_MODE_ENTITY,
     DEFAULT_PRIORITY_MESSAGE_ENTITY,
+    STATE_DASHBOARD_MESSAGE,
 )
 from .notification_manager import NotificationManager
 from .phone_manager import PhoneManager
 
 _LOGGER = logging.getLogger(__name__)
-PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SWITCH, Platform.NUMBER, Platform.TIME]
+PLATFORMS = [
+    Platform.SENSOR,
+    Platform.BINARY_SENSOR,
+    Platform.SWITCH,
+    Platform.NUMBER,
+    Platform.TIME,
+    Platform.TEXT,
+    Platform.BUTTON,
+]
 
 CONFIG_SCHEMA = vol.Schema(
     {
@@ -187,6 +196,7 @@ class NotifierHub:
             "day_period": "",
             "day_period_volume": 0,
             "day_period_volume_level": 0.0,
+            STATE_DASHBOARD_MESSAGE: "",
         }
         self.entities: list[Any] = []
         self.notification_manager = NotificationManager(hass, self)
@@ -387,6 +397,26 @@ class NotifierHub:
         self.state["last_message"] = message
         self._refresh_entities()
 
+    def set_dashboard_message(self, message: str) -> None:
+        self.state[STATE_DASHBOARD_MESSAGE] = message
+        self._refresh_entities()
+
+    async def async_send_dashboard_message(self) -> None:
+        message = str(self.state.get(STATE_DASHBOARD_MESSAGE, "")).strip()
+        if not message:
+            self.set_debug("dashboard message empty", {})
+            return
+        await self.dispatch(
+            {
+                "title": "Dashboard",
+                "message": message,
+                "notify": True,
+                "alexa": True,
+                "google": True,
+                "phone": True,
+            }
+        )
+
     def set_alexa_speak(self, is_on: bool, attributes: dict[str, Any]) -> None:
         self.state["alexa_speak"] = is_on
         self.state["alexa_attributes"] = attributes
@@ -480,15 +510,17 @@ class NotifierHub:
         self.config.update(call.data.get("config", {}))
         self._async_update_presence_listener()
         self._refresh_entities()
-        self.set_debug("config updated", {"config_keys": sorted(call.data.get("config", {}).keys())})
+        await self.async_install_dashboard()
         await self.async_apply_auto_volume()
+        self.set_debug("config updated", {"config_keys": sorted(call.data.get("config", {}).keys())})
 
     async def async_update_config(self) -> None:
         self.config = self._merged_config()
         self._async_update_presence_listener()
         self._refresh_entities()
-        self.set_debug("config options updated", {"config_keys": sorted(self.config.keys())})
+        await self.async_install_dashboard()
         await self.async_apply_auto_volume()
+        self.set_debug("config options updated", {"config_keys": sorted(self.config.keys())})
 
     async def _handle_notifier_event(self, event) -> None:
         data = dict(event.data or {})

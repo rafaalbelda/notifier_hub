@@ -31,6 +31,8 @@ CONF_DND_MODE = "dnd_mode"
 CONF_GUEST_MODE = "guest_mode"
 CONF_PRIORITY_MESSAGE = "priority_message"
 
+STATE_DASHBOARD_MESSAGE = "dashboard_message"
+
 DEFAULT_DND_ENTITY = "switch.notifier_hub_dnd"
 DEFAULT_GUEST_MODE_ENTITY = "switch.notifier_hub_guest_mode"
 DEFAULT_PRIORITY_MESSAGE_ENTITY = "switch.notifier_hub_priority_message"

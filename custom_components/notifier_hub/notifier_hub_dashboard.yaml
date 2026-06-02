@@ -13,6 +13,7 @@ views:
       - type: entities
         title: Estado
         show_header_toggle: false
+        state_color: true
         entities:
           - entity: sensor.notifier_hub_debug
             name: Debug
@@ -116,7 +117,16 @@ views:
           - type: markdown
             content: |
               ## Pruebas rapidas
-              Estos botones llaman al servicio `notifier_hub.send`.
+              Escribe un mensaje libre o usa los botones de prueba.
+
+          - type: entities
+            title: Enviar mensaje
+            show_header_toggle: false
+            entities:
+              - entity: text.notifier_hub_dashboard_message
+                name: Mensaje
+              - entity: button.notifier_hub_send_dashboard_message
+                name: Enviar
 
           - type: horizontal-stack
             cards:
@@ -180,20 +190,3 @@ views:
           - binary_sensor.notifier_hub_home_occupied
           - binary_sensor.notifier_hub_alexa_speak
           - binary_sensor.notifier_hub_google_speak
-
-      - type: markdown
-        content: |
-          ## Registro YAML
-
-          Para mostrar este panel en la barra lateral, anade esto a `configuration.yaml`:
-
-          ```yaml
-          lovelace:
-            dashboards:
-              notifier-hub:
-                mode: yaml
-                title: Notifier Hub
-                icon: mdi:bell-ring
-                show_in_sidebar: true
-                filename: notifier_hub_dashboard.yaml
-          ```

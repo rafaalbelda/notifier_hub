@@ -1,35 +1,160 @@
-alias: Prueba Notifier Hub
-mode: single
-trigger:
-  - platform: state
-    entity_id: input_button.notifier_test
-condition: []
-action:
-  - action: notifier_hub.send
-    data:
-      title: "Prueba"
-      message: "Notifier Hub funciona correctamente"
-      notify: true
-      alexa:
-        media_player: media_player.echo_salon
-        type: tts
-        volume: 0.3
+# Example Home Assistant automations for Notifier Hub.
+# Replace entity IDs, notify services, players, and phone numbers with your own.
 
+- alias: "Notifier Hub: basic text notification"
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: input_button.notifier_test
+  conditions: []
+  actions:
+    - action: notifier_hub.send
+      data:
+        title: "Test"
+        message: "Notifier Hub is working correctly"
+        notify: true
 
----
-alias: Prueba Notifier Hub Google Cast
-mode: single
-trigger:
-  - platform: state
-    entity_id: input_button.notifier_test_google
-condition: []
-action:
-  - action: notifier_hub.send
-    data:
-      title: "Prueba Google"
-      message: "Notifier Hub funciona con Google Cast"
-      notify: false
-      google:
-        media_player: media_player.google_home_salon
-        volume: 0.3
-        tts_service: tts.google_es_es
+- alias: "Notifier Hub: text and Alexa"
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: input_button.notifier_test_alexa
+  conditions: []
+  actions:
+    - action: notifier_hub.send
+      data:
+        title: "Alexa test"
+        message: "Notifier Hub works with Alexa"
+        notify: true
+        alexa:
+          media_player:
+            - media_player.echo_living_room
+          type: tts
+          volume: 0.3
+          wait_time: 2
+
+- alias: "Notifier Hub: Google Cast TTS"
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: input_button.notifier_test_google
+  conditions: []
+  actions:
+    - action: notifier_hub.send
+      data:
+        title: "Google test"
+        message: "Notifier Hub works with Google Cast"
+        notify: false
+        google:
+          media_player:
+            - media_player.google_home_living_room
+          volume: 0.3
+          tts_service: tts.google_en_com
+
+- alias: "Notifier Hub: door open reminder"
+  mode: restart
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.front_door_contact
+      to: "on"
+      for: "00:00:05"
+  conditions: []
+  actions:
+    - repeat:
+        while:
+          - condition: state
+            entity_id: binary_sensor.front_door_contact
+            state: "on"
+        sequence:
+          - action: notifier_hub.send
+            data:
+              title: "Door"
+              message: "The front door is still open"
+              notify: true
+              no_show: false
+              location: home
+              alexa: true
+          - wait_for_trigger:
+              - trigger: state
+                entity_id: binary_sensor.front_door_contact
+                to: "off"
+            timeout: "00:00:30"
+            continue_on_timeout: true
+
+- alias: "Notifier Hub: priority alarm"
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.home_alarm
+      to: "on"
+  conditions: []
+  actions:
+    - action: notifier_hub.send
+      data:
+        title: "Alarm"
+        message: "Alarm triggered"
+        notify:
+          - notify.mobile_app_my_phone
+          - notify.telegram
+        priority: true
+        alexa:
+          media_player: media_player.echo_living_room
+          type: announce
+          method: all
+          volume: 0.6
+          priority: true
+        google:
+          media_player: media_player.google_home_living_room
+          volume: 0.6
+          priority: true
+        phone: true
+        called_number: "+34600000000"
+
+- alias: "Notifier Hub: Telegram image with link"
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: binary_sensor.entry_camera_motion
+      to: "on"
+  conditions: []
+  actions:
+    - action: notifier_hub.send
+      data:
+        title: "Camera"
+        message: "Motion detected at the entrance"
+        notify: notify.telegram
+        image: /config/www/entry_camera.jpg
+        caption: "Motion detected at the entrance"
+        link: "https://example.com/camera"
+        html: true
+
+- alias: "Notifier Hub: temporary runtime volume"
+  mode: single
+  triggers:
+    - trigger: time
+      at: "23:00:00"
+  conditions: []
+  actions:
+    - action: notifier_hub.set_config
+      data:
+        config:
+          default_volume: 0.2
+          tts_wait_time: 3
+
+- alias: "Notifier Hub: AppDaemon legacy event compatibility"
+  mode: single
+  triggers:
+    - trigger: state
+      entity_id: input_button.notifier_test_legacy_event
+  conditions: []
+  actions:
+    - event: notifier
+      event_data:
+        title: "Legacy event"
+        message: "This alert uses the old notifier event"
+        notify: true
+        alexa:
+          media_player: media_player.echo_living_room
+          type: announce
+          method: all
+          volume: 0.4

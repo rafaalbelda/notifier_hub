@@ -2,7 +2,7 @@
 
 Integracion personalizada de Home Assistant para centralizar notificaciones de texto, avisos persistentes, Alexa, Google/Cast y llamadas telefonicas.
 
-Es la conversion nativa de la aplicacion AppDaemon `Centro Notifiche / Notifier`. Mantiene compatibilidad con el evento antiguo `notifier`, pero para automatizaciones nuevas se recomienda usar el servicio `notifier_hub.send`.
+Es la conversion nativa de la aplicacion AppDaemon [`Centro Notifiche`](https://github.com/caiosweet/Package-Notification-HUB-AppDaemon) / [`Notifier`](https://github.com/jumping2000/notifier). Mantiene compatibilidad con el evento antiguo `notifier`, pero para automatizaciones nuevas se recomienda usar el servicio `notifier_hub.send`.
 
 ## Contenido
 

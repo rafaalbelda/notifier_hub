@@ -1,6 +1,6 @@
 # Notifier Hub Integration - AI Agent Guidelines
 
-This is a **Home Assistant custom integration** that provides a centralized notification hub supporting multiple channels: text notifications, Alexa TTS, Google TTS, phone calls, and persistent notifications.
+This is a **Home Assistant custom integration** that provides a centralized notification hub supporting multiple channels: text notifications, Alexa TTS, Google/Cast TTS, phone calls, Home Assistant lifecycle notices, persistent notifications, and Auto Volume controls.
 
 ## Quick Architecture
 
@@ -12,7 +12,7 @@ NotifierHub (coordinator)
 └── PhoneManager (voice calls)
 ```
 
-**Entry Point**: [__init__.py](custom_components/notifier_hub/__init__.py) initializes the hub, registers services, and coordinates message dispatch.
+**Entry Point**: [__init__.py](custom_components/notifier_hub/__init__.py) initializes the hub, registers services/events, creates runtime entities, installs the optional dashboard, and coordinates message dispatch.
 
 ## Key Patterns & Conventions
 
@@ -33,17 +33,26 @@ NotifierHub (coordinator)
 
 ### Configuration
 - **Merged Config**: Combines `entry.data` (setup) + `entry.options` (runtime updates)
+- **Runtime Updates**: `notifier_hub.set_config` and editable entities update config entry options
 - **Constants**: All magic strings in [const.py](custom_components/notifier_hub/const.py)
 - **Validation**: Voluptuous schemas with sensible defaults
 - **Config Flow**: [config_flow.py](custom_components/notifier_hub/config_flow.py) uses entity selectors for media players
+- **Dashboard Install**: `install_dashboard` copies the bundled Lovelace YAML to `/config/notifier_hub_dashboard.yaml`
 
 ### State-Based Routing
 Messages are routed through state checks:
-- **Location**: Checks `location_tracker` entity (can suppress notifications)
+- **Location**: Prefer configured `persons`; fall back to `location_tracker` entity (can suppress text and speech notifications)
+- **Speech Home Only**: Adds an implicit `location: home` check to speech channels when enabled
 - **DND**: Blocks TTS and phone if `dnd_entity` is "on"
 - **Guest Mode**: Overrides location check if enabled
 - **Priority**: Bypasses all toggles if `priority_message_entity` is "on"
-- **Toggles**: `text_notifications`, `screen_notifications`, `speech_notifications`, `phone_notifications`
+- **Toggles**: `text_notifications`, `screen_notifications`, `speech_notifications`, `alexa_notifications`, `google_notifications`, `phone_notifications`, `ha_event_notifications`, `auto_volume`
+
+### Auto Volume
+- Auto Volume uses editable `time.*` period starts and `number.*` period volumes
+- Period state is exposed by `sensor.notifier_hub_day_period` and `sensor.notifier_hub_day_period_volume`
+- Explicit per-message `alexa.volume` / `google.volume` takes precedence over Auto Volume
+- Respect `auto_volume_exclude_players` before changing player volumes
 
 ## Common Development Tasks
 
@@ -68,8 +77,13 @@ Messages are routed through state checks:
 
 ### Adding Entities
 - Extend `NotifierHubEntity` from [entity.py](custom_components/notifier_hub/entity.py)
-- Sensors go in [sensor.py](custom_components/sensor.py) (debug status, last message)
+- Sensors go in [sensor.py](custom_components/notifier_hub/sensor.py) (debug status, last message, presence, Auto Volume period)
 - Binary sensors go in [binary_sensor.py](custom_components/notifier_hub/binary_sensor.py) (Alexa/Google speaking states)
+- Switches go in [switch.py](custom_components/notifier_hub/switch.py) (channel toggles, DND, guest mode, priority, Auto Volume)
+- Numbers go in [number.py](custom_components/notifier_hub/number.py) (Auto Volume period volumes)
+- Times go in [time.py](custom_components/notifier_hub/time.py) (Auto Volume period starts)
+- Buttons go in [button.py](custom_components/notifier_hub/button.py) (test/action buttons)
+- Text entities go in [text.py](custom_components/notifier_hub/text.py) (editable text values)
 - No polling needed (`_attr_should_poll = False`)
 - Update via `async_update_state()` which calls `async_write_ha_state()`
 
@@ -86,10 +100,16 @@ Messages are routed through state checks:
 | [entity.py](custom_components/notifier_hub/entity.py) | Base entity class with common setup |
 | [sensor.py](custom_components/notifier_hub/sensor.py) | Debug and last-message sensors |
 | [binary_sensor.py](custom_components/notifier_hub/binary_sensor.py) | Alexa/Google speaking state sensors |
+| [switch.py](custom_components/notifier_hub/switch.py) | Channel toggles and runtime boolean controls |
+| [number.py](custom_components/notifier_hub/number.py) | Editable numeric controls, including Auto Volume levels |
+| [time.py](custom_components/notifier_hub/time.py) | Editable Auto Volume period starts |
+| [button.py](custom_components/notifier_hub/button.py) | Runtime action/test buttons |
+| [text.py](custom_components/notifier_hub/text.py) | Editable text controls |
 | [const.py](custom_components/notifier_hub/const.py) | Constants, config keys, defaults |
 | [helpers.py](custom_components/notifier_hub/helpers.py) | Utility functions (text processing, normalization, duration estimation) |
 | [services.yaml](custom_components/notifier_hub/services.yaml) | Service schema definitions |
 | [manifest.json](custom_components/notifier_hub/manifest.json) | Integration metadata |
+| [notifier_hub_dashboard.yaml](custom_components/notifier_hub/notifier_hub_dashboard.yaml) | Bundled Lovelace dashboard |
 
 ## Testing & Debugging
 
@@ -107,6 +127,8 @@ event_data:
 
 **Service Call**: Primary interface is `notifier_hub.send` service with full payload options.
 
+**Runtime Config**: `notifier_hub.set_config` updates in-memory/runtime options without requiring a reload.
+
 **Queue Processing**: Both Alexa and Google managers process TTS sequentially—use binary sensors to monitor when playback is happening.
 
 ## Important Notes
@@ -116,6 +138,7 @@ event_data:
 - **Async-First**: All I/O operations are async-safe
 - **Language Support**: Configurable defaults (default_language: es-ES) with per-message overrides
 - **Volume Control**: TTS automatically manages volume—never sends bare volume commands
+- **Auto Volume**: Period-based volume is a global fallback; message-level volume always wins
 - **Timing**: `tts_wait_time` config provides buffer for speech duration estimation
 
 ## Common Pitfalls to Avoid

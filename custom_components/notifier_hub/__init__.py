@@ -36,6 +36,7 @@ from .const import (
     CONF_HA_EVENT_NOTIFY_SERVICES,
     CONF_AUTO_VOLUME,
     CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
+    CONF_NIGHT_DND,
     CONF_INSTALL_DASHBOARD,
     CONF_DND_ENTITY,
     CONF_DND_MODE,
@@ -65,6 +66,7 @@ from .const import (
     DEFAULT_DND_ENTITY,
     DEFAULT_GUEST_MODE_ENTITY,
     DEFAULT_PRIORITY_MESSAGE_ENTITY,
+    NIGHT_DND_PERIOD_KEYS,
     STATE_DASHBOARD_MESSAGE,
 )
 from .notification_manager import NotificationManager
@@ -108,6 +110,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_HA_EVENT_NOTIFY_SERVICES, default=[]): cv.ensure_list,
                 vol.Optional(CONF_AUTO_VOLUME, default=False): cv.boolean,
                 vol.Optional(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, default=[]): cv.ensure_list,
+                vol.Optional(CONF_NIGHT_DND, default=False): cv.boolean,
                 vol.Optional(CONF_INSTALL_DASHBOARD, default=True): cv.boolean,
                 vol.Optional(CONF_DND_ENTITY, default=DEFAULT_DND_ENTITY): cv.string,
                 vol.Optional(CONF_GUEST_MODE_ENTITY, default=DEFAULT_GUEST_MODE_ENTITY): cv.string,
@@ -147,6 +150,14 @@ SEND_SCHEMA = vol.Schema(
 )
 
 SET_CONFIG_SCHEMA = vol.Schema({vol.Required("config"): dict}, extra=vol.ALLOW_EXTRA)
+
+
+def _copy_dashboard_if_changed(source: Path, target: Path) -> bool:
+    source_bytes = source.read_bytes()
+    if target.exists() and target.read_bytes() == source_bytes:
+        return False
+    shutil.copyfile(source, target)
+    return True
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -194,6 +205,7 @@ class NotifierHub:
             "google_speak": False,
             "google_attributes": {},
             "day_period": "",
+            "day_period_key": "",
             "day_period_volume": 0,
             "day_period_volume_level": 0.0,
             STATE_DASHBOARD_MESSAGE: "",
@@ -233,6 +245,7 @@ class NotifierHub:
         data.setdefault(CONF_HA_EVENT_NOTIFY_SERVICES, [])
         data.setdefault(CONF_AUTO_VOLUME, False)
         data.setdefault(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, [])
+        data.setdefault(CONF_NIGHT_DND, False)
         data.setdefault(CONF_INSTALL_DASHBOARD, True)
         data.setdefault(CONF_DND_ENTITY, DEFAULT_DND_ENTITY)
         data.setdefault(CONF_GUEST_MODE_ENTITY, DEFAULT_GUEST_MODE_ENTITY)
@@ -283,7 +296,9 @@ class NotifierHub:
             _LOGGER.warning("Notifier Hub dashboard source not found: %s", source)
             return
         target = Path(self.hass.config.path("notifier_hub_dashboard.yaml"))
-        await self.hass.async_add_executor_job(shutil.copyfile, source, target)
+        copied = await self.hass.async_add_executor_job(_copy_dashboard_if_changed, source, target)
+        if not copied:
+            return
         await self.hass.services.async_call(
             "persistent_notification",
             "create",
@@ -436,26 +451,33 @@ class NotifierHub:
             hour, minute, second = [int(part) for part in fallback.split(":")]
             return dt_time(hour, minute, second)
 
-    def _current_auto_volume(self) -> tuple[str, int, float]:
+    def _current_auto_volume(self) -> tuple[str, str, int, float]:
         now_time = dt_util.now().time()
         configured = []
         for key, (label, default_time, default_volume) in AUTO_VOLUME_PERIODS.items():
             start = self._parse_time(self.config.get(f"auto_volume_{key}_time"), default_time)
             volume = int(float(self.config.get(f"auto_volume_{key}_volume", default_volume)))
-            configured.append((start, label, max(0, min(100, volume))))
+            configured.append((start, key, label, max(0, min(100, volume))))
         configured.sort(key=lambda item: item[0])
         current = configured[-1]
         for item in configured:
             if item[0] <= now_time:
                 current = item
-        _, label, volume = current
-        return label, volume, volume / 100
+        _, key, label, volume = current
+        return key, label, volume, volume / 100
 
     def _update_auto_volume_state(self) -> None:
-        period, volume, volume_level = self._current_auto_volume()
+        period_key, period, volume, volume_level = self._current_auto_volume()
+        self.state["day_period_key"] = period_key
         self.state["day_period"] = period
         self.state["day_period_volume"] = volume
         self.state["day_period_volume_level"] = volume_level
+
+    def _night_dnd_active(self) -> bool:
+        if not self.config.get(CONF_NIGHT_DND, False):
+            return False
+        self._update_auto_volume_state()
+        return self.state.get("day_period_key") in NIGHT_DND_PERIOD_KEYS
 
     def current_tts_volume(self) -> float:
         self._update_auto_volume_state()
@@ -608,7 +630,7 @@ class NotifierHub:
 
         message = str(data.get("message", ""))
         priority = h.check_bool(data.get("priority")) or self._state_is_on(self.config.get(CONF_PRIORITY_MESSAGE_ENTITY, ""))
-        dnd = self._state_value(self.config.get(CONF_DND_ENTITY, ""), "off") == "on"
+        dnd = self._state_value(self.config.get(CONF_DND_ENTITY, ""), "off") == "on" or self._night_dnd_active()
         guest = self._state_value(self.config.get(CONF_GUEST_MODE_ENTITY, ""), "off") == "on"
         requested_location = str(data.get("location", ""))
         location_ok = self._check_location(requested_location)

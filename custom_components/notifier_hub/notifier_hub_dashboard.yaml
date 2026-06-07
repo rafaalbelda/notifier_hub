@@ -65,6 +65,8 @@ views:
         entities:
           - entity: switch.notifier_hub_dnd
             name: No molestar
+          - entity: switch.notifier_hub_night_dnd
+            name: DND durante la noche
           - entity: switch.notifier_hub_guest_mode
             name: Invitados
           - entity: switch.notifier_hub_priority_message

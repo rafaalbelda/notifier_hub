@@ -33,6 +33,7 @@
           "ha_event_notifications": "Notificaciones de eventos de Home Assistant",
           "auto_volume_section": "Auto Volumen",
           "auto_volume": "Volumen automatico",
+          "night_dnd": "Activar DND durante la noche",
           "auto_volume_exclude_players": "Reproductores excluidos",
           "install_dashboard": "Instalar dashboard"
         },
@@ -67,6 +68,7 @@
           "ha_event_notifications": "Envia notificaciones para arranque, parada, reinicio y eventos relacionados de Home Assistant.",
           "auto_volume_section": "Configuracion de volumen automatico por periodo del dia.",
           "auto_volume": "Ajusta automaticamente el volumen TTS segun el periodo actual del dia.",
+          "night_dnd": "Activa el modo no molestar automaticamente mientras el periodo actual de Auto Volumen sea Noche o Altas horas.",
           "auto_volume_exclude_players": "Reproductores que no deben ser controlados por el volumen automatico.",
           "install_dashboard": "Copia el YAML del dashboard de Notifier Hub y muestra las instrucciones de configuracion."
         },
@@ -168,10 +170,12 @@
             "name": "Auto Volumen",
             "data": {
               "auto_volume": "Volumen automatico",
+              "night_dnd": "Activar DND durante la noche",
               "auto_volume_exclude_players": "Reproductores excluidos"
             },
             "data_description": {
               "auto_volume": "Ajusta automaticamente el volumen TTS segun el periodo actual del dia.",
+              "night_dnd": "Activa el modo no molestar automaticamente mientras el periodo actual de Auto Volumen sea Noche o Altas horas.",
               "auto_volume_exclude_players": "Reproductores que no deben ser controlados por el volumen automatico."
             }
           }
@@ -213,6 +217,7 @@
           "ha_event_notifications": "Notificaciones de eventos de Home Assistant",
           "auto_volume_section": "Auto Volume",
           "auto_volume": "Volumen automatico",
+          "night_dnd": "Activar DND durante la noche",
           "auto_volume_exclude_players": "Reproductores excluidos",
           "install_dashboard": "Instalar dashboard"
         },
@@ -247,6 +252,7 @@
           "ha_event_notifications": "Envia notificaciones para arranque, parada, reinicio y eventos relacionados de Home Assistant.",
           "auto_volume_section": "Configuracion de volumen automatico por periodo del dia.",
           "auto_volume": "Ajusta automaticamente el volumen TTS segun el periodo actual del dia.",
+          "night_dnd": "Activa el modo no molestar automaticamente mientras el periodo actual de Auto Volumen sea Noche o Altas horas.",
           "auto_volume_exclude_players": "Reproductores que no deben ser controlados por el volumen automatico.",
           "install_dashboard": "Copia el YAML del dashboard de Notifier Hub y muestra las instrucciones de configuracion."
         },
@@ -348,10 +354,12 @@
             "name": "Auto Volumen",
             "data": {
               "auto_volume": "Volumen automatico",
+              "night_dnd": "Activar DND durante la noche",
               "auto_volume_exclude_players": "Reproductores excluidos"
             },
             "data_description": {
               "auto_volume": "Ajusta automaticamente el volumen TTS segun el periodo actual del dia.",
+              "night_dnd": "Activa el modo no molestar automaticamente mientras el periodo actual de Auto Volumen sea Noche o Altas horas.",
               "auto_volume_exclude_players": "Reproductores que no deben ser controlados por el volumen automatico."
             }
           }

@@ -33,6 +33,7 @@ Es la conversion nativa de la aplicacion AppDaemon [`Centro Notifiche`](https://
 - Filtro por ubicacion basado en entidades `person.*` o en un tracker compatible con instalaciones antiguas.
 - Interruptores para activar o desactivar canales, modo no molestar, modo invitados y prioridad.
 - Auto Volume con periodos del dia editables desde entidades `time.*` y `number.*`.
+- DND nocturno opcional usando los horarios de `Noche` y `Altas horas` de Auto Volume.
 - Avisos opcionales para eventos del ciclo de vida de Home Assistant.
 - Compatibilidad con automatizaciones antiguas que usan `event: notifier`.
 
@@ -177,6 +178,7 @@ notifier_hub:
   ha_event_notify_services:
     - notify.mobile_app_mi_telefono
   auto_volume: true
+  night_dnd: false
   auto_volume_exclude_players:
     - media_player.echo_dormitorio
   dnd_entity: switch.notifier_hub_dnd
@@ -279,6 +281,20 @@ Por defecto se usa:
 ```yaml
 dnd_entity: switch.notifier_hub_dnd
 ```
+
+Tambien puedes activar DND automaticamente durante los periodos `Noche` y `Altas horas` de Auto Volume con:
+
+```yaml
+night_dnd: true
+```
+
+o desde la entidad:
+
+```text
+switch.notifier_hub_night_dnd
+```
+
+Cuando esta activo, Notifier Hub aplica DND mientras `sensor.notifier_hub_day_period` corresponde a los periodos `Noche` o `Altas horas`. El inicio se configura con `time.notifier_hub_noche_start` y `time.notifier_hub_altas_horas_start`; termina cuando comienza el siguiente periodo de Auto Volume. El switch manual `switch.notifier_hub_dnd` sigue funcionando de forma independiente.
 
 Las notificaciones de texto y las persistentes siguen funcionando.
 
@@ -595,6 +611,7 @@ Notifier Hub crea interruptores que puedes usar desde la UI, el dashboard o auto
 | `switch.notifier_hub_home_assistant_event_notifications` | `ha_event_notifications` | Avisos del ciclo de vida de Home Assistant. |
 | `switch.notifier_hub_auto_volume` | `auto_volume` | Volumen automatico segun periodo del dia. |
 | `switch.notifier_hub_dnd` | `dnd_mode` | Modo no molestar. |
+| `switch.notifier_hub_night_dnd` | `night_dnd` | Aplica DND automaticamente durante los periodos `Noche` y `Altas horas` de Auto Volume. |
 | `switch.notifier_hub_guest_mode` | `guest_mode` | Permite voz cuando `location` no coincide. |
 | `switch.notifier_hub_priority_message` | `priority_message` | Fuerza prioridad para el siguiente mensaje. |
 
@@ -608,6 +625,7 @@ Cuando `auto_volume` esta activo:
 - Un `volume` explicito en el mensaje tiene prioridad.
 - La integracion actualiza periodicamente el volumen de los reproductores configurados.
 - `auto_volume_exclude_players` permite excluir reproductores concretos.
+- `night_dnd` permite reutilizar los periodos `Noche` y `Altas horas` para activar automaticamente DND.
 
 Periodos por defecto:
 
@@ -626,6 +644,8 @@ El dashboard incluye:
 - `sensor.notifier_hub_day_period_volume`
 - Entidades `time.notifier_hub_*_start` para editar el inicio de cada periodo.
 - Entidades `number.notifier_hub_*_volume` para editar el volumen de cada periodo.
+
+Si `switch.notifier_hub_night_dnd` esta activo, los periodos `Noche` y `Altas horas` tambien se usan como ventana de no molestar para voz y telefono.
 
 ## Dashboard
 
@@ -651,6 +671,14 @@ lovelace:
 ```
 
 Si no usas `install_dashboard`, puedes copiar manualmente `notifier_hub_dashboard.yaml` a `/config/notifier_hub_dashboard.yaml` y registrar el mismo bloque.
+
+Tambien se incluye una tarjeta compacta de ejemplo en:
+
+```text
+samples/notifier_hub_compact_card.yaml
+```
+
+Esa tarjeta esta pensada para pegarla dentro de `cards:` en una vista Lovelace existente. Usa las mismas entidades de Notifier Hub y muestra controles rapidos, Auto Volume, DND manual, DND durante la noche, estado de Alexa/Google y envio de mensajes desde el dashboard.
 
 ## Entidades creadas
 

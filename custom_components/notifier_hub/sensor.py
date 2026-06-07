@@ -35,6 +35,7 @@ class NotifierHubSensor(NotifierHubEntity, SensorEntity):
             return {
                 "volume_level": self.coordinator.state.get("day_period_volume_level", 0.0),
                 "period": self.coordinator.state.get("day_period", ""),
+                "period_key": self.coordinator.state.get("day_period_key", ""),
             }
         return None
 

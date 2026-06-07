@@ -9,6 +9,7 @@ from .const import (
     CONF_GOOGLE_NOTIFICATIONS,
     CONF_GUEST_MODE,
     CONF_HA_EVENT_NOTIFICATIONS,
+    CONF_NIGHT_DND,
     CONF_PHONE_NOTIFICATIONS,
     CONF_PRIORITY_MESSAGE,
     CONF_SCREEN_NOTIFICATIONS,
@@ -29,6 +30,7 @@ SWITCHES = [
     (CONF_HA_EVENT_NOTIFICATIONS, "Notifier Hub Home Assistant Event Notifications", True, "mdi:home-assistant"),
     (CONF_AUTO_VOLUME, "Notifier Hub Auto Volume", False, "mdi:volume-high"),
     (CONF_DND_MODE, "Notifier Hub DND", False, "mdi:bell-off"),
+    (CONF_NIGHT_DND, "Notifier Hub Night DND", False, "mdi:weather-night"),
     (CONF_GUEST_MODE, "Notifier Hub Guest Mode", False, "mdi:account-group"),
     (CONF_PRIORITY_MESSAGE, "Notifier Hub Priority Message", False, "mdi:alert-circle"),
 ]

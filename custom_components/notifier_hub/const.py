@@ -23,6 +23,7 @@ CONF_HA_EVENT_NOTIFICATIONS = "ha_event_notifications"
 CONF_HA_EVENT_NOTIFY_SERVICES = "ha_event_notify_services"
 CONF_AUTO_VOLUME = "auto_volume"
 CONF_AUTO_VOLUME_EXCLUDE_PLAYERS = "auto_volume_exclude_players"
+CONF_NIGHT_DND = "night_dnd"
 CONF_INSTALL_DASHBOARD = "install_dashboard"
 CONF_DND_ENTITY = "dnd_entity"
 CONF_GUEST_MODE_ENTITY = "guest_mode_entity"
@@ -45,6 +46,7 @@ AUTO_VOLUME_PERIODS = {
     "evening": ("Atardecer", "18:00:00", 30),
     "night": ("Noche", "22:00:00", 20),
 }
+NIGHT_DND_PERIOD_KEYS = {"night", "late_night"}
 
 DEFAULT_PERSONAL_ASSISTANT = "Assistant"
 DEFAULT_SIP_SERVER_NAME = "fritz.box:5060"

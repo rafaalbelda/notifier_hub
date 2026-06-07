@@ -29,6 +29,7 @@ from .const import (
     CONF_HA_EVENT_NOTIFY_SERVICES,
     CONF_AUTO_VOLUME,
     CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
+    CONF_NIGHT_DND,
     CONF_INSTALL_DASHBOARD,
     CONF_SIP_SERVER_NAME,
     CONF_TTS_WAIT_TIME,
@@ -259,6 +260,7 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                 vol.Schema(
                     {
                         vol.Optional(CONF_AUTO_VOLUME, default=default(CONF_AUTO_VOLUME, False)): selector.BooleanSelector(),
+                        vol.Optional(CONF_NIGHT_DND, default=default(CONF_NIGHT_DND, False)): selector.BooleanSelector(),
                         vol.Optional(
                             CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
                             default=_as_list(default(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, [])),

@@ -1,0 +1,48 @@
+# Movil battery level (from Companion App): sensor.pixel_9a_battery_level
+# Movil charging state (from Companion App): binary_sensor.pixel_9a_is_charging
+# Low battery threshold helper: input_number.alarma_bateria
+# Reminder interval helper: input_number.aviso_bateria_intervalo_minutos
+# Alternative fixed delay: "00:15:00"
+# Notifier Hub must have notify services and Alexa players configured if those channels are enabled.
+
+alias: MOBILE BATTERY Moni
+description: ""
+triggers:
+  - trigger: numeric_state
+    entity_id:
+      - sensor.pixel_9a_battery_level
+    below: input_number.alarma_bateria
+conditions:
+  - condition: state
+    entity_id: binary_sensor.pixel_9a_is_charging
+    state:
+      - "off"
+actions:
+  - repeat:
+      while:
+        - condition: numeric_state
+          entity_id: sensor.pixel_9a_battery_level
+          below: input_number.alarma_bateria
+        - condition: state
+          entity_id: binary_sensor.pixel_9a_is_charging
+          state:
+            - "off"
+      sequence:
+        - action: notifier_hub.send
+          metadata: {}
+          data:
+            title: ⭐ Jarvis Battery.
+            message: >-
+              Moni's phone battery is low: {{
+              states('sensor.pixel_9a_battery_level') }}%.
+            notify: true
+            location: home
+            no_show: false
+            alexa: true
+            phone: false
+        # Fixed delay alternative:
+        # - delay: "00:15:00"
+        #  enabled: false
+        - delay:
+            minutes: "{{ states('input_number.aviso_bateria_intervalo_minutos') | int(15) }}"
+mode: restart

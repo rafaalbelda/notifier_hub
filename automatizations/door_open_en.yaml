@@ -1,4 +1,4 @@
-alias: "ALARMA: Avisar si la puerta está abierta"
+alias: "ALARM: Notify if the door is open"
 description: ""
 triggers:
   - type: opened
@@ -23,8 +23,8 @@ actions:
         - action: notifier_hub.send
           metadata: {}
           data:
-            title: ⭐ Jarvis Alarma.
-            message: La puerta está abierta
+            title: ⭐ Jarvis Alarm.
+            message: The door is open
             notify: true
             location: home
             no_show: false

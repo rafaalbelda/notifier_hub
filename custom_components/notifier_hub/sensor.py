@@ -22,6 +22,8 @@ class NotifierHubSensor(NotifierHubEntity, SensorEntity):
     def __init__(self, coordinator, key: str, name: str, data_key: str) -> None:
         super().__init__(coordinator, key, name)
         self.data_key = data_key
+        if data_key in {"day_period", "day_period_volume"}:
+            self._attr_translation_key = data_key
 
     @property
     def native_value(self):

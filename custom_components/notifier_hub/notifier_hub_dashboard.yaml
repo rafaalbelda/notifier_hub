@@ -89,9 +89,9 @@ views:
           - entity: number.notifier_hub_primera_hora_volume
             name: Primera hora volumen
           - entity: time.notifier_hub_manana_start
-            name: Manana inicio
+            name: Mañana inicio
           - entity: number.notifier_hub_manana_volume
-            name: Manana volumen
+            name: Mañana volumen
           - entity: time.notifier_hub_tarde_start
             name: Tarde inicio
           - entity: number.notifier_hub_tarde_volume

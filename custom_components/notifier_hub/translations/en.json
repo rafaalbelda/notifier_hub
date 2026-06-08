@@ -1,4 +1,62 @@
 {
+  "entity": {
+    "sensor": {
+      "day_period": {
+        "name": "Day period",
+        "state": {
+          "Altas horas": "Late night",
+          "Primera hora": "Early morning",
+          "Mañana": "Morning",
+          "Tarde": "Afternoon",
+          "Atardecer": "Evening",
+          "Noche": "Night"
+        }
+      },
+      "day_period_volume": {
+        "name": "Period volume"
+      }
+    },
+    "number": {
+      "auto_volume_late_night_volume": {
+        "name": "Late night volume"
+      },
+      "auto_volume_early_morning_volume": {
+        "name": "Early morning volume"
+      },
+      "auto_volume_morning_volume": {
+        "name": "Morning volume"
+      },
+      "auto_volume_afternoon_volume": {
+        "name": "Afternoon volume"
+      },
+      "auto_volume_evening_volume": {
+        "name": "Evening volume"
+      },
+      "auto_volume_night_volume": {
+        "name": "Night volume"
+      }
+    },
+    "time": {
+      "auto_volume_late_night_time": {
+        "name": "Late night start"
+      },
+      "auto_volume_early_morning_time": {
+        "name": "Early morning start"
+      },
+      "auto_volume_morning_time": {
+        "name": "Morning start"
+      },
+      "auto_volume_afternoon_time": {
+        "name": "Afternoon start"
+      },
+      "auto_volume_evening_time": {
+        "name": "Evening start"
+      },
+      "auto_volume_night_time": {
+        "name": "Night start"
+      }
+    }
+  },
   "config": {
     "step": {
       "user": {

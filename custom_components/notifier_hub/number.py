@@ -22,9 +22,12 @@ class NotifierHubVolumeNumber(NotifierHubEntity, NumberEntity):
     _attr_native_step = 1
     _attr_native_unit_of_measurement = "%"
     _attr_icon = "mdi:volume-high"
+    _attr_has_entity_name = True
 
     def __init__(self, coordinator, key: str, label: str, default_volume: int) -> None:
         super().__init__(coordinator, f"auto_volume_{key}_volume", f"Notifier Hub {label} Volume")
+        self._attr_name = None
+        self._attr_translation_key = f"auto_volume_{key}_volume"
         self.default_volume = default_volume
 
     @property

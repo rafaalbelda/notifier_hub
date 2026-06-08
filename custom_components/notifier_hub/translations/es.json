@@ -1,4 +1,62 @@
 {
+  "entity": {
+    "sensor": {
+      "day_period": {
+        "name": "Periodo del día",
+        "state": {
+          "Altas horas": "Altas horas",
+          "Primera hora": "Primera hora",
+          "Mañana": "Mañana",
+          "Tarde": "Tarde",
+          "Atardecer": "Atardecer",
+          "Noche": "Noche"
+        }
+      },
+      "day_period_volume": {
+        "name": "Volumen del periodo"
+      }
+    },
+    "number": {
+      "auto_volume_late_night_volume": {
+        "name": "Altas horas volumen"
+      },
+      "auto_volume_early_morning_volume": {
+        "name": "Primera hora volumen"
+      },
+      "auto_volume_morning_volume": {
+        "name": "Mañana volumen"
+      },
+      "auto_volume_afternoon_volume": {
+        "name": "Tarde volumen"
+      },
+      "auto_volume_evening_volume": {
+        "name": "Atardecer volumen"
+      },
+      "auto_volume_night_volume": {
+        "name": "Noche volumen"
+      }
+    },
+    "time": {
+      "auto_volume_late_night_time": {
+        "name": "Altas horas inicio"
+      },
+      "auto_volume_early_morning_time": {
+        "name": "Primera hora inicio"
+      },
+      "auto_volume_morning_time": {
+        "name": "Mañana inicio"
+      },
+      "auto_volume_afternoon_time": {
+        "name": "Tarde inicio"
+      },
+      "auto_volume_evening_time": {
+        "name": "Atardecer inicio"
+      },
+      "auto_volume_night_time": {
+        "name": "Noche inicio"
+      }
+    }
+  },
   "config": {
     "step": {
       "user": {

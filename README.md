@@ -633,7 +633,7 @@ Periodos por defecto:
 |---|---:|---:|
 | Altas horas | `01:00` | `10%` |
 | Primera hora | `05:00` | `20%` |
-| Manana | `07:00` | `30%` |
+| Mañana | `07:00` | `30%` |
 | Tarde | `12:00` | `40%` |
 | Atardecer | `18:00` | `30%` |
 | Noche | `22:00` | `20%` |

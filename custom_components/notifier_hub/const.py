@@ -41,7 +41,7 @@ DEFAULT_PRIORITY_MESSAGE_ENTITY = "switch.notifier_hub_priority_message"
 AUTO_VOLUME_PERIODS = {
     "late_night": ("Altas horas", "01:00:00", 10),
     "early_morning": ("Primera hora", "05:00:00", 20),
-    "morning": ("Manana", "07:00:00", 30),
+    "morning": ("Mañana", "07:00:00", 30),
     "afternoon": ("Tarde", "12:00:00", 40),
     "evening": ("Atardecer", "18:00:00", 30),
     "night": ("Noche", "22:00:00", 20),

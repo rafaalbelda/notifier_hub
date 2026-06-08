@@ -14,7 +14,8 @@ cards:
             color: var(--primary-text-color)
             justify-content: flex-start
         tap_action:
-          action: more-info
+          action: navigate
+          navigation_path: /notifier-hub
   - type: conditional
     conditions:
       - entity: sensor.notifier_hub_debug

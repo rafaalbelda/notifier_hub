@@ -1,0 +1,101 @@
+alias: ZONAS - in/out
+description: ""
+mode: parallel
+max: 4
+triggers:
+  - entity_id:
+      - person.moni
+      - person.rafa
+    zone: zone.estacion_de_fuencarral
+    event: enter
+    trigger: zone
+  - entity_id:
+      - person.moni
+      - person.rafa
+    zone: zone.estacion_de_fuencarral
+    event: leave
+    trigger: zone
+  - entity_id:
+      - person.moni
+      - person.rafa
+    zone: zone.telefonica
+    event: enter
+    trigger: zone
+  - entity_id:
+      - person.moni
+      - person.rafa
+    zone: zone.telefonica
+    event: leave
+    trigger: zone
+  - entity_id:
+      - person.moni
+      - person.rafa
+    zone: zone.home
+    event: enter
+    trigger: zone
+  - entity_id:
+      - person.moni
+      - person.rafa
+    zone: zone.home
+    event: leave
+    trigger: zone
+  - entity_id:
+      - person.moni
+      - person.rafa
+    zone: zone.estacion_tres_cantos
+    event: enter
+    trigger: zone
+  - entity_id:
+      - person.moni
+      - person.rafa
+    zone: zone.estacion_tres_cantos
+    event: leave
+    trigger: zone
+  - entity_id:
+      - person.moni
+      - person.rafa
+    zone: zone.casa_moni
+    event: enter
+    trigger: zone
+  - entity_id:
+      - person.moni
+      - person.rafa
+    zone: zone.casa_moni
+    event: leave
+    trigger: zone
+  - entity_id:
+      - person.moni
+      - person.rafa
+    zone: zone.casa_rafa
+    event: enter
+    trigger: zone
+  - entity_id:
+      - person.moni
+      - person.rafa
+    zone: zone.casa_rafa
+    event: leave
+    trigger: zone
+conditions:
+  - condition: or
+    conditions:
+      - condition: zone
+        entity_id: person.rafa
+        zone: zone.home
+      - condition: zone
+        entity_id: person.moni
+        zone: zone.home
+    enabled: false
+actions:
+  - action: notifier_hub.send
+    metadata: {}
+    data:
+      title: ⭐ Jarvis Presencia.
+      message: >-
+        {{ trigger.to_state.attributes.friendly_name }} {% if trigger.event ==
+        'enter' %}llegó a{% else %}salió de{% endif %} {{
+        trigger.zone.attributes.friendly_name }}
+      notify: true
+      location: home
+      no_show: false
+      alexa: true
+      phone: false

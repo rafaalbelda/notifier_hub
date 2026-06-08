@@ -1,4 +1,4 @@
-alias: ZONAS - in/out
+alias: ZONES - in/out
 description: ""
 mode: parallel
 max: 4
@@ -86,38 +86,16 @@ conditions:
         zone: zone.home
     enabled: false
 actions:
-  - action: script.my_notify
-    metadata: {}
-    data:
-      title: ⭐ Jarvis Presencia.
-      message: >-
-        {#  {%- for state in states.person if state.entity_id ==
-        trigger.entity_id -%}
-              {{ state.attributes.friendly_name }}
-        {%- endfor -%} it could work --> {{
-        trigger.entity_id.attributes.friendly_name }} #}  {{
-        trigger.to_state.attributes.friendly_name }}  {% if trigger.event ==
-        'enter' %} llegó a {% else %} salió de {% endif %}  {{
-        trigger.zone.attributes.friendly_name }} 
-      location: home
-      no_show: false
-      alexa: true
-      phone: true
-    enabled: false
   - action: notifier_hub.send
     metadata: {}
     data:
-      title: ⭐ Jarvis Presencia.
+      title: ⭐ Jarvis Presence.
       message: >-
-        {#  {%- for state in states.person if state.entity_id ==
-        trigger.entity_id -%}
-              {{ state.attributes.friendly_name }}
-        {%- endfor -%} it could work --> {{
-        trigger.entity_id.attributes.friendly_name }} #}  {{
-        trigger.to_state.attributes.friendly_name }}  {% if trigger.event ==
-        'enter' %} llegó a {% else %} salió de {% endif %}  {{
-        trigger.zone.attributes.friendly_name }} 
+        {{ trigger.to_state.attributes.friendly_name }} {% if trigger.event ==
+        'enter' %}arrived at{% else %}left{% endif %} {{
+        trigger.zone.attributes.friendly_name }}
+      notify: true
       location: home
       no_show: false
       alexa: true
-    
+      phone: false

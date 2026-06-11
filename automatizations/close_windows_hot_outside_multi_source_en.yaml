@@ -1,0 +1,98 @@
+# Outdoor temperature sources:
+#   - sensor.openweathermap_temperatura
+#   - sensor.aemet_temperature
+#   - weather.casa attribute: temperatura
+# Indoor temperature sources averaged when available:
+#   - sensor.netatmo_carby_temperature
+#   - sensor.xiaomi_th1_temperature
+#   - sensor.xiaomi_th2_temperature
+# Optional temperature margin helper in degrees: input_number.margen_temperatura_ventanas
+# The outdoor temperature used for closing windows is the maximum available value.
+# The outdoor temperature used for opening windows is the minimum available value.
+# The indoor temperature used is the average of the available indoor sensors.
+
+alias: WINDOWS - Notify whether to open or close based on outdoor temperature
+description: ""
+triggers:
+  - id: close_windows
+    trigger: template
+    value_template: >-
+      {% set indoor_sources = [
+        states('sensor.netatmo_carby_temperature') | float(none),
+        states('sensor.xiaomi_th1_temperature') | float(none),
+        states('sensor.xiaomi_th2_temperature') | float(none)
+      ] %}
+      {% set indoors = indoor_sources | reject('eq', none) | list %}
+      {% set indoor = ((indoors | sum) / (indoors | count)) if indoors | count > 0 else none %}
+      {% set margin = states('input_number.margen_temperatura_ventanas') | float(0.5) %}
+      {% set outdoor_sources = [
+        states('sensor.openweathermap_temperatura') | float(none),
+        states('sensor.aemet_temperature') | float(none),
+        state_attr('weather.casa', 'temperatura') | float(none)
+      ] %}
+      {% set outdoors = outdoor_sources | reject('eq', none) | list %}
+      {{ indoor is not none and outdoors | count > 0 and outdoors | max > indoor + margin }}
+    for:
+      minutes: 5
+  - id: open_windows
+    trigger: template
+    value_template: >-
+      {% set indoor_sources = [
+        states('sensor.netatmo_carby_temperature') | float(none),
+        states('sensor.xiaomi_th1_temperature') | float(none),
+        states('sensor.xiaomi_th2_temperature') | float(none)
+      ] %}
+      {% set indoors = indoor_sources | reject('eq', none) | list %}
+      {% set indoor = ((indoors | sum) / (indoors | count)) if indoors | count > 0 else none %}
+      {% set margin = states('input_number.margen_temperatura_ventanas') | float(0.5) %}
+      {% set outdoor_sources = [
+        states('sensor.openweathermap_temperatura') | float(none),
+        states('sensor.aemet_temperature') | float(none),
+        state_attr('weather.casa', 'temperatura') | float(none)
+      ] %}
+      {% set outdoors = outdoor_sources | reject('eq', none) | list %}
+      {{ indoor is not none and outdoors | count > 0 and outdoors | min < indoor - margin }}
+    for:
+      minutes: 5
+conditions: []
+actions:
+  - variables:
+      outdoor_temperature: >-
+        {% set outdoor_sources = [
+          states('sensor.openweathermap_temperatura') | float(none),
+          states('sensor.aemet_temperature') | float(none),
+          state_attr('weather.casa', 'temperatura') | float(none)
+        ] %}
+        {% set outdoors = outdoor_sources | reject('eq', none) | list %}
+        {{ (outdoors | max) if trigger.id == 'close_windows' else (outdoors | min) }}
+      indoor_temperature: >-
+        {% set indoor_sources = [
+          states('sensor.netatmo_carby_temperature') | float(none),
+          states('sensor.xiaomi_th1_temperature') | float(none),
+          states('sensor.xiaomi_th2_temperature') | float(none)
+        ] %}
+        {% set indoors = indoor_sources | reject('eq', none) | list %}
+        {{ ((indoors | sum) / (indoors | count)) | round(1) }}
+      title: >-
+        ⭐ Jarvis Windows.
+      message: >-
+        {% if trigger.id == 'close_windows' %}
+          It is hotter outside than inside. Close the windows to keep the house
+          cool. Outdoor: {{ outdoor_temperature }}°C. Indoor:
+          {{ indoor_temperature }}°C.
+        {% else %}
+          It is cooler outside than inside. Open the windows to cool the house
+          down. Outdoor: {{ outdoor_temperature }}°C. Indoor:
+          {{ indoor_temperature }}°C.
+        {% endif %}
+  - action: notifier_hub.send
+    metadata: {}
+    data:
+      title: "{{ title }}"
+      message: "{{ message }}"
+      notify: true
+      location: home
+      no_show: false
+      alexa: true
+      phone: false
+mode: single

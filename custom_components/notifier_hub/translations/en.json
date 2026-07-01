@@ -4,12 +4,12 @@
       "day_period": {
         "name": "Day period",
         "state": {
-          "Altas horas": "Late night",
-          "Primera hora": "Early morning",
-          "Mañana": "Morning",
-          "Tarde": "Afternoon",
-          "Atardecer": "Evening",
-          "Noche": "Night"
+          "late_night": "Late night",
+          "early_morning": "Early morning",
+          "morning": "Morning",
+          "afternoon": "Afternoon",
+          "evening": "Evening",
+          "night": "Night"
         }
       },
       "day_period_volume": {

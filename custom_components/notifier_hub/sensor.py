@@ -27,6 +27,8 @@ class NotifierHubSensor(NotifierHubEntity, SensorEntity):
 
     @property
     def native_value(self):
+        if self.data_key == "day_period":
+            return self.coordinator.state.get("day_period_key", "")
         return self.coordinator.state.get(self.data_key, "")
 
     @property
@@ -36,6 +38,11 @@ class NotifierHubSensor(NotifierHubEntity, SensorEntity):
         if self.data_key == "day_period_volume":
             return {
                 "volume_level": self.coordinator.state.get("day_period_volume_level", 0.0),
+                "period": self.coordinator.state.get("day_period", ""),
+                "period_key": self.coordinator.state.get("day_period_key", ""),
+            }
+        if self.data_key == "day_period":
+            return {
                 "period": self.coordinator.state.get("day_period", ""),
                 "period_key": self.coordinator.state.get("day_period_key", ""),
             }

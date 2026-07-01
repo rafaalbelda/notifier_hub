@@ -4,12 +4,12 @@
       "day_period": {
         "name": "Periodo del día",
         "state": {
-          "Altas horas": "Altas horas",
-          "Primera hora": "Primera hora",
-          "Mañana": "Mañana",
-          "Tarde": "Tarde",
-          "Atardecer": "Atardecer",
-          "Noche": "Noche"
+          "late_night": "Altas horas",
+          "early_morning": "Primera hora",
+          "morning": "Mañana",
+          "afternoon": "Tarde",
+          "evening": "Atardecer",
+          "night": "Noche"
         }
       },
       "day_period_volume": {

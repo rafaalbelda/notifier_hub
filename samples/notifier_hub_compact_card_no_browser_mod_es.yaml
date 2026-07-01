@@ -63,6 +63,17 @@ cards:
               color: var(--red-color)
       - entity: sensor.notifier_hub_day_period
         layout: state
+        state: >-
+          {{
+            {
+              'late_night': 'Altas horas',
+              'early_morning': 'Primera hora',
+              'morning': 'Mañana',
+              'afternoon': 'Tarde',
+              'evening': 'Atardecer',
+              'night': 'Noche'
+            }.get(states(config.entity), states(config.entity))
+          }}
         styles:
           button:
             color: var(--info-color)

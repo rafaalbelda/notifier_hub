@@ -4,85 +4,85 @@ mode: parallel
 max: 4
 triggers:
   - entity_id:
-      - person.moni
-      - person.rafa
-    zone: zone.estacion_de_fuencarral
+      - person.person_1
+      - person.person_2
+    zone: zone.train_station
     event: enter
     trigger: zone
   - entity_id:
-      - person.moni
-      - person.rafa
-    zone: zone.estacion_de_fuencarral
+      - person.person_1
+      - person.person_2
+    zone: zone.train_station
     event: leave
     trigger: zone
   - entity_id:
-      - person.moni
-      - person.rafa
-    zone: zone.telefonica
+      - person.person_1
+      - person.person_2
+    zone: zone.office
     event: enter
     trigger: zone
   - entity_id:
-      - person.moni
-      - person.rafa
-    zone: zone.telefonica
+      - person.person_1
+      - person.person_2
+    zone: zone.office
     event: leave
     trigger: zone
   - entity_id:
-      - person.moni
-      - person.rafa
+      - person.person_1
+      - person.person_2
     zone: zone.home
     event: enter
     trigger: zone
   - entity_id:
-      - person.moni
-      - person.rafa
+      - person.person_1
+      - person.person_2
     zone: zone.home
     event: leave
     trigger: zone
   - entity_id:
-      - person.moni
-      - person.rafa
-    zone: zone.estacion_tres_cantos
+      - person.person_1
+      - person.person_2
+    zone: zone.secondary_station
     event: enter
     trigger: zone
   - entity_id:
-      - person.moni
-      - person.rafa
-    zone: zone.estacion_tres_cantos
+      - person.person_1
+      - person.person_2
+    zone: zone.secondary_station
     event: leave
     trigger: zone
   - entity_id:
-      - person.moni
-      - person.rafa
-    zone: zone.casa_moni
+      - person.person_1
+      - person.person_2
+    zone: zone.family_home
     event: enter
     trigger: zone
   - entity_id:
-      - person.moni
-      - person.rafa
-    zone: zone.casa_moni
+      - person.person_1
+      - person.person_2
+    zone: zone.family_home
     event: leave
     trigger: zone
   - entity_id:
-      - person.moni
-      - person.rafa
-    zone: zone.casa_rafa
+      - person.person_1
+      - person.person_2
+    zone: zone.secondary_home
     event: enter
     trigger: zone
   - entity_id:
-      - person.moni
-      - person.rafa
-    zone: zone.casa_rafa
+      - person.person_1
+      - person.person_2
+    zone: zone.secondary_home
     event: leave
     trigger: zone
 conditions:
   - condition: or
     conditions:
       - condition: zone
-        entity_id: person.rafa
+        entity_id: person.person_1
         zone: zone.home
       - condition: zone
-        entity_id: person.moni
+        entity_id: person.person_2
         zone: zone.home
     enabled: false
 actions:

@@ -1,30 +1,30 @@
-# Movil battery level (from Companion App): sensor.pixel_9a_battery_level
-# Movil charging state (from Companion App): binary_sensor.pixel_9a_is_charging
-# Low battery threshold helper: input_number.alarma_bateria
-# Reminder interval helper: input_number.aviso_bateria_intervalo_minutos
+# Nivel de bateria del movil (Companion App): sensor.phone_battery_level
+# Estado de carga del movil (Companion App): binary_sensor.phone_is_charging
+# Umbral de bateria baja: input_number.phone_low_battery_threshold
+# Intervalo de recordatorio en minutos: input_number.phone_battery_reminder_minutes
 # Alternative fixed delay: "00:15:00"
 # Notifier Hub must have notify services and Alexa players configured if those channels are enabled.
 
-alias: BATERÍA MÓVIL Moni
+alias: BATERÍA MÓVIL - Recordatorio de batería baja
 description: ""
 triggers:
   - trigger: numeric_state
     entity_id:
-      - sensor.pixel_9a_battery_level
-    below: input_number.alarma_bateria
+      - sensor.phone_battery_level
+    below: input_number.phone_low_battery_threshold
 conditions:
   - condition: state
-    entity_id: binary_sensor.pixel_9a_is_charging
+    entity_id: binary_sensor.phone_is_charging
     state:
       - "off"
 actions:
   - repeat:
       while:
         - condition: numeric_state
-          entity_id: sensor.pixel_9a_battery_level
-          below: input_number.alarma_bateria
+          entity_id: sensor.phone_battery_level
+          below: input_number.phone_low_battery_threshold
         - condition: state
-          entity_id: binary_sensor.pixel_9a_is_charging
+          entity_id: binary_sensor.phone_is_charging
           state:
             - "off"
       sequence:
@@ -33,8 +33,8 @@ actions:
           data:
             title: ⭐ Jarvis Batería.
             message: >-
-              El móvil de Moni tiene la batería baja: {{
-              states('sensor.pixel_9a_battery_level') }}%.
+              El móvil tiene la batería baja: {{
+              states('sensor.phone_battery_level') }}%.
             notify: true
             location: home
             no_show: false
@@ -43,7 +43,7 @@ actions:
         # Fixed delay alternative:
         # - delay: "00:15:00"
         #  enabled: false
-        # Create an input_number for the delay interval in minutes, e.g. input_number.aviso_bateria_intervalo_minutos
+        # Crea un input_number para el intervalo de recordatorio en minutos, por ejemplo input_number.phone_battery_reminder_minutes
         - delay:
-            minutes: "{{ states('input_number.aviso_bateria_intervalo_minutos') | int(15) }}"
+            minutes: "{{ states('input_number.phone_battery_reminder_minutes') | int(15) }}"
 mode: restart

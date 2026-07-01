@@ -1,24 +1,18 @@
 alias: "ALARM: Notify if the door is open"
 description: ""
 triggers:
-  - type: opened
-    device_id: 1f0c9f55e15a4aa7b75cdc451b649371
-    entity_id: binary_sensor.aq_sensor_magnet_contact
-    domain: binary_sensor
+  - trigger: state
+    entity_id: binary_sensor.front_door_contact
+    to: "on"
     for:
-      hours: 0
-      minutes: 0
       seconds: 5
-    trigger: device
 conditions: []
 actions:
   - repeat:
       while:
-        - type: is_open
-          condition: device
-          device_id: 1f0c9f55e15a4aa7b75cdc451b649371
-          entity_id: binary_sensor.aq_sensor_magnet_contact
-          domain: binary_sensor
+        - condition: state
+          entity_id: binary_sensor.front_door_contact
+          state: "on"
       sequence:
         - action: notifier_hub.send
           metadata: {}
@@ -32,10 +26,8 @@ actions:
             alexa: true
             phone: false
         - wait_for_trigger:
-            - type: not_opened
-              device_id: 1f0c9f55e15a4aa7b75cdc451b649371
-              entity_id: binary_sensor.aq_sensor_magnet_contact
-              domain: binary_sensor
-              trigger: device
+            - trigger: state
+              entity_id: binary_sensor.front_door_contact
+              to: "off"
           timeout: "00:00:30"
 mode: single

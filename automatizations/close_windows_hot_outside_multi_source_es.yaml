@@ -1,15 +1,15 @@
-# Outdoor temperature sources:
-#   - sensor.openweathermap_temperatura
-#   - sensor.aemet_temperature
-#   - weather.casa attribute: temperatura
-# Indoor temperature sources averaged when available:
-#   - sensor.netatmo_carby_temperature
-#   - sensor.xiaomi_th1_temperature
-#   - sensor.xiaomi_th2_temperature
-# Optional temperature margin helper in degrees: input_number.margen_temperatura_ventanas
-# The outdoor temperature used for closing windows is the maximum available value.
-# The outdoor temperature used for opening windows is the minimum available value.
-# The indoor temperature used is the average of the available indoor sensors.
+# Fuentes de temperatura exterior:
+#   - sensor.outdoor_temperature_1
+#   - sensor.outdoor_temperature_2
+#   - weather.home atributo: temperature
+# Fuentes de temperatura interior promediadas cuando estan disponibles:
+#   - sensor.indoor_temperature_1
+#   - sensor.indoor_temperature_2
+#   - sensor.indoor_temperature_3
+# Margen opcional de temperatura en grados: input_number.window_temperature_margin
+# La temperatura exterior usada para cerrar ventanas es el valor maximo disponible.
+# La temperatura exterior usada para abrir ventanas es el valor minimo disponible.
+# La temperatura interior usada es la media de los sensores interiores disponibles.
 
 alias: VENTANAS - Avisar si abrir o cerrar por temperatura exterior
 description: ""
@@ -18,17 +18,17 @@ triggers:
     trigger: template
     value_template: >-
       {% set fuentes_interior = [
-        states('sensor.netatmo_carby_temperature') | float(none),
-        states('sensor.xiaomi_th1_temperature') | float(none),
-        states('sensor.xiaomi_th2_temperature') | float(none)
+        states('sensor.indoor_temperature_1') | float(none),
+        states('sensor.indoor_temperature_2') | float(none),
+        states('sensor.indoor_temperature_3') | float(none)
       ] %}
       {% set interiores = fuentes_interior | reject('eq', none) | list %}
       {% set interior = ((interiores | sum) / (interiores | count)) if interiores | count > 0 else none %}
-      {% set margen = states('input_number.margen_temperatura_ventanas') | float(0.5) %}
+      {% set margen = states('input_number.window_temperature_margin') | float(0.5) %}
       {% set fuentes_exterior = [
-        states('sensor.openweathermap_temperatura') | float(none),
-        states('sensor.aemet_temperature') | float(none),
-        state_attr('weather.casa', 'temperatura') | float(none)
+        states('sensor.outdoor_temperature_1') | float(none),
+        states('sensor.outdoor_temperature_2') | float(none),
+        state_attr('weather.home', 'temperature') | float(none)
       ] %}
       {% set exteriores = fuentes_exterior | reject('eq', none) | list %}
       {{ interior is not none and exteriores | count > 0 and exteriores | max > interior + margen }}
@@ -38,17 +38,17 @@ triggers:
     trigger: template
     value_template: >-
       {% set fuentes_interior = [
-        states('sensor.netatmo_carby_temperature') | float(none),
-        states('sensor.xiaomi_th1_temperature') | float(none),
-        states('sensor.xiaomi_th2_temperature') | float(none)
+        states('sensor.indoor_temperature_1') | float(none),
+        states('sensor.indoor_temperature_2') | float(none),
+        states('sensor.indoor_temperature_3') | float(none)
       ] %}
       {% set interiores = fuentes_interior | reject('eq', none) | list %}
       {% set interior = ((interiores | sum) / (interiores | count)) if interiores | count > 0 else none %}
-      {% set margen = states('input_number.margen_temperatura_ventanas') | float(0.5) %}
+      {% set margen = states('input_number.window_temperature_margin') | float(0.5) %}
       {% set fuentes_exterior = [
-        states('sensor.openweathermap_temperatura') | float(none),
-        states('sensor.aemet_temperature') | float(none),
-        state_attr('weather.casa', 'temperatura') | float(none)
+        states('sensor.outdoor_temperature_1') | float(none),
+        states('sensor.outdoor_temperature_2') | float(none),
+        state_attr('weather.home', 'temperature') | float(none)
       ] %}
       {% set exteriores = fuentes_exterior | reject('eq', none) | list %}
       {{ interior is not none and exteriores | count > 0 and exteriores | min < interior - margen }}
@@ -59,17 +59,17 @@ actions:
   - variables:
       temperatura_exterior: >-
         {% set fuentes_exterior = [
-          states('sensor.openweathermap_temperatura') | float(none),
-          states('sensor.aemet_temperature') | float(none),
-          state_attr('weather.casa', 'temperatura') | float(none)
+          states('sensor.outdoor_temperature_1') | float(none),
+          states('sensor.outdoor_temperature_2') | float(none),
+          state_attr('weather.home', 'temperature') | float(none)
         ] %}
         {% set exteriores = fuentes_exterior | reject('eq', none) | list %}
         {{ (exteriores | max) if trigger.id == 'cerrar_ventanas' else (exteriores | min) }}
       temperatura_interior: >-
         {% set fuentes_interior = [
-          states('sensor.netatmo_carby_temperature') | float(none),
-          states('sensor.xiaomi_th1_temperature') | float(none),
-          states('sensor.xiaomi_th2_temperature') | float(none)
+          states('sensor.indoor_temperature_1') | float(none),
+          states('sensor.indoor_temperature_2') | float(none),
+          states('sensor.indoor_temperature_3') | float(none)
         ] %}
         {% set interiores = fuentes_interior | reject('eq', none) | list %}
         {{ ((interiores | sum) / (interiores | count)) | round(1) }}

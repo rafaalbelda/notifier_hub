@@ -1,0 +1,535 @@
+type: custom:vertical-stack-in-card
+cards:
+  - type: custom:paper-buttons-row
+    styles:
+      background: var(--primary-color)
+    buttons:
+      - entity: sensor.notifier_hub_personal_assistant
+        icon: mdi:bell-badge
+        name: "{{ states(config.entity) }}"
+        layout: icon|name
+        styles:
+          button:
+            font-size: 16px
+            color: var(--primary-text-color)
+            justify-content: flex-start
+        tap_action:
+          action: navigate
+          navigation_path: notifier-hub
+        hold_action:
+          action: more-info
+
+  - type: conditional
+    conditions:
+      - entity: sensor.notifier_hub_debug
+        state_not: "OK"
+      - entity: sensor.notifier_hub_debug
+        state_not: "on"
+      - entity: sensor.notifier_hub_debug
+        state_not: "off"
+    card:
+      type: markdown
+      card_mod:
+        style: |
+          ha-markdown.no-header {
+            padding: 0px !important;
+          }
+      content: |-
+        <ha-alert alert-type="error">
+          <details>
+            <summary>Atencion {{ user }}, Notifier Hub informa de un estado a revisar</summary>
+            {{ states('sensor.notifier_hub_debug') }}
+          </details>
+        </ha-alert>
+
+  - type: custom:paper-buttons-row
+    styles:
+      display: flex
+      justify-content: space-between
+      font-size: 0.9em
+    buttons:
+      - entity: switch.notifier_hub_text_notifications
+        layout: icon
+        tooltip: Texto
+        hold_action:
+          action: more-info
+        state_icons:
+          "on": mdi:message-text
+          "off": mdi:message-text-outline
+      - entity: switch.notifier_hub_screen_notifications
+        layout: icon
+        tooltip: Persistente
+        hold_action:
+          action: more-info
+        state_icons:
+          "on": mdi:bell-badge
+          "off": mdi:bell-outline
+      - entity: switch.notifier_hub_speech_notifications
+        layout: icon
+        tooltip: Voz
+        hold_action:
+          action: more-info
+        state_icons:
+          "on": mdi:account-voice
+          "off": mdi:account-voice-off
+      - entity: switch.notifier_hub_alexa_notifications
+        layout: icon
+        tooltip: Alexa
+        hold_action:
+          action: more-info
+        state_icons:
+          "on": mdi:amazon-alexa
+          "off": mdi:amazon-alexa
+      - entity: switch.notifier_hub_google_notifications
+        layout: icon
+        tooltip: Google
+        hold_action:
+          action: more-info
+        state_icons:
+          "on": mdi:google-assistant
+          "off": mdi:google-assistant
+      - entity: switch.notifier_hub_phone_notifications
+        layout: icon
+        tooltip: Telefono
+        hold_action:
+          action: more-info
+        state_icons:
+          "on": mdi:phone-message
+          "off": mdi:phone-outline
+      - entity: switch.notifier_hub_guest_mode
+        layout: icon
+        tooltip: Invitados
+        hold_action:
+          action: more-info
+        state_icons:
+          "on": mdi:account-group
+          "off": mdi:account-group-outline
+      - entity: switch.notifier_hub_priority_message
+        layout: icon
+        tooltip: Prioridad
+        hold_action:
+          action: more-info
+        state_icons:
+          "on": mdi:alert-decagram
+          "off": mdi:alert-decagram-outline
+      - entity: switch.notifier_hub_home_assistant_event_notifications
+        layout: icon
+        tooltip: Eventos HA
+        hold_action:
+          action: more-info
+        state_icons:
+          "on": mdi:home-assistant
+          "off": mdi:home-outline
+
+  - type: divider
+    style:
+      background-color: var(--primary-color)
+      height: 1px
+
+  - type: custom:paper-buttons-row
+    styles:
+      display: grid
+      grid-template-columns: repeat(4, 1fr)
+      font-size: 0.9em
+    buttons:
+      - entity: binary_sensor.notifier_hub_home_occupied
+        layout: icon|name|state
+        name: "{{ states('sensor.notifier_hub_home_people') }}"
+        styles:
+          button:
+            justify-content: flex-start
+            color: var(--state-person-home-color)
+          icon:
+            scale: 70%
+        state_icons:
+          "on": mdi:home-import-outline
+          "off": mdi:home-export-outline
+        state_styles:
+          "off":
+            button:
+              color: var(--red-color)
+        tap_action:
+          action: more-info
+      - entity: sensor.notifier_hub_day_period
+        layout: state
+        styles:
+          button:
+            color: var(--info-color)
+        tap_action:
+          action: more-info
+      - entity: sensor.notifier_hub_day_period_volume
+        layout: name|state
+        name: VOL
+        state: "{{ states(config.entity) }}%"
+        styles:
+          button:
+            color: var(--info-color)
+        tap_action:
+          action: more-info
+      - entity: switch.notifier_hub_dnd
+        layout: name|state
+        name: DND
+        styles:
+          button:
+            color: >-
+              {{ iif(is_state(config.entity, 'on'), 'var(--warning-color)', 'var(--info-color)') }}
+        state_icons:
+          "on": mdi:bell-cancel
+          "off": mdi:bell-cancel-outline
+        tap_action:
+          action: more-info
+
+  - type: custom:paper-buttons-row
+    styles:
+      display: grid
+      grid-template-columns: repeat(4, 1fr)
+      font-size: 0.9em
+    buttons:
+      - entity: switch.notifier_hub_auto_volume
+        layout: icon|name
+        name: Auto
+        styles:
+          button:
+            justify-content: flex-start
+            color: >-
+              {{ iif(is_state(config.entity, 'on'), 'var(--state-active-color)', 'var(--info-color)') }}
+          icon:
+            scale: 70%
+        state_icons:
+          "on": mdi:volume-high
+          "off": mdi:volume-mute
+        tap_action:
+          action: more-info
+      - entity: switch.notifier_hub_speech_home_only
+        layout: icon|name
+        name: Casa
+        tooltip: Voz solo si hay alguien en casa
+        tap_action:
+          action: more-info
+        state_icons:
+          "on": mdi:home-account
+          "off": mdi:home-outline
+      - entity: switch.notifier_hub_night_dnd
+        layout: icon|name
+        name: Noche
+        tooltip: DND durante Noche y Altas horas
+        tap_action:
+          action: more-info
+        state_icons:
+          "on": mdi:bell-sleep
+          "off": mdi:bell-sleep-outline
+      - entity: sensor.notifier_hub_debug
+        layout: icon|state
+        icon: mdi:tune-variant
+        styles:
+          button:
+            color: >-
+              {{ iif(states(config.entity) in ['OK', 'on', 'off'], 'var(--info-color)', 'var(--error-color)') }}
+        tap_action:
+          action: more-info
+
+  - type: divider
+    style:
+      background-color: var(--primary-color)
+      height: 1px
+
+  - type: custom:paper-buttons-row
+    styles:
+      display: grid
+      grid-template-columns: repeat(4, 1fr)
+      font-size: 0.9em
+    buttons:
+      - entity: switch.notifier_hub_alexa_notifications
+        icon: mdi:amazon-alexa
+        layout: icon|name
+        name: Alexa
+        styles:
+          button:
+            justify-content: flex-start
+            color: >-
+              {{ iif(is_state('binary_sensor.notifier_hub_alexa_speak', 'on'), 'var(--warning-color)', '') }}
+            animation: >-
+              {{ iif(is_state('binary_sensor.notifier_hub_alexa_speak', 'on'), 'blink 1.5s linear infinite alternate', '') }}
+          icon:
+            scale: 70%
+        tap_action:
+          action: more-info
+      - entity: binary_sensor.notifier_hub_alexa_speak
+        layout: name|state
+        name: TTS
+        state_icons:
+          "on": mdi:speaker-play
+          "off": mdi:speaker-outline
+        tap_action:
+          action: more-info
+      - entity: switch.notifier_hub_google_notifications
+        icon: mdi:google-assistant
+        layout: icon|name
+        name: Google
+        styles:
+          button:
+            justify-content: flex-start
+            color: >-
+              {{ iif(is_state('binary_sensor.notifier_hub_google_speak', 'on'), 'var(--warning-color)', '') }}
+            animation: >-
+              {{ iif(is_state('binary_sensor.notifier_hub_google_speak', 'on'), 'blink 1.5s linear infinite alternate', '') }}
+          icon:
+            scale: 70%
+        tap_action:
+          action: more-info
+      - entity: binary_sensor.notifier_hub_google_speak
+        layout: name|state
+        name: TTS
+        state_icons:
+          "on": mdi:speaker-play
+          "off": mdi:speaker-outline
+        tap_action:
+          action: more-info
+
+  - type: divider
+    style:
+      background-color: var(--primary-color)
+      height: 1px
+
+  - type: entities
+    card_mod:
+      style: |
+        ha-card {
+          background: none;
+          border-radius: 0px;
+          box-shadow: none;
+        }
+        .card-content {
+          padding: 0px;
+          margin: 0;
+        }
+    entities:
+      - type: custom:fold-entity-row
+        clickable: true
+        head:
+          entity: sensor.notifier_hub_debug
+          icon: mdi:tune-variant
+          name: Configuracion
+          tap_action:
+            action: fire-dom-event
+            fold_row: true
+        entities:
+          - entity: sensor.notifier_hub_debug
+            name: Debug
+          - entity: sensor.notifier_hub_personal_assistant
+            name: Asistente
+          - entity: sensor.notifier_hub_last_message
+            name: Ultimo mensaje
+          - type: section
+            label: Canales
+          - entity: switch.notifier_hub_text_notifications
+            name: Texto
+          - entity: switch.notifier_hub_screen_notifications
+            name: Persistente
+          - entity: switch.notifier_hub_speech_notifications
+            name: Voz
+          - entity: switch.notifier_hub_alexa_notifications
+            name: Alexa
+          - entity: switch.notifier_hub_google_notifications
+            name: Google / Cast
+          - entity: switch.notifier_hub_phone_notifications
+            name: Telefono
+          - entity: switch.notifier_hub_home_assistant_event_notifications
+            name: Eventos Home Assistant
+          - type: section
+            label: Modos
+          - entity: switch.notifier_hub_dnd
+            name: No molestar
+          - entity: switch.notifier_hub_night_dnd
+            name: DND durante la noche
+          - entity: switch.notifier_hub_guest_mode
+            name: Invitados
+          - entity: switch.notifier_hub_priority_message
+            name: Prioridad
+
+      - type: custom:fold-entity-row
+        clickable: true
+        head:
+          entity: sensor.notifier_hub_day_period
+          icon: mdi:calendar-clock
+          name: Horarios Auto Volume
+          tap_action:
+            action: fire-dom-event
+            fold_row: true
+        entities:
+          - entity: sensor.notifier_hub_day_period
+            name: Periodo actual
+          - time.notifier_hub_altas_horas_start
+          - time.notifier_hub_primera_hora_start
+          - time.notifier_hub_manana_start
+          - time.notifier_hub_tarde_start
+          - time.notifier_hub_atardecer_start
+          - time.notifier_hub_noche_start
+
+      - type: custom:fold-entity-row
+        clickable: true
+        head:
+          entity: sensor.notifier_hub_day_period_volume
+          icon: mdi:volume-high
+          name: Volumenes Auto Volume
+          tap_action:
+            action: fire-dom-event
+            fold_row: true
+        entities:
+          - entity: switch.notifier_hub_auto_volume
+            name: Auto Volume
+          - entity: sensor.notifier_hub_day_period_volume
+            name: Volumen actual
+          - number.notifier_hub_altas_horas_volume
+          - number.notifier_hub_primera_hora_volume
+          - number.notifier_hub_manana_volume
+          - number.notifier_hub_tarde_volume
+          - number.notifier_hub_atardecer_volume
+          - number.notifier_hub_noche_volume
+
+      - type: custom:fold-entity-row
+        clickable: true
+        head:
+          entity: switch.notifier_hub_alexa_notifications
+          icon: mdi:amazon-alexa
+          name: Alexa
+          tap_action:
+            action: fire-dom-event
+            fold_row: true
+        entities:
+          - switch.notifier_hub_alexa_notifications
+          - binary_sensor.notifier_hub_alexa_speak
+          - type: attribute
+            entity: binary_sensor.notifier_hub_alexa_speak
+            attribute: media_player
+            name: Players
+          - type: attribute
+            entity: binary_sensor.notifier_hub_alexa_speak
+            attribute: message
+            name: Mensaje
+          - type: button
+            name: Prueba Alexa
+            icon: mdi:speaker-play
+            tap_action:
+              action: call-service
+              service: notifier_hub.send
+              data:
+                title: Alexa
+                message: Prueba de voz desde Notifier Hub
+                notify: false
+                alexa: true
+
+      - type: custom:fold-entity-row
+        clickable: true
+        head:
+          entity: switch.notifier_hub_google_notifications
+          icon: mdi:google-assistant
+          name: Google / Cast
+          tap_action:
+            action: fire-dom-event
+            fold_row: true
+        entities:
+          - switch.notifier_hub_google_notifications
+          - binary_sensor.notifier_hub_google_speak
+          - type: attribute
+            entity: binary_sensor.notifier_hub_google_speak
+            attribute: players
+            name: Players
+          - type: attribute
+            entity: binary_sensor.notifier_hub_google_speak
+            attribute: message
+            name: Mensaje
+          - type: button
+            name: Prueba Google
+            icon: mdi:speaker-play
+            tap_action:
+              action: call-service
+              service: notifier_hub.send
+              data:
+                title: Google
+                message: Prueba de voz desde Notifier Hub
+                notify: false
+                google: true
+
+      - type: custom:fold-entity-row
+        clickable: true
+        head:
+          entity: text.notifier_hub_dashboard_message
+          icon: mdi:message-edit-outline
+          name: Enviar mensaje
+          tap_action:
+            action: fire-dom-event
+            fold_row: true
+          extend_paper_buttons_row:
+            hide_state: true
+            position: right
+            buttons:
+              - entity: button.notifier_hub_send_dashboard_message
+                layout: icon
+                icon: mdi:send
+                tap_action:
+                  action: call-service
+                  service: button.press
+                  target:
+                    entity_id: button.notifier_hub_send_dashboard_message
+                styles:
+                  ripple:
+                    color: var(--accent-color)
+        entities:
+          - entity: text.notifier_hub_dashboard_message
+            name: Mensaje
+          - type: section
+            label: Pruebas rapidas
+          - type: button
+            name: Texto
+            icon: mdi:message-text
+            tap_action:
+              action: call-service
+              service: notifier_hub.send
+              data:
+                title: Dashboard
+                message: Prueba de notificacion desde Notifier Hub
+                notify: true
+          - type: button
+            name: Prioridad
+            icon: mdi:alert-decagram
+            tap_action:
+              action: call-service
+              service: notifier_hub.send
+              data:
+                title: Prioridad
+                message: Mensaje prioritario de prueba desde Notifier Hub
+                notify: true
+                priority: true
+          - type: button
+            name: Voz
+            icon: mdi:account-voice
+            tap_action:
+              action: call-service
+              service: notifier_hub.send
+              data:
+                title: Voz
+                message: Prueba de voz desde Notifier Hub
+                notify: false
+                alexa: true
+                google: true
+
+  - type: conditional
+    conditions:
+      - entity: sensor.notifier_hub_last_message
+        state_not: ""
+    card:
+      type: markdown
+      entity_id: sensor.notifier_hub_last_message
+      card_mod:
+        style: |
+          ha-markdown.no-header {
+            padding: 0px !important;
+          }
+      content: |-
+        <ha-alert alert-type="success">
+          <details>
+            <summary>Ultimo mensaje</summary>
+            {{ states('sensor.notifier_hub_last_message') }}
+          </details>
+        </ha-alert>

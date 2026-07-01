@@ -1,0 +1,348 @@
+# Lovelace sample card for the close/open windows temperature automation.
+# Uses the same entities and decision logic as:
+# automatizations/close_windows_hot_outside_multi_source_es.yaml
+#
+# Requires:
+#   - custom:button-card
+#     https://github.com/custom-cards/button-card
+#
+# Outdoor temperature sources:
+#   - sensor.openweathermap_temperatura
+#   - sensor.aemet_temperature
+#   - weather.casa attribute: temperatura
+# Indoor temperature sources averaged when available:
+#   - sensor.netatmo_carby_temperature
+#   - sensor.xiaomi_th1_temperature
+#   - sensor.xiaomi_th2_temperature
+# Optional temperature margin helper:
+#   - input_number.margen_temperatura_ventanas
+
+type: custom:button-card
+entity: input_number.margen_temperatura_ventanas
+show_icon: false
+show_name: false
+show_state: false
+triggers_update:
+  - sensor.netatmo_carby_temperature
+  - sensor.xiaomi_th1_temperature
+  - sensor.xiaomi_th2_temperature
+  - sensor.openweathermap_temperatura
+  - sensor.aemet_temperature
+  - weather.casa
+  - input_number.margen_temperatura_ventanas
+tap_action:
+  action: more-info
+styles:
+  card:
+    - padding: 0
+    - border-radius: 8px
+    - overflow: hidden
+  grid:
+    - grid-template-areas: '"header" "metrics" "bars" "sources"'
+    - grid-template-columns: 1fr
+    - grid-template-rows: auto auto auto auto
+  custom_fields:
+    header:
+      - display: block
+    metrics:
+      - display: block
+    bars:
+      - display: block
+    sources:
+      - display: block
+custom_fields:
+  header: |
+    [[[
+      const num = (entityId, attr) => {
+        const entity = states[entityId];
+        const raw = attr ? entity?.attributes?.[attr] : entity?.state;
+        const value = Number(raw);
+        return Number.isFinite(value) ? value : null;
+      };
+      const indoorValues = [
+        num('sensor.netatmo_carby_temperature'),
+        num('sensor.xiaomi_th1_temperature'),
+        num('sensor.xiaomi_th2_temperature'),
+      ].filter((value) => value !== null);
+      const outdoorValues = [
+        num('sensor.openweathermap_temperatura'),
+        num('sensor.aemet_temperature'),
+        num('weather.casa', 'temperatura'),
+      ].filter((value) => value !== null);
+      const indoor = indoorValues.length
+        ? indoorValues.reduce((total, value) => total + value, 0) / indoorValues.length
+        : null;
+      const margin = num('input_number.margen_temperatura_ventanas') ?? 0.5;
+      const closeTemp = outdoorValues.length ? Math.max(...outdoorValues) : null;
+      const openTemp = outdoorValues.length ? Math.min(...outdoorValues) : null;
+      const closeNow = indoor !== null && closeTemp !== null && closeTemp > indoor + margin;
+      const openNow = indoor !== null && openTemp !== null && openTemp < indoor - margin;
+      const missing = indoor === null || !outdoorValues.length;
+      const color = missing
+        ? 'var(--warning-color)'
+        : closeNow
+          ? 'var(--error-color)'
+          : openNow
+            ? 'var(--info-color)'
+            : 'var(--success-color)';
+      const bg = missing
+        ? 'rgba(245, 124, 0, 0.16)'
+        : closeNow
+          ? 'rgba(211, 47, 47, 0.16)'
+          : openNow
+            ? 'rgba(2, 136, 209, 0.16)'
+            : 'rgba(56, 142, 60, 0.16)';
+      const icon = missing ? 'mdi:alert-circle-outline' : closeNow ? 'mdi:window-closed' : openNow ? 'mdi:window-open' : 'mdi:home-check-outline';
+      const title = missing ? 'Revisar sensores' : closeNow ? 'Cerrar ventanas' : openNow ? 'Abrir ventanas' : 'Mantener como esta';
+      const detail = missing
+        ? 'Faltan lecturas validas de temperatura interior o exterior.'
+        : closeNow
+          ? 'El exterior mas alto supera el interior mas el margen configurado.'
+          : openNow
+            ? 'El exterior mas bajo queda por debajo del interior menos el margen.'
+            : 'La diferencia no supera el margen configurado.';
+
+      return `
+        <div style="
+          background: ${bg};
+          border-left: 8px solid ${color};
+          padding: 16px;
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 12px;
+          align-items: center;
+        ">
+          <div>
+            <div style="
+              color: var(--secondary-text-color);
+              font-size: 12px;
+              font-weight: 700;
+              text-transform: uppercase;
+            ">Control de ventanas</div>
+            <div style="
+              color: ${color};
+              font-size: 24px;
+              line-height: 1.15;
+              font-weight: 800;
+              margin-top: 2px;
+            ">${title}</div>
+            <div style="
+              color: var(--primary-text-color);
+              font-size: 13px;
+              line-height: 1.35;
+              margin-top: 7px;
+            ">${detail}</div>
+          </div>
+          <ha-icon icon="${icon}" style="
+            color: ${color};
+            width: 42px;
+            height: 42px;
+          "></ha-icon>
+        </div>
+      `;
+    ]]]
+  metrics: |
+    [[[
+      const num = (entityId, attr) => {
+        const entity = states[entityId];
+        const raw = attr ? entity?.attributes?.[attr] : entity?.state;
+        const value = Number(raw);
+        return Number.isFinite(value) ? value : null;
+      };
+      const fmt = (value) => value === null ? '---' : `${value.toFixed(1)}°C`;
+      const indoorValues = [
+        num('sensor.netatmo_carby_temperature'),
+        num('sensor.xiaomi_th1_temperature'),
+        num('sensor.xiaomi_th2_temperature'),
+      ].filter((value) => value !== null);
+      const outdoorValues = [
+        num('sensor.openweathermap_temperatura'),
+        num('sensor.aemet_temperature'),
+        num('weather.casa', 'temperatura'),
+      ].filter((value) => value !== null);
+      const indoor = indoorValues.length
+        ? indoorValues.reduce((total, value) => total + value, 0) / indoorValues.length
+        : null;
+      const margin = num('input_number.margen_temperatura_ventanas') ?? 0.5;
+      const closeThreshold = indoor === null ? null : indoor + margin;
+      const openThreshold = indoor === null ? null : indoor - margin;
+      const closeTemp = outdoorValues.length ? Math.max(...outdoorValues) : null;
+      const openTemp = outdoorValues.length ? Math.min(...outdoorValues) : null;
+
+      const tile = (label, value, color) => `
+        <div style="
+          border: 1px solid var(--divider-color);
+          border-radius: 8px;
+          padding: 10px;
+          min-width: 0;
+          background: var(--card-background-color);
+        ">
+          <div style="
+            color: var(--secondary-text-color);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          ">${label}</div>
+          <div style="
+            color: ${color};
+            font-size: 20px;
+            line-height: 1.25;
+            font-weight: 800;
+            margin-top: 3px;
+          ">${value}</div>
+        </div>
+      `;
+
+      return `
+        <div style="
+          padding: 14px 14px 4px;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 8px;
+        ">
+          ${tile('Interior medio', fmt(indoor), 'var(--primary-text-color)')}
+          ${tile('Exterior max', fmt(closeTemp), closeTemp !== null && closeThreshold !== null && closeTemp > closeThreshold ? 'var(--error-color)' : 'var(--warning-color)')}
+          ${tile('Exterior min', fmt(openTemp), openTemp !== null && openThreshold !== null && openTemp < openThreshold ? 'var(--info-color)' : 'var(--warning-color)')}
+        </div>
+      `;
+    ]]]
+  bars: |
+    [[[
+      const num = (entityId, attr) => {
+        const entity = states[entityId];
+        const raw = attr ? entity?.attributes?.[attr] : entity?.state;
+        const value = Number(raw);
+        return Number.isFinite(value) ? value : null;
+      };
+      const pct = (value) => {
+        if (value === null) return 0;
+        const min = 15;
+        const max = 40;
+        return Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+      };
+      const fmt = (value) => value === null ? '---' : `${value.toFixed(1)}°C`;
+      const indoorValues = [
+        num('sensor.netatmo_carby_temperature'),
+        num('sensor.xiaomi_th1_temperature'),
+        num('sensor.xiaomi_th2_temperature'),
+      ].filter((value) => value !== null);
+      const outdoorValues = [
+        num('sensor.openweathermap_temperatura'),
+        num('sensor.aemet_temperature'),
+        num('weather.casa', 'temperatura'),
+      ].filter((value) => value !== null);
+      const indoor = indoorValues.length
+        ? indoorValues.reduce((total, value) => total + value, 0) / indoorValues.length
+        : null;
+      const margin = num('input_number.margen_temperatura_ventanas') ?? 0.5;
+      const closeTemp = outdoorValues.length ? Math.max(...outdoorValues) : null;
+      const openTemp = outdoorValues.length ? Math.min(...outdoorValues) : null;
+      const closeThreshold = indoor === null ? null : indoor + margin;
+      const openThreshold = indoor === null ? null : indoor - margin;
+      const closeNow = indoor !== null && closeTemp !== null && closeTemp > closeThreshold;
+      const openNow = indoor !== null && openTemp !== null && openTemp < openThreshold;
+
+      const bar = (label, value, threshold, color, markerLabel) => `
+        <div style="display: grid; gap: 5px;">
+          <div style="
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            align-items: baseline;
+            font-size: 13px;
+          ">
+            <span style="font-weight: 700;">${label}</span>
+            <span>${fmt(value)}</span>
+          </div>
+          <div style="
+            position: relative;
+            height: 20px;
+            background: var(--divider-color);
+            border-radius: 999px;
+            overflow: hidden;
+          ">
+            <div style="
+              width: ${pct(value)}%;
+              height: 100%;
+              background: ${color};
+              border-radius: 999px;
+            "></div>
+            <div style="
+              position: absolute;
+              left: ${pct(threshold)}%;
+              top: 0;
+              bottom: 0;
+              width: 4px;
+              background: var(--primary-text-color);
+              opacity: 0.88;
+            "></div>
+          </div>
+          <div style="
+            display: flex;
+            justify-content: space-between;
+            color: var(--secondary-text-color);
+            font-size: 11px;
+          ">
+            <span>${markerLabel}</span>
+            <span>Umbral: ${fmt(threshold)}</span>
+          </div>
+        </div>
+      `;
+
+      return `
+        <div style="padding: 12px 14px 14px; display: grid; gap: 14px;">
+          ${bar('Interior medio', indoor, indoor, 'var(--primary-color)', 'Referencia interior')}
+          ${bar('Cerrar: exterior mas alto', closeTemp, closeThreshold, closeNow ? 'var(--error-color)' : 'var(--warning-color)', 'Se cierra si supera el umbral')}
+          ${bar('Abrir: exterior mas bajo', openTemp, openThreshold, openNow ? 'var(--info-color)' : 'var(--warning-color)', 'Se abre si baja del umbral')}
+        </div>
+      `;
+    ]]]
+  sources: |
+    [[[
+      const num = (entityId, attr) => {
+        const entity = states[entityId];
+        const raw = attr ? entity?.attributes?.[attr] : entity?.state;
+        const value = Number(raw);
+        return Number.isFinite(value) ? value : null;
+      };
+      const fmt = (value) => value === null ? '---' : `${value.toFixed(1)}°C`;
+      const margin = num('input_number.margen_temperatura_ventanas') ?? 0.5;
+      const items = [
+        ['Netatmo', num('sensor.netatmo_carby_temperature')],
+        ['Xiaomi TH1', num('sensor.xiaomi_th1_temperature')],
+        ['Xiaomi TH2', num('sensor.xiaomi_th2_temperature')],
+        ['OpenWeather', num('sensor.openweathermap_temperatura')],
+        ['AEMET', num('sensor.aemet_temperature')],
+        ['Weather casa', num('weather.casa', 'temperatura')],
+      ];
+      return `
+        <div style="
+          border-top: 1px solid var(--divider-color);
+          padding: 10px 14px 14px;
+          display: grid;
+          gap: 8px;
+          color: var(--secondary-text-color);
+          font-size: 12px;
+        ">
+          <div style="display: flex; justify-content: space-between; gap: 8px;">
+            <span>Margen configurado</span>
+            <b style="color: var(--primary-text-color);">${margin.toFixed(1)}°C</b>
+          </div>
+          <div style="
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 5px 10px;
+          ">
+            ${items.map(([label, value]) => `
+              <div style="display: flex; justify-content: space-between; gap: 6px;">
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${label}</span>
+                <span style="color: var(--primary-text-color);">${fmt(value)}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    ]]]

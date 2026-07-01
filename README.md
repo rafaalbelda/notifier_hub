@@ -1,82 +1,86 @@
-# Notifier Hub para Home Assistant
+# Notifier Hub for Home Assistant
 
-Integracion personalizada de Home Assistant para centralizar notificaciones de texto, avisos persistentes, Alexa, Google/Cast y llamadas telefonicas.
+[English](README.md) | [Espanol](README.es.md)
 
-Es la conversion nativa de la aplicacion AppDaemon [`Centro Notifiche`](https://github.com/caiosweet/Package-Notification-HUB-AppDaemon) / [`Notifier`](https://github.com/jumping2000/notifier). Mantiene compatibilidad con el evento antiguo `notifier`, pero para automatizaciones nuevas se recomienda usar el servicio `notifier_hub.send`.
+[![Open your Home Assistant instance and open this repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rafaalbelda&repository=notifier_hub&category=integration)
 
-## Contenido
+Home Assistant custom integration for centralizing text notifications, persistent notifications, Alexa, Google/Cast, and phone calls.
 
-- [Funciones principales](#funciones-principales)
-- [Instalacion](#instalacion)
-- [Primeros pasos](#primeros-pasos)
-- [Configuracion global](#configuracion-global)
-- [Como se decide cada envio](#como-se-decide-cada-envio)
-- [Referencia de `notifier_hub.send`](#referencia-de-notifier_hubsend)
-- [Guias por canal](#guias-por-canal)
-- [Ubicacion y presencia](#ubicacion-y-presencia)
-- [Controles globales](#controles-globales)
+It is a native integration conversion of the AppDaemon app [`Centro Notifiche`](https://github.com/caiosweet/Package-Notification-HUB-AppDaemon) / [`Notifier`](https://github.com/jumping2000/notifier). It keeps compatibility with the legacy `notifier` event, but new automations should use the `notifier_hub.send` service.
+
+## Contents
+
+- [Main features](#main-features)
+- [Installation](#installation)
+- [Getting started](#getting-started)
+- [Global configuration](#global-configuration)
+- [How each delivery is decided](#how-each-delivery-is-decided)
+- [`notifier_hub.send` reference](#notifier_hubsend-reference)
+- [Channel guides](#channel-guides)
+- [Location and presence](#location-and-presence)
+- [Global controls](#global-controls)
 - [Auto Volume](#auto-volume)
 - [Dashboard](#dashboard)
-- [Entidades creadas](#entidades-creadas)
-- [Eventos de Home Assistant](#eventos-de-home-assistant)
-- [Compatibilidad con AppDaemon](#compatibilidad-con-appdaemon)
-- [Notas de migracion](#notas-de-migracion)
+- [Created entities](#created-entities)
+- [Home Assistant events](#home-assistant-events)
+- [AppDaemon compatibility](#appdaemon-compatibility)
+- [Migration notes](#migration-notes)
 
-## Funciones principales
+## Main features
 
-- Servicio `notifier_hub.send` para enviar mensajes desde automatizaciones, scripts o herramientas de desarrollador.
-- Notificaciones persistentes en Home Assistant.
-- Notificaciones mediante servicios `notify.*`: Telegram, `mobile_app`, Pushover, Discord y servicios genericos.
-- Alexa Media Player: TTS, announce, push, reproduccion multimedia, volumen temporal y restauracion de volumen.
-- Google/Cast: TTS mediante entidades o servicios `tts.*`, modo notify, reproduccion multimedia, volumen temporal y restauracion de volumen.
-- Llamadas telefonicas mediante el add-on ha-sip.
-- Filtro por ubicacion basado en entidades `person.*` o en un tracker compatible con instalaciones antiguas.
-- Interruptores para activar o desactivar canales, modo no molestar, modo invitados y prioridad.
-- Auto Volume con periodos del dia editables desde entidades `time.*` y `number.*`.
-- DND nocturno opcional usando los horarios de `Noche` y `Altas horas` de Auto Volume.
-- Avisos opcionales para eventos del ciclo de vida de Home Assistant.
-- Compatibilidad con automatizaciones antiguas que usan `event: notifier`.
+- `notifier_hub.send` service for sending messages from automations, scripts, or Developer Tools.
+- Persistent notifications in Home Assistant.
+- Notifications through `notify.*` services: Telegram, `mobile_app`, Pushover, Discord, and generic services.
+- Alexa Media Player: TTS, announce, push, media playback, temporary volume, and volume restore.
+- Google/Cast: TTS through entities or `tts.*` services, notify mode, media playback, temporary volume, and volume restore.
+- Phone calls through the ha-sip add-on.
+- Location filtering based on `person.*` entities or a tracker compatible with older setups.
+- Switches for enabling or disabling channels, do not disturb mode, guest mode, and priority.
+- Auto Volume with editable day periods through `time.*` and `number.*` entities.
+- Optional night DND using the `Night` and `Late night` Auto Volume periods.
+- Optional notifications for Home Assistant lifecycle events.
+- Compatibility with old automations that use `event: notifier`.
 
-## Instalacion
+## Installation
 
 ### HACS
 
-Puedes instalar Notifier Hub desde HACS como repositorio personalizado:
+You can install Notifier Hub from HACS as a custom repository:
 
-1. Abre HACS en Home Assistant.
-2. Pulsa los tres puntos de la esquina superior derecha y entra en **Repositorios personalizados**.
-3. Añade `https://github.com/rafaalbelda/notifier_hub`.
-4. Selecciona la categoria **Integracion**.
-5. Instala **Notifier Hub** y reinicia Home Assistant.
-6. Añade la integracion desde:
+1. Open HACS in Home Assistant.
+2. Select the three dots in the top-right corner and open **Custom repositories**.
+3. Add `https://github.com/rafaalbelda/notifier_hub`.
+4. Select the **Integration** category.
+5. Install **Notifier Hub** and restart Home Assistant.
+6. Add the integration from:
 
 ```text
-Ajustes > Dispositivos y servicios > Añadir integracion > Notifier Hub
+Settings > Devices & services > Add integration > Notifier Hub
 ```
 
-### Instalacion manual
+### Manual installation
 
-Copia la carpeta:
+Copy the folder:
 
 ```text
 custom_components/notifier_hub
 ```
 
-en:
+to:
 
 ```text
 /config/custom_components/notifier_hub
 ```
 
-Reinicia Home Assistant y añade la integracion desde:
+Restart Home Assistant and add the integration from:
 
 ```text
-Ajustes > Dispositivos y servicios > Añadir integracion > Notifier Hub
+Settings > Devices & services > Add integration > Notifier Hub
 ```
 
-Solo puede existir una instancia de Notifier Hub por instalacion de Home Assistant.
+Only one Notifier Hub instance can exist per Home Assistant installation.
 
-El formulario de configuracion esta organizado en estas secciones:
+The configuration form is organized into these sections:
 
 - Persons
 - Notify Services
@@ -86,35 +90,35 @@ El formulario de configuracion esta organizado en estas secciones:
 - Notifications
 - Auto Volume
 
-## Primeros pasos
+## Getting started
 
-Notifier Hub se usa llamando al servicio `notifier_hub.send` desde una automatizacion, un script o:
+Notifier Hub is used by calling the `notifier_hub.send` service from an automation, a script, or:
 
 ```text
-Herramientas para desarrolladores > Acciones
+Developer Tools > Actions
 ```
 
-Antes de enviar mensajes, configura desde la UI los servicios `notify.*` y los reproductores Alexa o Google/Cast que quieras utilizar.
+Before sending messages, configure the `notify.*` services and the Alexa or Google/Cast players you want to use from the UI.
 
-### Notificacion de texto
+### Text notification
 
-`notify: true` usa los servicios configurados globalmente en `notify_services`.
+`notify: true` uses the globally configured services in `notify_services`.
 
 ```yaml
 action: notifier_hub.send
 data:
-  title: "Puerta"
-  message: "Se ha abierto la puerta principal"
+  title: "Door"
+  message: "The front door has been opened"
   notify: true
 ```
 
-### Texto y Alexa
+### Text and Alexa
 
 ```yaml
 action: notifier_hub.send
 data:
-  title: "Lavadora"
-  message: "La lavadora ha terminado"
+  title: "Washing machine"
+  message: "The washing machine has finished"
   notify: true
   alexa: true
 ```
@@ -124,47 +128,47 @@ data:
 ```yaml
 action: notifier_hub.send
 data:
-  message: "Hay alguien en la puerta"
+  message: "Someone is at the door"
   google: true
 ```
 
-### Mensaje urgente
+### Urgent message
 
 ```yaml
 action: notifier_hub.send
 data:
-  title: "Alarma"
-  message: "Alarma activada"
+  title: "Alarm"
+  message: "Alarm triggered"
   notify: true
   alexa: true
   priority: true
 ```
 
-`priority: true` permite saltarse interruptores, filtro de ubicacion y modo no molestar. Consulta [Prioridad](#prioridad) antes de usarlo con llamadas telefonicas.
+`priority: true` bypasses switches, location filtering, and do not disturb mode. See [Priority](#priority) before using it with phone calls.
 
-## Configuracion global
+## Global configuration
 
-La configuracion recomendada se realiza desde la UI. Tambien puedes importar una configuracion inicial desde `configuration.yaml`:
+The recommended configuration method is the UI. You can also import an initial configuration from `configuration.yaml`:
 
 ```yaml
 notifier_hub:
   personal_assistant: Jarvis
   persons:
-    - person.ana
+    - person.anna
     - person.carlos
   notify_services:
-    - notify.mobile_app_mi_telefono
+    - notify.mobile_app_my_phone
     - notify.telegram
   alexa_players:
-    - media_player.echo_salon
-    - media_player.echo_cocina
+    - media_player.living_room_echo
+    - media_player.kitchen_echo
   google_players:
-    - media_player.google_home_salon
-  google_tts_service: tts.google_es_es
+    - media_player.living_room_google_home
+  google_tts_service: tts.google_en_com
   google_notify_service: google_assistant
   sip_server_name: fritz.box:5060
   called_number: "600123456"
-  default_language: es-ES
+  default_language: en-US
   default_volume: 0.30
   tts_wait_time: 3
   text_notifications: true
@@ -176,11 +180,11 @@ notifier_hub:
   phone_notifications: false
   ha_event_notifications: true
   ha_event_notify_services:
-    - notify.mobile_app_mi_telefono
+    - notify.mobile_app_my_phone
   auto_volume: true
   night_dnd: false
   auto_volume_exclude_players:
-    - media_player.echo_dormitorio
+    - media_player.bedroom_echo
   dnd_entity: switch.notifier_hub_dnd
   guest_mode_entity: switch.notifier_hub_guest_mode
   priority_message_entity: switch.notifier_hub_priority_message
@@ -188,18 +192,18 @@ notifier_hub:
   install_dashboard: true
 ```
 
-### Orden de precedencia
+### Precedence order
 
-Notifier Hub combina valores globales, opciones runtime e informacion enviada con cada mensaje.
+Notifier Hub combines global values, runtime options, and data sent with each message.
 
-La configuracion efectiva se obtiene en este orden:
+The effective configuration is resolved in this order:
 
-1. Valores por defecto internos de la integracion.
-2. Configuracion inicial guardada al instalar la integracion o importada desde YAML.
-3. Opciones runtime guardadas desde la UI y desde las entidades editables. Estas opciones sobreescriben la configuracion inicial.
-4. Parametros enviados a `notifier_hub.send`. Cuando existe una opcion equivalente, el valor del mensaje sobreescribe el global solo para esa llamada.
+1. Internal integration defaults.
+2. Initial configuration saved when installing the integration or imported from YAML.
+3. Runtime options saved from the UI and editable entities. These options override the initial configuration.
+4. Parameters sent to `notifier_hub.send`. When an equivalent option exists, the message value overrides the global value only for that call.
 
-El servicio `notifier_hub.set_config` permite cambiar temporalmente valores runtime sin reiniciar Home Assistant:
+The `notifier_hub.set_config` service can temporarily change runtime values without restarting Home Assistant:
 
 ```yaml
 action: notifier_hub.set_config
@@ -208,249 +212,260 @@ data:
     default_volume: 0.25
 ```
 
-Estos cambios permanecen en memoria hasta que se recargue la configuracion o se reinicie la integracion.
+These changes stay in memory until the configuration is reloaded or the integration is restarted.
 
-### Valores globales usados como fallback
+### Global fallback values
 
-| Configuracion global | Parametro del mensaje con preferencia | Comportamiento |
+| Global configuration | Message parameter with priority | Behavior |
 |---|---|---|
-| `notify_services` | `notify` | Con `notify: true`, se usan los servicios globales. Un servicio o lista en `notify` sustituye la lista global para ese mensaje. |
-| `alexa_players` | `alexa.media_player` | Si el mensaje no indica reproductores Alexa, se usan los globales. |
-| `google_players` | `google.media_player` o `google.player` | Si el mensaje no indica reproductores Google/Cast, se usan los globales. |
-| `default_volume` | `alexa.volume` o `google.volume` | Se usa si no hay volumen explicito y `auto_volume` esta desactivado. |
-| Volumen del periodo de `auto_volume` | `alexa.volume` o `google.volume` | Con `auto_volume` activo, sustituye a `default_volume`. Un volumen explicito tiene prioridad sobre ambos. |
-| `tts_wait_time` | `alexa.wait_time` o `google.wait_time` | El valor del mensaje sustituye el margen global usado antes de restaurar el volumen. |
-| `default_language` | `alexa.language` o `google.language` | El idioma del mensaje sustituye al global. |
-| `google_tts_service` | `google.tts_service`, `google.service`, `google.tts_entity` o `google.engine_id` | El motor indicado en el mensaje sustituye al global. |
-| `google_notify_service` | `google.notify_service` | El servicio del mensaje sustituye al global en modo Google Assistant o notify. |
-| `called_number` | `called_number` | El numero del mensaje sustituye al global para esa llamada. |
-| `persons` | `location` | `location` indica el estado requerido. Si `persons` esta vacio, se usa `location_tracker` como fallback. |
+| `notify_services` | `notify` | With `notify: true`, the global services are used. A service or list in `notify` replaces the global list for that message. |
+| `alexa_players` | `alexa.media_player` | If the message does not set Alexa players, the global players are used. |
+| `google_players` | `google.media_player` or `google.player` | If the message does not set Google/Cast players, the global players are used. |
+| `default_volume` | `alexa.volume` or `google.volume` | Used when there is no explicit volume and `auto_volume` is disabled. |
+| Current `auto_volume` period volume | `alexa.volume` or `google.volume` | When `auto_volume` is enabled, it replaces `default_volume`. An explicit volume has priority over both. |
+| `tts_wait_time` | `alexa.wait_time` or `google.wait_time` | The message value replaces the global buffer used before restoring volume. |
+| `default_language` | `alexa.language` or `google.language` | The message language replaces the global language. |
+| `google_tts_service` | `google.tts_service`, `google.service`, `google.tts_entity` or `google.engine_id` | The engine set in the message replaces the global one. |
+| `google_notify_service` | `google.notify_service` | The message service replaces the global one in Google Assistant or notify mode. |
+| `called_number` | `called_number` | The message number replaces the global one for that call. |
+| `persons` | `location` | `location` defines the required state. If `persons` is empty, `location_tracker` is used as fallback. |
 
-`sip_server_name` solo se configura globalmente: no se puede sobrescribir por mensaje.
+`sip_server_name` can only be configured globally and cannot be overridden per message.
 
-Si `speech_home_only` esta activo, los mensajes de voz sin `location` explicito se comportan como si incluyeran `location: home`. Un valor `location` enviado con el mensaje tiene prioridad.
+If `speech_home_only` is enabled, voice messages without an explicit `location` behave as if they included `location: home`. A `location` sent with the message has priority.
 
-## Como se decide cada envio
+## How each delivery is decided
 
-Los interruptores globales no son simples valores por defecto. Actuan como permisos para cada canal.
+Global switches are not simple defaults. They work as permissions for each channel.
 
-| Canal | Debe estar activado | Parametro del mensaje | Filtrado por `location` | Bloqueado por DND |
+| Channel | Must be enabled | Message parameter | Filtered by `location` | Blocked by DND |
 |---|---|---|---|---|
-| Texto `notify.*` | `text_notifications` | `notify` | Si | No |
-| Persistente de Home Assistant | `screen_notifications` | Se crea salvo que uses `no_show: true` | No | No |
-| Alexa | `speech_notifications` y `alexa_notifications` | `alexa` | Si | Si |
-| Google/Cast | `speech_notifications` y `google_notifications` | `google` | Si | Si |
-| Telefono | `phone_notifications` | `phone` | No | Si |
+| Text `notify.*` | `text_notifications` | `notify` | Yes | No |
+| Home Assistant persistent notification | `screen_notifications` | Created unless `no_show: true` is used | No | No |
+| Alexa | `speech_notifications` and `alexa_notifications` | `alexa` | Yes | Yes |
+| Google/Cast | `speech_notifications` and `google_notifications` | `google` | Yes | Yes |
+| Phone | `phone_notifications` | `phone` | No | Yes |
 
-Ejemplo: este mensaje usa los servicios notify globales, limita Alexa a un reproductor concreto y sustituye temporalmente el volumen global o automatico:
+For selectable channels, the global option means the channel may be used and the message means you want to use it for that call. For example, Alexa is only used when `alexa_notifications` is enabled and the message includes `alexa: true` or an `alexa:` dictionary.
+
+| Channel global | Message value | Normal result |
+|---|---|---|
+| `true` | `true` or active dictionary | The channel is used |
+| `true` | `false` or missing | The channel is not used |
+| `false` | `true` or active dictionary | The channel is not used |
+| `false` | `false` or missing | The channel is not used |
+
+Priority can bypass global blocks, `location`, and DND, but it does not turn a disabled channel selector into an active one. See [Priority](#priority) for the exact exceptions.
+
+Example: this message uses the global notify services, limits Alexa to a specific player, and temporarily overrides the global or automatic volume:
 
 ```yaml
 action: notifier_hub.send
 data:
-  title: "Puerta"
-  message: "Se ha abierto la puerta principal"
+  title: "Door"
+  message: "The front door has been opened"
   location: home
   notify: true
   alexa:
-    media_player: media_player.echo_salon
+    media_player: media_player.living_room_echo
     volume: 0.45
 ```
 
-Alexa solo habla si los interruptores de voz y Alexa estan activados, no hay DND y la ubicacion coincide, salvo que se active alguna excepcion de prioridad o modo invitados.
+Alexa only speaks if the speech and Alexa switches are enabled, DND is off, and the location matches, unless priority or guest mode creates an exception.
 
-### Voz solo si hay alguien en casa
+### Voice only when someone is home
 
-Activa `speech_home_only` o el switch:
+Enable `speech_home_only` or the switch:
 
 ```text
 switch.notifier_hub_speech_home_only
 ```
 
-Cuando esta activo, Alexa y Google/Cast asumen `location: home` si una accion no incluye `location`. De este modo puedes silenciar globalmente la voz cuando no hay nadie en casa sin repetir `location: home` en cada automatizacion.
+When enabled, Alexa and Google/Cast assume `location: home` if an action does not include `location`. This lets you globally silence speech when nobody is home without repeating `location: home` in every automation.
 
-Un `location` explicito en el mensaje tiene prioridad. Por ejemplo, `location: oficina` sigue comprobando `oficina`.
+An explicit `location` in the message has priority. For example, `location: office` still checks for `office`.
 
-Este filtro solo afecta a voz. No filtra notificaciones de texto, persistentes ni llamadas telefonicas.
+This filter only affects speech. It does not filter text notifications, persistent notifications, or phone calls.
 
-### No molestar
+### Do not disturb
 
-La entidad configurada en `dnd_entity` bloquea Alexa, Google/Cast y telefono cuando esta en `on`.
+The entity configured in `dnd_entity` blocks Alexa, Google/Cast, and phone calls when it is `on`.
 
-Por defecto se usa:
+By default it uses:
 
 ```yaml
 dnd_entity: switch.notifier_hub_dnd
 ```
 
-Tambien puedes activar DND automaticamente durante los periodos `Noche` y `Altas horas` de Auto Volume con:
+You can also automatically enable DND during the `Night` and `Late night` Auto Volume periods with:
 
 ```yaml
 night_dnd: true
 ```
 
-o desde la entidad:
+or from the entity:
 
 ```text
 switch.notifier_hub_night_dnd
 ```
 
-Cuando esta activo, Notifier Hub aplica DND mientras `sensor.notifier_hub_day_period` corresponde a los periodos `Noche` o `Altas horas`. El inicio se configura con `time.notifier_hub_noche_start` y `time.notifier_hub_altas_horas_start`; termina cuando comienza el siguiente periodo de Auto Volume. El switch manual `switch.notifier_hub_dnd` sigue funcionando de forma independiente.
+When enabled, Notifier Hub applies DND while `sensor.notifier_hub_day_period` matches the `Night` or `Late night` periods. The start is configured with `time.notifier_hub_night_start` and `time.notifier_hub_late_night_start`; it ends when the next Auto Volume period starts. The manual `switch.notifier_hub_dnd` keeps working independently.
 
-Las notificaciones de texto y las persistentes siguen funcionando.
+Text notifications and persistent notifications keep working.
 
-### Modo invitados
+### Guest mode
 
-La entidad configurada en `guest_mode_entity` permite que Alexa y Google/Cast hablen aunque `location` no coincida.
+The entity configured in `guest_mode_entity` allows Alexa and Google/Cast to speak even when `location` does not match.
 
-Por defecto se usa:
+By default it uses:
 
 ```yaml
 guest_mode_entity: switch.notifier_hub_guest_mode
 ```
 
-Es util cuando hay invitados en casa. No salta el modo no molestar y no afecta a las llamadas telefonicas.
+This is useful when guests are at home. It does not bypass do not disturb mode and does not affect phone calls.
 
-### Prioridad
+### Priority
 
-La prioridad general puede activarse con `priority: true` en el mensaje o encendiendo la entidad configurada en `priority_message_entity`:
+General priority can be enabled with `priority: true` in the message or by turning on the entity configured in `priority_message_entity`:
 
 ```yaml
 priority_message_entity: switch.notifier_hub_priority_message
 ```
 
-`switch.notifier_hub_priority_message` se apaga automaticamente despues de procesar el siguiente mensaje.
+`switch.notifier_hub_priority_message` turns off automatically after the next message is processed.
 
-Reglas especiales:
+Special rules:
 
-- La prioridad general salta interruptores, `location` y DND.
-- Tambien fuerza la notificacion persistente aunque exista `no_show: true`.
-- Para texto, Alexa y Google/Cast, la prioridad general no sustituye el selector del canal: `notify: false`, `alexa: false` o `google: false` siguen evitando ese envio.
-- Para telefono, la prioridad general intenta realizar la llamada aunque `phone` sea `false`. Si existe un numero global y no quieres llamadas prioritarias, evita usar prioridad general o elimina el numero global.
-- `alexa.priority: true` y `google.priority: true` saltan los bloqueos solo para ese canal de voz.
+- General priority bypasses switches, `location`, and DND.
+- It also forces the persistent notification even when `no_show: true` exists.
+- For text, Alexa, and Google/Cast, general priority does not replace the channel selector: `notify: false`, `alexa: false`, or `google: false` still prevents that delivery.
+- For phone, general priority attempts the call even if `phone` is `false`. If a global number exists and you do not want priority phone calls, avoid general priority or remove the global number.
+- `alexa.priority: true` and `google.priority: true` bypass blocks only for that speech channel.
 
-## Referencia de `notifier_hub.send`
+## `notifier_hub.send` reference
 
-### Parametros generales
+### General parameters
 
-| Campo | Tipo | Valor por defecto | Descripcion |
+| Field | Type | Default value | Description |
 |---|---|---|---|
-| `message` | cadena | Obligatorio | Texto principal del mensaje. |
-| `title` | cadena | `""` | Titulo de la notificacion. |
-| `notify` | booleano, cadena o lista | `true` | Envia texto mediante `notify.*`. Con `true` usa `notify_services`. Tambien admite un servicio, una lista o una cadena separada por comas. |
-| `no_show` | booleano | `false` | Con `true`, evita crear la notificacion persistente. |
-| `priority` | booleano | `false` | Activa prioridad general. |
-| `location` | cadena | `""` | Estado requerido para los canales sujetos a ubicacion. Un valor vacio no aplica filtro. |
-| `alexa` | booleano o diccionario | `false` | Con `true`, envia el texto a los reproductores Alexa configurados. Un diccionario permite personalizar el envio. |
-| `google` | booleano o diccionario | `false` | Con `true`, envia el texto a los reproductores Google/Cast configurados. Un diccionario permite personalizar el envio. |
-| `phone` | booleano | `false` | Solicita una llamada mediante ha-sip. El canal debe estar activado o el mensaje debe ser prioritario. |
-| `called_number` | cadena | Configuracion global | Numero al que llama ha-sip. Permite sobrescribir el numero global. |
-| `image` | cadena | `""` | Imagen para Telegram, Pushover, Discord o `mobile_app`. Puede ser una ruta local o una URL, segun el servicio. |
-| `caption` | cadena | `""` | Pie de foto para Telegram. Si esta vacio, se genera con el titulo y el mensaje. |
-| `link` | cadena | `""` | Enlace añadido al texto. En Discord con `embed` se usa como URL del contenido embebido. En la UI aparece como **Enlace**. |
-| `target` | cadena o lista | `""` | Destinatario concreto pasado a `notify.*`, por ejemplo uno o varios chats de Telegram. |
-| `html` | booleano | `false` | Activa formato HTML para Telegram y genera el titulo en negrita. |
+| `message` | string | Required | Main message text. |
+| `title` | string | `""` | Notification title. |
+| `notify` | boolean, string, or list | `true` | Sends text through `notify.*`. With `true`, it uses `notify_services`. Also accepts a service, a list, or a comma-separated string. |
+| `no_show` | boolean | `false` | With `true`, avoids creating the persistent notification. |
+| `priority` | boolean | `false` | Enables general priority. |
+| `location` | string | `""` | Required state for channels subject to location filtering. An empty value applies no filter. |
+| `alexa` | boolean or dictionary | `false` | Requests Alexa for this message. Requires `speech_notifications` and `alexa_notifications` to be enabled, except with priority. A dictionary customizes delivery. |
+| `google` | boolean or dictionary | `false` | Requests Google/Cast for this message. Requires `speech_notifications` and `google_notifications` to be enabled, except with priority. A dictionary customizes delivery. |
+| `phone` | boolean | `false` | Requests a call through ha-sip. The channel must be enabled or the message must be priority. |
+| `called_number` | string | Global configuration | Number called by ha-sip. Overrides the global number. |
+| `image` | string | `""` | Image for Telegram, Pushover, Discord, or `mobile_app`. Can be a local path or URL depending on the service. |
+| `caption` | string | `""` | Telegram photo caption. If empty, it is generated from the title and message. |
+| `link` | string | `""` | Link added to the text. In Discord with `embed`, it is used as the embedded content URL. In the UI it appears as **Link**. |
+| `target` | string or list | `""` | Specific target passed to `notify.*`, for example one or more Telegram chats. |
+| `html` | boolean | `false` | Enables HTML formatting for Telegram and renders the title in bold. |
 
-### Payloads especificos para `notify.*`
+### Provider-specific `notify.*` payloads
 
-Los siguientes campos permiten añadir opciones propias de cada proveedor:
+These fields allow provider-specific options:
 
-| Campo | Tipo | Descripcion |
+| Field | Type | Description |
 |---|---|---|
-| `telegram` | diccionario | Payload adicional para Telegram. Con `html: true` añade `parse_mode: html`. |
-| `pushover` | diccionario | Payload adicional para Pushover. Recibe automaticamente `image` y `priority` cuando se indican. |
-| `mobile` | diccionario | Payload adicional para `notify.mobile_app_*`. Con `tts: true`, envia el texto mediante `tts_text`. |
-| `discord` | diccionario | Payload adicional para Discord. Si incluye la clave `embed`, utiliza `title`, `description`, `link` e `image` para crear contenido embebido. |
+| `telegram` | dictionary | Additional payload for Telegram. With `html: true`, it adds `parse_mode: html`. |
+| `pushover` | dictionary | Additional payload for Pushover. Automatically receives `image` and `priority` when set. |
+| `mobile` | dictionary | Additional payload for `notify.mobile_app_*`. With `tts: true`, it sends the text through `tts_text`. |
+| `discord` | dictionary | Additional payload for Discord. If it includes the `embed` key, it uses `title`, `description`, `link`, and `image` to create embedded content. |
 
-### Opciones de `alexa`
+### `alexa` options
 
-Cuando `alexa` es un diccionario admite:
+When `alexa` is a dictionary, it accepts:
 
-| Campo | Valor por defecto | Descripcion |
+| Field | Default value | Description |
 |---|---|---|
-| `media_player` | `alexa_players` | Reproductor, lista, grupo, nombre amigable o `all`. |
-| `message` | `message` general | Texto que se debe reproducir. |
-| `message_tts` | `message` de Alexa | Texto TTS alternativo con prioridad sobre `message`. |
-| `title` | `title` general | Titulo usado para push. |
-| `volume` | Volumen actual de Notifier Hub | Volumen temporal entre `0.0` y `1.0`. |
-| `wait_time` | `tts_wait_time` | Margen adicional antes de restaurar el volumen. |
-| `type` | `tts` | Admite `tts`, `announce`, `push`, `dropin` o `dropin_notification`. |
-| `method` | `all` | Metodo usado con `type: announce`. |
-| `push` | `false` | Fuerza una notificacion push. |
-| `priority` | `false` | Salta los bloqueos solo para Alexa. |
-| `notifier` | `notify.alexa_media` | Servicio notify alternativo de Alexa Media Player. |
-| `ssml` | `false` | Activa la generacion de etiquetas SSML. |
-| `voice` | `Alexa` | Voz SSML alternativa. |
-| `language` | `default_language` | Idioma SSML. |
-| `audio` | `""` | URL o etiqueta `<audio>` SSML insertada antes del mensaje. |
-| `rate` | `100` | Velocidad SSML en porcentaje. |
-| `pitch` | `0` | Tono SSML en porcentaje. |
-| `ssml_volume` | `0` | Ajuste de volumen SSML en dB. |
-| `whisper` | `false` | Activa el modo susurro SSML. |
-| `media_content_id` | `""` | URL o identificador multimedia reproducido en lugar del TTS. |
-| `media_content_type` | Sin valor fijo | Tipo del contenido multimedia. |
-| `extra` | `0` | Valor `timer` enviado al reproducir contenido multimedia. |
-| `auto_volumes` | `false` | Ajusta el volumen sin reproducir TTS. |
+| `media_player` | `alexa_players` | Player, list, group, friendly name, or `all`. |
+| `message` | General `message` | Text to play. |
+| `message_tts` | Alexa `message` | Alternative TTS text with priority over `message`. |
+| `title` | General `title` | Title used for push. |
+| `volume` | Current Notifier Hub volume | Temporary volume between `0.0` and `1.0`. |
+| `wait_time` | `tts_wait_time` | Additional buffer before restoring volume. |
+| `type` | `tts` | Accepts `tts`, `announce`, `push`, `dropin`, or `dropin_notification`. |
+| `method` | `all` | Method used with `type: announce`. |
+| `push` | `false` | Forces a push notification. |
+| `priority` | `false` | Bypasses blocks only for Alexa. |
+| `notifier` | `notify.alexa_media` | Alternative Alexa Media Player notify service. |
+| `ssml` | `false` | Enables SSML tag generation. |
+| `voice` | `Alexa` | Alternative SSML voice. |
+| `language` | `default_language` | SSML language. |
+| `audio` | `""` | URL or `<audio>` SSML tag inserted before the message. |
+| `rate` | `100` | SSML speech rate percentage. |
+| `pitch` | `0` | SSML pitch percentage. |
+| `ssml_volume` | `0` | SSML volume adjustment in dB. |
+| `whisper` | `false` | Enables SSML whisper mode. |
+| `media_content_id` | `""` | URL or media identifier played instead of TTS. |
+| `media_content_type` | No fixed value | Media content type. |
+| `extra` | `0` | `timer` value sent when playing media content. |
+| `auto_volumes` | `false` | Adjusts volume without playing TTS. |
 
-### Opciones de `google`
+### `google` options
 
-Cuando `google` es un diccionario admite:
+When `google` is a dictionary, it accepts:
 
-| Campo | Valor por defecto | Descripcion |
+| Field | Default value | Description |
 |---|---|---|
-| `media_player` | `google_players` | Reproductor, lista, grupo o nombre amigable. Tambien admite el alias `player`. |
-| `message` | `message` general | Texto que se debe reproducir. |
-| `volume` | Volumen actual de Notifier Hub | Volumen temporal entre `0.0` y `1.0`. |
-| `wait_time` | `tts_wait_time` | Margen adicional antes de restaurar el volumen. |
-| `language` | `default_language` | Idioma del motor TTS. |
-| `tts_service` | `google_tts_service` | Entidad moderna `tts.*` o servicio heredado. Tambien admite el alias `service`. |
-| `tts_entity` | `""` | Entidad moderna `tts.*` explicita. Tambien admite el alias `engine_id`. |
-| `mode` | `tts` | Usa `tts`, `notify`, `assistant` o `google assistant`. Tambien admite el alias `type`. |
-| `notify_service` | `google_notify_service` | Servicio usado en modo Google Assistant o notify. |
-| `priority` | `false` | Salta los bloqueos solo para Google/Cast. |
-| `media_content_id` | `""` | URL o identificador multimedia reproducido en lugar del TTS. |
-| `media_content_type` | `music` | Tipo del contenido multimedia. |
+| `media_player` | `google_players` | Player, list, group, or friendly name. Also accepts the `player` alias. |
+| `message` | General `message` | Text to play. |
+| `volume` | Current Notifier Hub volume | Temporary volume between `0.0` and `1.0`. |
+| `wait_time` | `tts_wait_time` | Additional buffer before restoring volume. |
+| `language` | `default_language` | TTS engine language. |
+| `tts_service` | `google_tts_service` | Modern `tts.*` entity or legacy service. Also accepts the `service` alias. |
+| `tts_entity` | `""` | Explicit modern `tts.*` entity. Also accepts the `engine_id` alias. |
+| `mode` | `tts` | Uses `tts`, `notify`, `assistant`, or `google assistant`. Also accepts the `type` alias. |
+| `notify_service` | `google_notify_service` | Service used in Google Assistant or notify mode. |
+| `priority` | `false` | Bypasses blocks only for Google/Cast. |
+| `media_content_id` | `""` | URL or media identifier played instead of TTS. |
+| `media_content_type` | `music` | Media content type. |
 
-## Guias por canal
+## Channel guides
 
-### Notificaciones de texto
+### Text notifications
 
-`notify: true` envia el mensaje a todos los servicios configurados en `notify_services`.
-Tambien puedes indicar servicios concretos:
+`notify: true` sends the message to all services configured in `notify_services`.
+You can also set specific services:
 
 ```yaml
 action: notifier_hub.send
 data:
-  title: "Aviso"
-  message: "Mensaje de prueba"
+  title: "Notice"
+  message: "Test message"
   notify:
     - notify.telegram
-    - notify.mobile_app_mi_telefono
+    - notify.mobile_app_my_phone
 ```
 
-### Telegram con HTML, enlace y destinatario
+### Telegram with HTML, link, and target
 
 ```yaml
 action: notifier_hub.send
 data:
-  title: "Camara"
-  message: "Se ha detectado <b>movimiento</b>"
+  title: "Camera"
+  message: "Motion <b>detected</b>"
   notify: notify.telegram
   target:
     - "123456789"
-  link: "https://example.com/camara"
+  link: "https://example.com/camera"
   html: true
 ```
 
-### Telegram con imagen
+### Telegram with image
 
 ```yaml
 action: notifier_hub.send
 data:
-  title: "Camara"
-  message: "Movimiento detectado"
+  title: "Camera"
+  message: "Motion detected"
   notify: notify.telegram
-  image: /config/www/camara.jpg
-  caption: "Movimiento detectado"
+  image: /config/www/camera.jpg
+  caption: "Motion detected"
 ```
 
 ### Alexa
@@ -458,44 +473,44 @@ data:
 ```yaml
 action: notifier_hub.send
 data:
-  title: "Puerta"
-  message: "Se ha abierto la puerta principal"
+  title: "Door"
+  message: "The front door has been opened"
   notify: true
   alexa:
     media_player:
-      - media_player.echo_salon
+      - media_player.living_room_echo
     type: tts
     volume: 0.35
 ```
 
 ### Google/Cast
 
-Para instalaciones recientes se recomienda usar la entidad `tts.*` creada por Google Translate, por ejemplo `tts.google_es_es`.
+For recent installations, use the `tts.*` entity created by Google Translate, for example `tts.google_en_com`.
 
 ```yaml
 action: notifier_hub.send
 data:
-  title: "Aviso"
-  message: "Mensaje enviado por Google Cast"
+  title: "Notice"
+  message: "Message sent through Google Cast"
   notify: false
   google:
-    media_player: media_player.google_home_salon
+    media_player: media_player.living_room_google_home
     volume: 0.35
-    tts_service: tts.google_es_es
+    tts_service: tts.google_en_com
 ```
 
-`google_tts_service` define el motor TTS global:
+`google_tts_service` defines the global TTS engine:
 
 ```yaml
-google_tts_service: tts.google_es_es
+google_tts_service: tts.google_en_com
 ```
 
-Cuando envias `google: true`, Notifier Hub genera el audio con ese motor y lo reproduce en `google_players`.
-Tambien puedes sobrescribirlo por mensaje con `google.tts_service`.
+When you send `google: true`, Notifier Hub generates audio with that engine and plays it on `google_players`.
+You can also override it per message with `google.tts_service`.
 
-El valor legacy `google_translate_say` sigue soportado si usas el servicio heredado `tts.google_translate_say`. Si existe una entidad moderna, Notifier Hub intenta utilizarla automaticamente.
+The legacy `google_translate_say` value is still supported if you use the legacy `tts.google_translate_say` service. If a modern entity exists, Notifier Hub tries to use it automatically.
 
-Tambien puedes reproducir contenido multimedia:
+You can also play media content:
 
 ```yaml
 action: notifier_hub.send
@@ -504,160 +519,160 @@ data:
   message: ""
   notify: false
   google:
-    media_player: media_player.google_home_salon
+    media_player: media_player.living_room_google_home
     media_content_id: "https://example.com/audio.mp3"
     media_content_type: music
 ```
 
-### Llamadas telefonicas
+### Phone calls
 
 ```yaml
 action: notifier_hub.send
 data:
-  title: "Alerta"
-  message: "Alarma activada"
+  title: "Alert"
+  message: "Alarm triggered"
   phone: true
   called_number: "+34600000000"
 ```
 
-Las llamadas se envian mediante el add-on ha-sip de [`arnonym/ha-plugins`](https://github.com/arnonym/ha-plugins). La integracion no realiza la llamada directamente: envia el destino y el texto al add-on con `hassio.addon_stdin`.
+Calls are sent through the ha-sip add-on from [`arnonym/ha-plugins`](https://github.com/arnonym/ha-plugins). The integration does not place the call directly: it sends the destination and text to the add-on with `hassio.addon_stdin`.
 
-El add-on esperado es `ha-sip`, identificado internamente como:
+The expected add-on is `ha-sip`, internally identified as:
 
 ```text
 c7744bff_ha-sip
 ```
 
-Notifier Hub construye una URI SIP con este formato:
+Notifier Hub builds a SIP URI with this format:
 
 ```text
 sip:<called_number>@<sip_server_name>
 ```
 
-Por ejemplo:
+For example:
 
 ```yaml
 sip_server_name: fritz.box:5060
 called_number: "600123456"
 ```
 
-genera:
+generates:
 
 ```text
 command: dial
 number: sip:600123456@fritz.box:5060
 menu:
-  message: <mensaje>
+  message: <message>
   post_action: hangup
 ```
 
-El valor por defecto `fritz.box:5060` esta pensado para un router FRITZ!Box con el puerto SIP estandar `5060`.
+The default value `fritz.box:5060` is intended for a FRITZ!Box router using the standard SIP port `5060`.
 
-ha-sip requiere una instalacion de Home Assistant con Supervisor y add-ons. En Home Assistant Core o Container sin Supervisor no existe `hassio.addon_stdin`.
+ha-sip requires a Home Assistant installation with Supervisor and add-ons. In Home Assistant Core or Container without Supervisor, `hassio.addon_stdin` does not exist.
 
-## Ubicacion y presencia
+## Location and presence
 
-`location` permite filtrar texto, Alexa y Google/Cast segun la ubicacion. No filtra las notificaciones persistentes ni las llamadas telefonicas.
+`location` filters text, Alexa, and Google/Cast according to presence. It does not filter persistent notifications or phone calls.
 
-La configuracion recomendada es usar `persons`:
+The recommended configuration is to use `persons`:
 
 ```yaml
 persons:
-  - person.ana
+  - person.anna
   - person.carlos
 ```
 
-Con `location: home`, el mensaje pasa si al menos una persona configurada esta en `home`:
+With `location: home`, the message passes if at least one configured person is `home`:
 
 ```yaml
 action: notifier_hub.send
 data:
-  title: "Aviso casa"
-  message: "Movimiento detectado"
+  title: "Home notice"
+  message: "Motion detected"
   location: home
   alexa: true
 ```
 
-Si `persons` esta vacio, Notifier Hub usa `location_tracker` como fallback:
+If `persons` is empty, Notifier Hub uses `location_tracker` as fallback:
 
 ```yaml
 location_tracker: group.notifier_location_tracker
 ```
 
-En ese caso compara `location` con el estado de la entidad configurada. Si el mensaje no incluye `location`, no aplica ningun filtro.
+In that case, it compares `location` with the configured entity state. If the message does not include `location`, no filter is applied.
 
-Entidades agregadas de presencia:
+Aggregated presence entities:
 
-| Entidad | Estado | Atributos utiles |
+| Entity | State | Useful attributes |
 |---|---|---|
-| `sensor.notifier_hub_home_people` | Numero de personas configuradas que estan en `home` | `total_count`, `away_count`, `is_home`, `home_persons`, `home_person_names`, `home_person_details`, `away_persons`, `away_person_names`, `away_person_details`, `persons` |
-| `binary_sensor.notifier_hub_home_occupied` | `on` si al menos una persona esta en `home` | `home_count`, `total_count`, `home_persons`, `home_person_names`, `home_person_details`, `away_persons`, `away_person_names`, `away_person_details` |
+| `sensor.notifier_hub_home_people` | Number of configured people currently `home` | `total_count`, `away_count`, `is_home`, `home_persons`, `home_person_names`, `home_person_details`, `away_persons`, `away_person_names`, `away_person_details`, `persons` |
+| `binary_sensor.notifier_hub_home_occupied` | `on` if at least one configured person is `home` | `home_count`, `total_count`, `home_persons`, `home_person_names`, `home_person_details`, `away_persons`, `away_person_names`, `away_person_details` |
 
-Para mostrar personas en un mapa, usa las entidades `person.*` originales. Las entidades agregadas resumen presencia, pero no representan una posicion unica.
+To show people on a map, use the original `person.*` entities. The aggregated entities summarize presence, but they do not represent a single position.
 
-## Controles globales
+## Global controls
 
-Notifier Hub crea interruptores que puedes usar desde la UI, el dashboard o automatizaciones:
+Notifier Hub creates switches that can be used from the UI, dashboard, or automations:
 
-| Entidad | Configuracion | Uso |
+| Entity | Configuration | Use |
 |---|---|---|
-| `switch.notifier_hub_text_notifications` | `text_notifications` | Notificaciones mediante `notify.*`. |
-| `switch.notifier_hub_screen_notifications` | `screen_notifications` | Notificaciones persistentes. |
-| `switch.notifier_hub_speech_notifications` | `speech_notifications` | Interruptor maestro de voz. |
-| `switch.notifier_hub_speech_home_only` | `speech_home_only` | Si una accion no incluye `location`, permite voz solo cuando alguien esta en `home`. |
-| `switch.notifier_hub_alexa_notifications` | `alexa_notifications` | Alexa TTS, announce y push. |
-| `switch.notifier_hub_google_notifications` | `google_notifications` | Google/Cast TTS o notify. |
-| `switch.notifier_hub_phone_notifications` | `phone_notifications` | Llamadas telefonicas. |
-| `switch.notifier_hub_home_assistant_event_notifications` | `ha_event_notifications` | Avisos del ciclo de vida de Home Assistant. |
-| `switch.notifier_hub_auto_volume` | `auto_volume` | Volumen automatico segun periodo del dia. |
-| `switch.notifier_hub_dnd` | `dnd_mode` | Modo no molestar. |
-| `switch.notifier_hub_night_dnd` | `night_dnd` | Aplica DND automaticamente durante los periodos `Noche` y `Altas horas` de Auto Volume. |
-| `switch.notifier_hub_guest_mode` | `guest_mode` | Permite voz cuando `location` no coincide. |
-| `switch.notifier_hub_priority_message` | `priority_message` | Fuerza prioridad para el siguiente mensaje. |
+| `switch.notifier_hub_text_notifications` | `text_notifications` | Notifications through `notify.*`. |
+| `switch.notifier_hub_screen_notifications` | `screen_notifications` | Persistent notifications. |
+| `switch.notifier_hub_speech_notifications` | `speech_notifications` | Master speech switch. |
+| `switch.notifier_hub_speech_home_only` | `speech_home_only` | If an action does not include `location`, allow speech only when someone is `home`. |
+| `switch.notifier_hub_alexa_notifications` | `alexa_notifications` | Alexa TTS, announce, and push. |
+| `switch.notifier_hub_google_notifications` | `google_notifications` | Google/Cast TTS or notify. |
+| `switch.notifier_hub_phone_notifications` | `phone_notifications` | Phone calls. |
+| `switch.notifier_hub_home_assistant_event_notifications` | `ha_event_notifications` | Home Assistant lifecycle notices. |
+| `switch.notifier_hub_auto_volume` | `auto_volume` | Automatic volume by day period. |
+| `switch.notifier_hub_dnd` | `dnd_mode` | Do not disturb mode. |
+| `switch.notifier_hub_night_dnd` | `night_dnd` | Automatically applies DND during the `Night` and `Late night` Auto Volume periods. |
+| `switch.notifier_hub_guest_mode` | `guest_mode` | Allows speech when `location` does not match. |
+| `switch.notifier_hub_priority_message` | `priority_message` | Forces priority for the next message. |
 
 ## Auto Volume
 
-Auto Volume ajusta los reproductores Alexa y Google configurados segun el periodo del dia.
+Auto Volume adjusts the configured Alexa and Google players according to the current day period.
 
-Cuando `auto_volume` esta activo:
+When `auto_volume` is enabled:
 
-- Los mensajes Alexa y Google sin `volume` explicito usan el volumen del periodo actual.
-- Un `volume` explicito en el mensaje tiene prioridad.
-- La integracion actualiza periodicamente el volumen de los reproductores configurados.
-- `auto_volume_exclude_players` permite excluir reproductores concretos.
-- `night_dnd` permite reutilizar los periodos `Noche` y `Altas horas` para activar automaticamente DND.
+- Alexa and Google messages without an explicit `volume` use the current period volume.
+- An explicit message `volume` has priority.
+- The integration periodically updates the volume of the configured players.
+- `auto_volume_exclude_players` excludes specific players.
+- `night_dnd` can reuse the `Night` and `Late night` periods to automatically enable DND.
 
-Periodos por defecto:
+Default periods:
 
-| Periodo | Inicio | Volumen |
+| Period | Start | Volume |
 |---|---:|---:|
-| Altas horas | `01:00` | `10%` |
-| Primera hora | `05:00` | `20%` |
-| Mañana | `07:00` | `30%` |
-| Tarde | `12:00` | `40%` |
-| Atardecer | `18:00` | `30%` |
-| Noche | `22:00` | `20%` |
+| Late night | `01:00` | `10%` |
+| Early morning | `05:00` | `20%` |
+| Morning | `07:00` | `30%` |
+| Afternoon | `12:00` | `40%` |
+| Evening | `18:00` | `30%` |
+| Night | `22:00` | `20%` |
 
-El dashboard incluye:
+The dashboard includes:
 
 - `sensor.notifier_hub_day_period`
 - `sensor.notifier_hub_day_period_volume`
-- Entidades `time.notifier_hub_*_start` para editar el inicio de cada periodo.
-- Entidades `number.notifier_hub_*_volume` para editar el volumen de cada periodo.
+- `time.notifier_hub_*_start` entities for editing the start of each period.
+- `number.notifier_hub_*_volume` entities for editing the volume of each period.
 
-Si `switch.notifier_hub_night_dnd` esta activo, los periodos `Noche` y `Altas horas` tambien se usan como ventana de no molestar para voz y telefono.
+If `switch.notifier_hub_night_dnd` is enabled, the `Night` and `Late night` periods are also used as a do not disturb window for speech and phone calls.
 
 ## Dashboard
 
-El archivo `notifier_hub_dashboard.yaml` incluye un panel Lovelace con estado, actividad TTS, botones de prueba, canales y controles de Auto Volume.
+The `notifier_hub_dashboard.yaml` file includes a Lovelace panel with status, TTS activity, test buttons, channels, and Auto Volume controls.
 
-La opcion `install_dashboard` copia automaticamente el panel a:
+The `install_dashboard` option automatically copies the panel to:
 
 ```text
 /config/notifier_hub_dashboard.yaml
 ```
 
-Tambien crea una notificacion persistente con el bloque que debes añadir a `configuration.yaml`:
+It also creates a persistent notification with the block you need to add to `configuration.yaml`:
 
 ```yaml
 lovelace:
@@ -670,105 +685,105 @@ lovelace:
       filename: notifier_hub_dashboard.yaml
 ```
 
-Si no usas `install_dashboard`, puedes copiar manualmente `notifier_hub_dashboard.yaml` a `/config/notifier_hub_dashboard.yaml` y registrar el mismo bloque.
+If you do not use `install_dashboard`, you can manually copy `notifier_hub_dashboard.yaml` to `/config/notifier_hub_dashboard.yaml` and register the same block.
 
-Tambien se incluye una tarjeta compacta de ejemplo en:
+A compact example card is also included in:
 
 ```text
 samples/notifier_hub_compact_card.yaml
 ```
 
-Esa tarjeta esta pensada para pegarla dentro de `cards:` en una vista Lovelace existente. Usa las mismas entidades de Notifier Hub y muestra controles rapidos, Auto Volume, DND manual, DND durante la noche, estado de Alexa/Google y envio de mensajes desde el dashboard.
+That card is meant to be pasted inside `cards:` in an existing Lovelace view. It uses the same Notifier Hub entities and shows quick controls, Auto Volume, manual DND, night DND, Alexa/Google status, and dashboard message sending.
 
-## Entidades creadas
+## Created entities
 
-### Sensores
+### Sensors
 
-| Entidad | Uso |
+| Entity | Use |
 |---|---|
-| `sensor.notifier_hub_debug` | Estado de depuracion y detalles de errores. |
-| `sensor.notifier_hub_last_message` | Ultimo mensaje procesado. |
-| `sensor.notifier_hub_personal_assistant` | Nombre configurado del asistente. |
-| `sensor.notifier_hub_home_people` | Numero y detalles de personas en casa. |
-| `sensor.notifier_hub_day_period` | Periodo actual de Auto Volume. |
-| `sensor.notifier_hub_day_period_volume` | Volumen correspondiente al periodo actual. |
+| `sensor.notifier_hub_debug` | Debug status and error details. |
+| `sensor.notifier_hub_last_message` | Last processed message. |
+| `sensor.notifier_hub_personal_assistant` | Configured assistant name. |
+| `sensor.notifier_hub_home_people` | Number and details of people at home. |
+| `sensor.notifier_hub_day_period` | Current Auto Volume period. |
+| `sensor.notifier_hub_day_period_volume` | Volume for the current period. |
 
-### Sensores binarios
+### Binary sensors
 
-| Entidad | Uso |
+| Entity | Use |
 |---|---|
-| `binary_sensor.notifier_hub_alexa_speak` | Indica si Alexa esta procesando voz. |
-| `binary_sensor.notifier_hub_google_speak` | Indica si Google/Cast esta procesando voz. |
-| `binary_sensor.notifier_hub_home_occupied` | Indica si al menos una persona configurada esta en casa. |
+| `binary_sensor.notifier_hub_alexa_speak` | Indicates whether Alexa is processing speech. |
+| `binary_sensor.notifier_hub_google_speak` | Indicates whether Google/Cast is processing speech. |
+| `binary_sensor.notifier_hub_home_occupied` | Indicates whether at least one configured person is home. |
 
-Las entidades `time.notifier_hub_*_start` y `number.notifier_hub_*_volume` permiten editar Auto Volume.
-Consulta [Controles globales](#controles-globales) para ver los interruptores.
+The `time.notifier_hub_*_start` and `number.notifier_hub_*_volume` entities edit Auto Volume.
+See [Global controls](#global-controls) for the switches.
 
-## Eventos de Home Assistant
+## Home Assistant events
 
-Notifier Hub puede avisar de los eventos equivalentes a `Start`, `Final Write`, `Close`, `Stop` y `Restart` de la aplicacion original:
+Notifier Hub can notify the events equivalent to `Start`, `Final Write`, `Close`, `Stop`, and `Restart` from the original app:
 
 - `homeassistant_started`
 - `homeassistant_final_write`
 - `homeassistant_close`
 - `homeassistant_stop`
-- Llamada al servicio `homeassistant.restart`
+- Calls to the `homeassistant.restart` service
 
-Activalos o desactivalos con `ha_event_notifications` o `switch.notifier_hub_home_assistant_event_notifications`.
+Enable or disable them with `ha_event_notifications` or `switch.notifier_hub_home_assistant_event_notifications`.
 
-Por defecto usa `notify_services`. Para separar los avisos internos de los mensajes normales, configura `ha_event_notify_services`:
+By default it uses `notify_services`. To separate internal notices from normal messages, configure `ha_event_notify_services`:
 
 ```yaml
 notify_services:
   - notify.telegram
-  - notify.mobile_app_mi_telefono
+  - notify.mobile_app_my_phone
 
 ha_event_notify_services:
-  - notify.mobile_app_mi_telefono
+  - notify.mobile_app_my_phone
 ```
 
-Si `ha_event_notify_services` esta vacio, se usa `notify_services` como fallback.
+If `ha_event_notify_services` is empty, `notify_services` is used as fallback.
 
-## Compatibilidad con AppDaemon
+## AppDaemon compatibility
 
-Notifier Hub escucha el evento personalizado `notifier` para mantener compatibilidad con automatizaciones antiguas creadas para la aplicacion original de AppDaemon.
+Notifier Hub listens to the custom `notifier` event to keep compatibility with old automations created for the original AppDaemon app.
 
-Los datos de `event_data` se procesan igual que los datos enviados mediante `notifier_hub.send`:
+The `event_data` is processed the same way as data sent through `notifier_hub.send`:
 
 ```yaml
 event: notifier
 event_data:
-  title: "Lavadora"
-  message: "La lavadora ha terminado"
+  title: "Washing machine"
+  message: "The washing machine has finished"
   notify: true
   alexa:
-    media_player: media_player.echo_salon
+    media_player: media_player.living_room_echo
     type: announce
     method: all
     volume: 0.4
 ```
 
-Para automatizaciones nuevas usa directamente:
+For new automations, call the service directly:
 
 ```yaml
 action: notifier_hub.send
 data:
-  title: "Lavadora"
-  message: "La lavadora ha terminado"
+  title: "Washing machine"
+  message: "The washing machine has finished"
   notify: true
 ```
 
-## Notas de migracion
+## Migration notes
 
-- Donde antes se usaba `script.my_notify`, ahora puede usarse `notifier_hub.send`.
-- Donde antes se lanzaba `event: notifier`, puede mantenerse igual durante la migracion.
-- Las entidades auxiliares antiguas (`input_boolean`, `input_select`, etc.) ya no son obligatorias.
-- Si quieres conservar entidades propias para no molestar, invitados o prioridad, puedes indicarlas con `dnd_entity`, `guest_mode_entity` y `priority_message_entity`.
-- Google/Cast se ha añadido como gestor nativo. Usa `google: true` o un diccionario `google:`.
+- Where `script.my_notify` was used before, `notifier_hub.send` can now be used.
+- Where `event: notifier` was fired before, it can stay in place during migration.
+- Old helper entities (`input_boolean`, `input_select`, etc.) are no longer required.
+- If you want to keep your own entities for do not disturb, guests, or priority, set them with `dnd_entity`, `guest_mode_entity`, and `priority_message_entity`.
+- Google/Cast has been added as a native manager. Use `google: true` or a `google:` dictionary.
 
-## Cambios respecto a AppDaemon
+## Changes from AppDaemon
 
-Se han eliminado:
+Removed:
 
-- La descarga automatica del paquete desde GitHub.
-- La gestion de grupos creada por AppDaemon.
+- Automatic package download from GitHub.
+- Group management created by AppDaemon.

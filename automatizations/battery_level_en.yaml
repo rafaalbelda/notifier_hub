@@ -43,6 +43,7 @@ actions:
         # Fixed delay alternative:
         # - delay: "00:15:00"
         #  enabled: false
+        # Create an input_number for the delay interval in minutes, e.g. input_number.aviso_bateria_intervalo_minutos
         - delay:
             minutes: "{{ states('input_number.aviso_bateria_intervalo_minutos') | int(15) }}"
 mode: restart

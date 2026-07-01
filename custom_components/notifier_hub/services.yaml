@@ -29,12 +29,12 @@ send:
       selector:
         boolean:
       default: false
-    # location:
-    #   name: Ubicación
-    #   description: Estado requerido para los canales sujetos a ubicación, por ejemplo home. Déjalo vacío para filtro global.
-    #   selector:
-    #     text:
-    #   default: "home"
+    location:
+      name: Ubicación
+      description: Estado requerido para los canales sujetos a ubicación, por ejemplo home. Déjalo vacío para no aplicar filtro.
+      selector:
+        text:
+      default: ""
     alexa:
       name: Alexa
       description: true/on o diccionario con media_player, volume, type, method, voice, language, ssml, push, event_id, media_content_id...

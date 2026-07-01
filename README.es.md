@@ -2,8 +2,6 @@
 
 [English](README.md) | [Espanol](README.es.md)
 
-[![Abrir tu instancia de Home Assistant y abrir este repositorio en HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rafaalbelda&repository=notifier_hub&category=integration)
-
 Integracion personalizada de Home Assistant para centralizar notificaciones de texto, avisos persistentes, Alexa, Google/Cast y llamadas telefonicas.
 
 Es la conversion nativa de la aplicacion AppDaemon [`Centro Notifiche`](https://github.com/caiosweet/Package-Notification-HUB-AppDaemon) / [`Notifier`](https://github.com/jumping2000/notifier). Mantiene compatibilidad con el evento antiguo `notifier`, pero para automatizaciones nuevas se recomienda usar el servicio `notifier_hub.send`.
@@ -46,6 +44,8 @@ Es la conversion nativa de la aplicacion AppDaemon [`Centro Notifiche`](https://
 ### HACS
 
 Puedes instalar Notifier Hub desde HACS como repositorio personalizado:
+
+[![Abrir tu instancia de Home Assistant y abrir este repositorio en HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rafaalbelda&repository=notifier_hub&category=integration)
 
 1. Abre HACS en Home Assistant.
 2. Pulsa los tres puntos de la esquina superior derecha y entra en **Repositorios personalizados**.

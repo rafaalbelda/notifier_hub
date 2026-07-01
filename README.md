@@ -10,8 +10,8 @@ It is a native integration conversion of the AppDaemon app [`Centro Notifiche`](
 
 - [Main features](#main-features)
 - [Installation](#installation)
-- [Getting started](#getting-started)
 - [Global configuration](#global-configuration)
+- [Getting started](#getting-started)
 - [How each delivery is decided](#how-each-delivery-is-decided)
 - [`notifier_hub.send` reference](#notifier_hubsend-reference)
 - [Channel guides](#channel-guides)
@@ -89,62 +89,6 @@ The configuration form is organized into these sections:
 - Phone
 - Notifications
 - Auto Volume
-
-## Getting started
-
-Notifier Hub is used by calling the `notifier_hub.send` service from an automation, a script, or:
-
-```text
-Developer Tools > Actions
-```
-
-Before sending messages, configure the `notify.*` services and the Alexa or Google/Cast players you want to use from the UI.
-
-### Text notification
-
-`notify: true` uses the globally configured services in `notify_services`.
-
-```yaml
-action: notifier_hub.send
-data:
-  title: "Door"
-  message: "The front door has been opened"
-  notify: true
-```
-
-### Text and Alexa
-
-```yaml
-action: notifier_hub.send
-data:
-  title: "Washing machine"
-  message: "The washing machine has finished"
-  notify: true
-  alexa: true
-```
-
-### Google/Cast
-
-```yaml
-action: notifier_hub.send
-data:
-  message: "Someone is at the door"
-  google: true
-```
-
-### Urgent message
-
-```yaml
-action: notifier_hub.send
-data:
-  title: "Alarm"
-  message: "Alarm triggered"
-  notify: true
-  alexa: true
-  priority: true
-```
-
-`priority: true` bypasses switches, location filtering, and do not disturb mode. See [Priority](#priority) before using it with phone calls.
 
 ## Global configuration
 
@@ -233,6 +177,62 @@ These changes stay in memory until the configuration is reloaded or the integrat
 `sip_server_name` can only be configured globally and cannot be overridden per message.
 
 If `speech_home_only` is enabled, voice messages without an explicit `location` behave as if they included `location: home`. A `location` sent with the message has priority.
+
+## Getting started
+
+Notifier Hub is used by calling the `notifier_hub.send` service from an automation, a script, or:
+
+```text
+Developer Tools > Actions
+```
+
+Before sending messages, configure the `notify.*` services and the Alexa or Google/Cast players you want to use from the UI.
+
+### Text notification
+
+`notify: true` uses the globally configured services in `notify_services`.
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Door"
+  message: "The front door has been opened"
+  notify: true
+```
+
+### Text and Alexa
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Washing machine"
+  message: "The washing machine has finished"
+  notify: true
+  alexa: true
+```
+
+### Google/Cast
+
+```yaml
+action: notifier_hub.send
+data:
+  message: "Someone is at the door"
+  google: true
+```
+
+### Urgent message
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Alarm"
+  message: "Alarm triggered"
+  notify: true
+  alexa: true
+  priority: true
+```
+
+`priority: true` bypasses switches, location filtering, and do not disturb mode. See [Priority](#priority) before using it with phone calls.
 
 ## How each delivery is decided
 
@@ -687,13 +687,11 @@ lovelace:
 
 If you do not use `install_dashboard`, you can manually copy `notifier_hub_dashboard.yaml` to `/config/notifier_hub_dashboard.yaml` and register the same block.
 
-A compact example card is also included in:
+### Compact Card Example
 
-```text
-samples/notifier_hub_compact_card.yaml
-```
+A ready-to-use compact Lovelace card is available at [samples/notifier_hub_compact_card_no_browser_mod_en.yaml](samples/notifier_hub_compact_card_no_browser_mod_en.yaml). It is meant to be pasted inside `cards:` in an existing Lovelace view and does not require Browser Mod.
 
-That card is meant to be pasted inside `cards:` in an existing Lovelace view. It uses the same Notifier Hub entities and shows quick controls, Auto Volume, manual DND, night DND, Alexa/Google status, and dashboard message sending.
+![Notifier Hub compact card preview](docs/images/notifier_hub_compact_card_preview_en.png)
 
 ## Created entities
 

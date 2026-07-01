@@ -10,8 +10,8 @@ Es la conversion nativa de la aplicacion AppDaemon [`Centro Notifiche`](https://
 
 - [Funciones principales](#funciones-principales)
 - [Instalacion](#instalacion)
-- [Primeros pasos](#primeros-pasos)
 - [Configuracion global](#configuracion-global)
+- [Primeros pasos](#primeros-pasos)
 - [Como se decide cada envio](#como-se-decide-cada-envio)
 - [Referencia de `notifier_hub.send`](#referencia-de-notifier_hubsend)
 - [Guias por canal](#guias-por-canal)
@@ -89,62 +89,6 @@ El formulario de configuracion esta organizado en estas secciones:
 - Phone
 - Notifications
 - Auto Volume
-
-## Primeros pasos
-
-Notifier Hub se usa llamando al servicio `notifier_hub.send` desde una automatizacion, un script o:
-
-```text
-Herramientas para desarrolladores > Acciones
-```
-
-Antes de enviar mensajes, configura desde la UI los servicios `notify.*` y los reproductores Alexa o Google/Cast que quieras utilizar.
-
-### Notificacion de texto
-
-`notify: true` usa los servicios configurados globalmente en `notify_services`.
-
-```yaml
-action: notifier_hub.send
-data:
-  title: "Puerta"
-  message: "Se ha abierto la puerta principal"
-  notify: true
-```
-
-### Texto y Alexa
-
-```yaml
-action: notifier_hub.send
-data:
-  title: "Lavadora"
-  message: "La lavadora ha terminado"
-  notify: true
-  alexa: true
-```
-
-### Google/Cast
-
-```yaml
-action: notifier_hub.send
-data:
-  message: "Hay alguien en la puerta"
-  google: true
-```
-
-### Mensaje urgente
-
-```yaml
-action: notifier_hub.send
-data:
-  title: "Alarma"
-  message: "Alarma activada"
-  notify: true
-  alexa: true
-  priority: true
-```
-
-`priority: true` permite saltarse interruptores, filtro de ubicacion y modo no molestar. Consulta [Prioridad](#prioridad) antes de usarlo con llamadas telefonicas.
 
 ## Configuracion global
 
@@ -233,6 +177,62 @@ Estos cambios permanecen en memoria hasta que se recargue la configuracion o se 
 `sip_server_name` solo se configura globalmente: no se puede sobrescribir por mensaje.
 
 Si `speech_home_only` esta activo, los mensajes de voz sin `location` explicito se comportan como si incluyeran `location: home`. Un valor `location` enviado con el mensaje tiene prioridad.
+
+## Primeros pasos
+
+Notifier Hub se usa llamando al servicio `notifier_hub.send` desde una automatizacion, un script o:
+
+```text
+Herramientas para desarrolladores > Acciones
+```
+
+Antes de enviar mensajes, configura desde la UI los servicios `notify.*` y los reproductores Alexa o Google/Cast que quieras utilizar.
+
+### Notificacion de texto
+
+`notify: true` usa los servicios configurados globalmente en `notify_services`.
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Puerta"
+  message: "Se ha abierto la puerta principal"
+  notify: true
+```
+
+### Texto y Alexa
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Lavadora"
+  message: "La lavadora ha terminado"
+  notify: true
+  alexa: true
+```
+
+### Google/Cast
+
+```yaml
+action: notifier_hub.send
+data:
+  message: "Hay alguien en la puerta"
+  google: true
+```
+
+### Mensaje urgente
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Alarma"
+  message: "Alarma activada"
+  notify: true
+  alexa: true
+  priority: true
+```
+
+`priority: true` permite saltarse interruptores, filtro de ubicacion y modo no molestar. Consulta [Prioridad](#prioridad) antes de usarlo con llamadas telefonicas.
 
 ## Como se decide cada envio
 
@@ -687,13 +687,11 @@ lovelace:
 
 Si no usas `install_dashboard`, puedes copiar manualmente `notifier_hub_dashboard.yaml` a `/config/notifier_hub_dashboard.yaml` y registrar el mismo bloque.
 
-Tambien se incluye una tarjeta compacta de ejemplo en:
+### Ejemplo De Tarjeta Compacta
 
-```text
-samples/notifier_hub_compact_card.yaml
-```
+Hay una tarjeta Lovelace compacta lista para usar en [samples/notifier_hub_compact_card_no_browser_mod_es.yaml](samples/notifier_hub_compact_card_no_browser_mod_es.yaml). Esta pensada para pegarla dentro de `cards:` en una vista Lovelace existente y no requiere Browser Mod.
 
-Esa tarjeta esta pensada para pegarla dentro de `cards:` en una vista Lovelace existente. Usa las mismas entidades de Notifier Hub y muestra controles rapidos, Auto Volume, DND manual, DND durante la noche, estado de Alexa/Google y envio de mensajes desde el dashboard.
+![Vista previa de la tarjeta compacta de Notifier Hub](docs/images/notifier_hub_compact_card_preview_es.png)
 
 ## Entidades creadas
 

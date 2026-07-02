@@ -1,17 +1,4 @@
 {
-  "runtime": {
-    "dashboard_install": {
-      "title": "Painel do Notifier Hub",
-      "message": "O painel do Notifier Hub foi copiado para `/config/notifier_hub_dashboard.yaml`.\n\nPara exibi-lo na barra lateral, adicione isto ao `configuration.yaml` e reinicie o Home Assistant:\n\n```yaml\nlovelace:\n  dashboards:\n    notifier-hub:\n      mode: yaml\n      title: Notifier Hub\n      icon: mdi:bell-ring\n      show_in_sidebar: true\n      filename: notifier_hub_dashboard.yaml\n```"
-    },
-    "ha_event": {
-      "started": "O Home Assistant está em operação.",
-      "stop": "O Home Assistant está parando.",
-      "final_write": "O Home Assistant concluiu a gravação final.",
-      "close": "O Home Assistant está fechando.",
-      "restart": "Reinício manual do Home Assistant solicitado."
-    }
-  },
   "entity": {
     "sensor": {
       "day_period": {

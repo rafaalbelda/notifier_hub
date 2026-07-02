@@ -670,15 +670,15 @@ Si `switch.notifier_hub_night_dnd` esta activo, los periodos `Noche` y `Altas ho
 
 ## Dashboard
 
-El archivo `notifier_hub_dashboard.yaml` incluye un panel Lovelace con estado, actividad TTS, botones de prueba, canales y controles de Auto Volume.
+La integracion incluye un panel Lovelace con estado, actividad TTS, botones de prueba, canales y controles de Auto Volume, disponible en ingles (`notifier_hub_dashboard.en.yaml`), español (`notifier_hub_dashboard.es.yaml`), portugues europeo (`notifier_hub_dashboard.pt.yaml`) y portugues de Brasil (`notifier_hub_dashboard.pt-BR.yaml`).
 
-La opcion `install_dashboard` copia automaticamente el panel a:
+La opcion `install_dashboard` elige automaticamente el archivo que coincide con el idioma de tu instancia de Home Assistant (`hass.config.language`, con ingles como idioma de respaldo si no hay coincidencia) y lo copia a:
 
 ```text
 /config/notifier_hub_dashboard.yaml
 ```
 
-Tambien crea una notificacion persistente con el bloque que debes añadir a `configuration.yaml`:
+Tambien crea una notificacion persistente, en el mismo idioma, con el bloque que debes añadir a `configuration.yaml`:
 
 ```yaml
 lovelace:
@@ -691,7 +691,7 @@ lovelace:
       filename: notifier_hub_dashboard.yaml
 ```
 
-Si no usas `install_dashboard`, puedes copiar manualmente `notifier_hub_dashboard.yaml` a `/config/notifier_hub_dashboard.yaml` y registrar el mismo bloque.
+Si no usas `install_dashboard`, puedes copiar manualmente uno de los archivos `notifier_hub_dashboard.<lang>.yaml` a `/config/notifier_hub_dashboard.yaml` y registrar el mismo bloque.
 
 ### Ejemplo De Tarjeta Compacta
 

@@ -60,3 +60,119 @@ DEFAULT_HA_SIP_ADDON = "c7744bff_ha-sip"
 SERVICE_SEND = "send"
 SERVICE_SET_CONFIG = "set_config"
 EVENT_NOTIFIER = "notifier"
+
+DASHBOARD_DEFAULT_LANGUAGE = "en"
+DASHBOARD_AVAILABLE_LANGUAGES = ("en", "es", "pt", "pt-BR")
+
+# Keyed by the resolved dashboard language (see DASHBOARD_AVAILABLE_LANGUAGES).
+# Used both for the dashboard YAML file selection and for the strings below,
+# since hass.config.language is the only per-installation language signal
+# available outside of the translations/ catalog (which HA only loads for
+# config/options flows and entity names, not for ad-hoc runtime messages).
+DASHBOARD_INSTALL_TITLES = {
+    "en": "Notifier Hub dashboard",
+    "es": "Panel de Notifier Hub",
+    "pt": "Painel do Notifier Hub",
+    "pt-BR": "Painel do Notifier Hub",
+}
+DASHBOARD_INSTALL_MESSAGES = {
+    "en": (
+        "The Notifier Hub dashboard has been copied to `/config/notifier_hub_dashboard.yaml`.\n\n"
+        "To show it in the sidebar, add this to `configuration.yaml` and restart Home Assistant:\n\n"
+        "```yaml\n"
+        "lovelace:\n"
+        "  dashboards:\n"
+        "    notifier-hub:\n"
+        "      mode: yaml\n"
+        "      title: Notifier Hub\n"
+        "      icon: mdi:bell-ring\n"
+        "      show_in_sidebar: true\n"
+        "      filename: notifier_hub_dashboard.yaml\n"
+        "```"
+    ),
+    "es": (
+        "El dashboard de Notifier Hub se ha copiado a `/config/notifier_hub_dashboard.yaml`.\n\n"
+        "Para mostrarlo en la barra lateral, anade esto a `configuration.yaml` y reinicia Home Assistant:\n\n"
+        "```yaml\n"
+        "lovelace:\n"
+        "  dashboards:\n"
+        "    notifier-hub:\n"
+        "      mode: yaml\n"
+        "      title: Notifier Hub\n"
+        "      icon: mdi:bell-ring\n"
+        "      show_in_sidebar: true\n"
+        "      filename: notifier_hub_dashboard.yaml\n"
+        "```"
+    ),
+    "pt": (
+        "O painel do Notifier Hub foi copiado para `/config/notifier_hub_dashboard.yaml`.\n\n"
+        "Para o mostrar na barra lateral, adicione isto ao `configuration.yaml` e reinicie o Home Assistant:\n\n"
+        "```yaml\n"
+        "lovelace:\n"
+        "  dashboards:\n"
+        "    notifier-hub:\n"
+        "      mode: yaml\n"
+        "      title: Notifier Hub\n"
+        "      icon: mdi:bell-ring\n"
+        "      show_in_sidebar: true\n"
+        "      filename: notifier_hub_dashboard.yaml\n"
+        "```"
+    ),
+    "pt-BR": (
+        "O painel do Notifier Hub foi copiado para `/config/notifier_hub_dashboard.yaml`.\n\n"
+        "Para exibi-lo na barra lateral, adicione isto ao `configuration.yaml` e reinicie o Home Assistant:\n\n"
+        "```yaml\n"
+        "lovelace:\n"
+        "  dashboards:\n"
+        "    notifier-hub:\n"
+        "      mode: yaml\n"
+        "      title: Notifier Hub\n"
+        "      icon: mdi:bell-ring\n"
+        "      show_in_sidebar: true\n"
+        "      filename: notifier_hub_dashboard.yaml\n"
+        "```"
+    ),
+}
+
+# Home Assistant lifecycle event notification bodies, keyed the same way.
+HA_EVENT_MESSAGES = {
+    "en": {
+        "started": "Home Assistant is running.",
+        "stop": "Home Assistant is stopping.",
+        "final_write": "Home Assistant has completed the final write.",
+        "close": "Home Assistant is closing.",
+        "restart": "Manual Home Assistant restart requested.",
+    },
+    "es": {
+        "started": "Home Assistant esta operativo.",
+        "stop": "Home Assistant se esta deteniendo.",
+        "final_write": "Home Assistant ha completado la escritura final.",
+        "close": "Home Assistant esta cerrando.",
+        "restart": "Reinicio manual de Home Assistant solicitado.",
+    },
+    "pt": {
+        "started": "O Home Assistant está operacional.",
+        "stop": "O Home Assistant está a parar.",
+        "final_write": "O Home Assistant concluiu a escrita final.",
+        "close": "O Home Assistant está a fechar.",
+        "restart": "Reinício manual do Home Assistant solicitado.",
+    },
+    "pt-BR": {
+        "started": "O Home Assistant está em operação.",
+        "stop": "O Home Assistant está parando.",
+        "final_write": "O Home Assistant concluiu a gravação final.",
+        "close": "O Home Assistant está fechando.",
+        "restart": "Reinício manual do Home Assistant solicitado.",
+    },
+}
+
+
+def resolve_dashboard_language(language: str) -> str:
+    """Resolve a hass.config.language value to one of DASHBOARD_AVAILABLE_LANGUAGES."""
+    if language in DASHBOARD_AVAILABLE_LANGUAGES:
+        return language
+    primary = (language or "").split("-")[0]
+    for candidate in DASHBOARD_AVAILABLE_LANGUAGES:
+        if candidate.split("-")[0] == primary:
+            return candidate
+    return DASHBOARD_DEFAULT_LANGUAGE

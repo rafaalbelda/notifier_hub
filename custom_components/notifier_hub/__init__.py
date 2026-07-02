@@ -51,6 +51,11 @@ from .const import (
     CONF_TEXT_NOTIFICATIONS,
     CONF_SIP_SERVER_NAME,
     CONF_TTS_WAIT_TIME,
+    DASHBOARD_INSTALL_MESSAGES,
+    DASHBOARD_INSTALL_TITLES,
+    DASHBOARD_DEFAULT_LANGUAGE,
+    HA_EVENT_MESSAGES,
+    resolve_dashboard_language,
     DEFAULT_LANGUAGE,
     DEFAULT_PERSONAL_ASSISTANT,
     DEFAULT_SIP_SERVER_NAME,
@@ -291,7 +296,8 @@ class NotifierHub:
     async def async_install_dashboard(self) -> None:
         if not self.config.get(CONF_INSTALL_DASHBOARD, True):
             return
-        source = Path(__file__).with_name("notifier_hub_dashboard.yaml")
+        language = resolve_dashboard_language(self.hass.config.language)
+        source = Path(__file__).with_name(f"notifier_hub_dashboard.{language}.yaml")
         if not source.exists():
             _LOGGER.warning("Notifier Hub dashboard source not found: %s", source)
             return
@@ -304,21 +310,8 @@ class NotifierHub:
             "create",
             {
                 "notification_id": "notifier_hub_dashboard_install",
-                "title": "Notifier Hub dashboard",
-                "message": (
-                    "El dashboard de Notifier Hub se ha copiado a `/config/notifier_hub_dashboard.yaml`.\n\n"
-                    "Para mostrarlo en la barra lateral, anade esto a `configuration.yaml` y reinicia Home Assistant:\n\n"
-                    "```yaml\n"
-                    "lovelace:\n"
-                    "  dashboards:\n"
-                    "    notifier-hub:\n"
-                    "      mode: yaml\n"
-                    "      title: Notifier Hub\n"
-                    "      icon: mdi:bell-ring\n"
-                    "      show_in_sidebar: true\n"
-                    "      filename: notifier_hub_dashboard.yaml\n"
-                    "```"
-                ),
+                "title": DASHBOARD_INSTALL_TITLES.get(language, DASHBOARD_INSTALL_TITLES[DASHBOARD_DEFAULT_LANGUAGE]),
+                "message": DASHBOARD_INSTALL_MESSAGES.get(language, DASHBOARD_INSTALL_MESSAGES[DASHBOARD_DEFAULT_LANGUAGE]),
             },
             blocking=False,
         )
@@ -552,17 +545,22 @@ class NotifierHub:
             return
         await self.dispatch(data)
 
+    def _ha_event_message(self, key: str) -> str:
+        language = resolve_dashboard_language(self.hass.config.language)
+        messages = HA_EVENT_MESSAGES.get(language, HA_EVENT_MESSAGES[DASHBOARD_DEFAULT_LANGUAGE])
+        return messages[key]
+
     async def _handle_ha_started(self, event) -> None:
-        await self._send_ha_event_notification("HomeAssistant Start!", "Home Assistant esta operativo.")
+        await self._send_ha_event_notification("HomeAssistant Start!", self._ha_event_message("started"))
 
     async def _handle_ha_stop(self, event) -> None:
-        await self._send_ha_event_notification("HomeAssistant Stop!", "Home Assistant se esta deteniendo.")
+        await self._send_ha_event_notification("HomeAssistant Stop!", self._ha_event_message("stop"))
 
     async def _handle_ha_final_write(self, event) -> None:
-        await self._send_ha_event_notification("HomeAssistant Final Write!", "Home Assistant ha completado la escritura final.")
+        await self._send_ha_event_notification("HomeAssistant Final Write!", self._ha_event_message("final_write"))
 
     async def _handle_ha_close(self, event) -> None:
-        await self._send_ha_event_notification("HomeAssistant Close!", "Home Assistant esta cerrando.")
+        await self._send_ha_event_notification("HomeAssistant Close!", self._ha_event_message("close"))
 
     async def _handle_ha_call_service(self, event) -> None:
         data = event.data or {}
@@ -570,7 +568,7 @@ class NotifierHub:
             return
         service = data.get("service", data.get("action", ""))
         if service == "restart":
-            await self._send_ha_event_notification("HomeAssistant Restart!", "Reinicio manual de Home Assistant solicitado.")
+            await self._send_ha_event_notification("HomeAssistant Restart!", self._ha_event_message("restart"))
 
     async def _send_ha_event_notification(self, title: str, message: str) -> None:
         if not self.config.get(CONF_HA_EVENT_NOTIFICATIONS, True):

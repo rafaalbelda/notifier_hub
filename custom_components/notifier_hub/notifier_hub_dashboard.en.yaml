@@ -1,0 +1,194 @@
+title: Notifier Hub
+views:
+  - title: Notifier Hub
+    path: notifier-hub
+    icon: mdi:bell-ring
+    type: masonry
+    badges: []
+    cards:
+      - type: markdown
+        content: |
+          # {{ states('sensor.notifier_hub_personal_assistant') }}
+
+      - type: entities
+        title: Status
+        show_header_toggle: false
+        state_color: true
+        entities:
+          - entity: sensor.notifier_hub_debug
+            name: Debug
+          - entity: sensor.notifier_hub_last_message
+            name: Last message
+          - entity: sensor.notifier_hub_personal_assistant
+            name: Assistant
+          - entity: sensor.notifier_hub_home_people
+            name: People at home
+          - type: attribute
+            entity: sensor.notifier_hub_home_people
+            attribute: home_person_names
+            name: Who is home
+          - entity: binary_sensor.notifier_hub_home_occupied
+            name: House occupied
+          - entity: binary_sensor.notifier_hub_alexa_speak
+            name: Alexa speaking
+          - entity: binary_sensor.notifier_hub_google_speak
+            name: Google speaking
+
+      - type: entities
+        title: Channels
+        show_header_toggle: false
+        state_color: true
+        entities:
+          - entity: switch.notifier_hub_text_notifications
+            name: Text
+          - entity: switch.notifier_hub_screen_notifications
+            name: Persistent
+          - entity: switch.notifier_hub_speech_notifications
+            name: Voice
+          - entity: switch.notifier_hub_speech_home_only
+            name: Voice only if someone is home
+          - entity: switch.notifier_hub_alexa_notifications
+            name: Alexa
+          - entity: switch.notifier_hub_google_notifications
+            name: Google
+          - entity: switch.notifier_hub_phone_notifications
+            name: Phone
+          - entity: switch.notifier_hub_home_assistant_event_notifications
+            name: HA events
+          - entity: switch.notifier_hub_auto_volume
+            name: Auto volume
+
+      - type: entities
+        title: Modes
+        show_header_toggle: false
+        state_color: true
+        entities:
+          - entity: switch.notifier_hub_dnd
+            name: Do not disturb
+          - entity: switch.notifier_hub_night_dnd
+            name: DND during the night
+          - entity: switch.notifier_hub_guest_mode
+            name: Guests
+          - entity: switch.notifier_hub_priority_message
+            name: Priority for next message
+
+      - type: entities
+        title: Auto Volume
+        show_header_toggle: false
+        entities:
+          - entity: sensor.notifier_hub_day_period
+            name: Current period
+          - entity: sensor.notifier_hub_day_period_volume
+            name: Current volume
+          - entity: time.notifier_hub_altas_horas_start
+            name: Late night start
+          - entity: number.notifier_hub_altas_horas_volume
+            name: Late night volume
+          - entity: time.notifier_hub_primera_hora_start
+            name: Early morning start
+          - entity: number.notifier_hub_primera_hora_volume
+            name: Early morning volume
+          - entity: time.notifier_hub_manana_start
+            name: Morning start
+          - entity: number.notifier_hub_manana_volume
+            name: Morning volume
+          - entity: time.notifier_hub_tarde_start
+            name: Afternoon start
+          - entity: number.notifier_hub_tarde_volume
+            name: Afternoon volume
+          - entity: time.notifier_hub_atardecer_start
+            name: Evening start
+          - entity: number.notifier_hub_atardecer_volume
+            name: Evening volume
+          - entity: time.notifier_hub_noche_start
+            name: Night start
+          - entity: number.notifier_hub_noche_volume
+            name: Night volume
+
+      - type: history-graph
+        title: TTS activity
+        hours_to_show: 6
+        entities:
+          - entity: binary_sensor.notifier_hub_alexa_speak
+            name: Alexa
+          - entity: binary_sensor.notifier_hub_google_speak
+            name: Google
+
+      - type: vertical-stack
+        cards:
+          - type: markdown
+            content: |
+              ## Quick tests
+              Write a free-text message or use the test buttons.
+
+          - type: entities
+            title: Send message
+            show_header_toggle: false
+            entities:
+              - entity: text.notifier_hub_dashboard_message
+                name: Message
+              - entity: button.notifier_hub_send_dashboard_message
+                name: Send
+
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: Text
+                icon: mdi:message-text
+                tap_action:
+                  action: call-service
+                  service: notifier_hub.send
+                  data:
+                    title: Dashboard
+                    message: Notification test from Notifier Hub
+                    notify: true
+
+              - type: button
+                name: Priority
+                icon: mdi:alert-circle
+                tap_action:
+                  action: call-service
+                  service: notifier_hub.send
+                  data:
+                    title: Priority
+                    message: Priority test message from Notifier Hub
+                    notify: true
+                    priority: true
+
+          - type: horizontal-stack
+            cards:
+              - type: button
+                name: Alexa
+                icon: mdi:speaker-message
+                tap_action:
+                  action: call-service
+                  service: notifier_hub.send
+                  data:
+                    title: Alexa
+                    message: Voice test from Notifier Hub
+                    notify: false
+                    alexa: true
+
+              - type: button
+                name: Google
+                icon: mdi:google-assistant
+                tap_action:
+                  action: call-service
+                  service: notifier_hub.send
+                  data:
+                    title: Google
+                    message: Voice test from Notifier Hub
+                    notify: false
+                    google: true
+
+      - type: logbook
+        title: Recent events
+        hours_to_show: 6
+        entities:
+          - sensor.notifier_hub_debug
+          - sensor.notifier_hub_last_message
+          - sensor.notifier_hub_personal_assistant
+          - sensor.notifier_hub_home_people
+          - binary_sensor.notifier_hub_home_occupied
+          - binary_sensor.notifier_hub_alexa_speak
+          - binary_sensor.notifier_hub_google_speak

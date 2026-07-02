@@ -6,6 +6,7 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.data_entry_flow import section
 from homeassistant.core import callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import selector
 
 from .const import (
@@ -52,6 +53,11 @@ SECTION_GOOGLE = "google_section"
 SECTION_PHONE = "phone_section"
 SECTION_AUTO_VOLUME = "auto_volume_section"
 
+CONF_NOTIFY_SERVICE_TARGETS = "notify_service_targets"
+CONF_NOTIFY_ENTITY_TARGETS = "notify_entity_targets"
+CONF_HA_EVENT_NOTIFY_SERVICE_TARGETS = "ha_event_notify_service_targets"
+CONF_HA_EVENT_NOTIFY_ENTITY_TARGETS = "ha_event_notify_entity_targets"
+
 
 class NotifierHubConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -97,6 +103,12 @@ def _notify_service_options(hass) -> list[str]:
     return [f"notify.{service}" for service in sorted(services)]
 
 
+def _notify_entity_options(hass) -> list[str]:
+    entity_options = set(hass.states.async_entity_ids("notify"))
+    entity_options.update(entry.entity_id for entry in er.async_get(hass).entities.values() if entry.domain == "notify")
+    return sorted(entity_options)
+
+
 def _as_list(value: Any) -> list[str]:
     if value is None or value == "":
         return []
@@ -114,13 +126,54 @@ def _flatten_sections(data: dict[str, Any]) -> dict[str, Any]:
             flattened.update(value)
         else:
             flattened[key] = value
+    _merge_notify_targets(flattened, CONF_NOTIFY_SERVICES, CONF_NOTIFY_SERVICE_TARGETS, CONF_NOTIFY_ENTITY_TARGETS)
+    _merge_notify_targets(
+        flattened,
+        CONF_HA_EVENT_NOTIFY_SERVICES,
+        CONF_HA_EVENT_NOTIFY_SERVICE_TARGETS,
+        CONF_HA_EVENT_NOTIFY_ENTITY_TARGETS,
+    )
     return flattened
+
+
+def _merge_notify_targets(data: dict[str, Any], target_key: str, service_key: str, entity_key: str) -> None:
+    if service_key not in data and entity_key not in data:
+        return
+    combined = _as_list(data.pop(service_key, [])) + _as_list(data.pop(entity_key, []))
+    data[target_key] = list(dict.fromkeys(combined))
+
+
+def _split_notify_targets(hass, targets: list[str], service_options: list[str]) -> tuple[list[str], list[str]]:
+    services: list[str] = []
+    entities: list[str] = []
+    service_set = set(service_options)
+    entity_set = set(_notify_entity_options(hass))
+    for target in targets:
+        if target in entity_set:
+            entities.append(target)
+        elif target in service_set:
+            services.append(target)
+        elif target.strip().lower().startswith("notify."):
+            entities.append(target)
+        else:
+            services.append(target)
+    return services, entities
 
 
 def _schema(hass, defaults: dict[str, Any] | None = None):
     defaults = defaults or {}
     notify_services = _as_list(defaults.get(CONF_NOTIFY_SERVICES, []))
-    notify_options = sorted(set(_notify_service_options(hass)) | set(notify_services))
+    ha_event_notify_services = _as_list(defaults.get(CONF_HA_EVENT_NOTIFY_SERVICES, []))
+    notify_service_options = _notify_service_options(hass)
+    notify_entity_options = _notify_entity_options(hass)
+    notify_service_targets, notify_entity_targets = _split_notify_targets(hass, notify_services, notify_service_options)
+    ha_event_notify_service_targets, ha_event_notify_entity_targets = _split_notify_targets(
+        hass,
+        ha_event_notify_services,
+        notify_service_options,
+    )
+    notify_service_options = sorted(set(notify_service_options) | set(notify_service_targets) | set(ha_event_notify_service_targets))
+    notify_entity_options = sorted(set(notify_entity_options) | set(notify_entity_targets) | set(ha_event_notify_entity_targets))
     location_tracker = defaults.get("location_tracker", "")
 
     def default(key: str, fallback: Any) -> Any:
@@ -173,18 +226,27 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                             CONF_SCREEN_NOTIFICATIONS,
                             default=default(CONF_SCREEN_NOTIFICATIONS, True),
                         ): selector.BooleanSelector(),
-                        vol.Optional(CONF_NOTIFY_SERVICES, default=notify_services): selector.SelectSelector(
-                            selector.SelectSelectorConfig(options=notify_options, multiple=True, custom_value=True)
+                        vol.Optional(CONF_NOTIFY_SERVICE_TARGETS, default=notify_service_targets): selector.SelectSelector(
+                            selector.SelectSelectorConfig(options=notify_service_options, multiple=True, custom_value=True)
+                        ),
+                        vol.Optional(CONF_NOTIFY_ENTITY_TARGETS, default=notify_entity_targets): selector.SelectSelector(
+                            selector.SelectSelectorConfig(options=notify_entity_options, multiple=True, custom_value=True)
                         ),
                         vol.Optional(
                             CONF_HA_EVENT_NOTIFICATIONS,
                             default=default(CONF_HA_EVENT_NOTIFICATIONS, True),
                         ): selector.BooleanSelector(),
                         vol.Optional(
-                            CONF_HA_EVENT_NOTIFY_SERVICES,
-                            default=_as_list(default(CONF_HA_EVENT_NOTIFY_SERVICES, [])),
+                            CONF_HA_EVENT_NOTIFY_SERVICE_TARGETS,
+                            default=ha_event_notify_service_targets,
                         ): selector.SelectSelector(
-                            selector.SelectSelectorConfig(options=notify_options, multiple=True, custom_value=True)
+                            selector.SelectSelectorConfig(options=notify_service_options, multiple=True, custom_value=True)
+                        ),
+                        vol.Optional(
+                            CONF_HA_EVENT_NOTIFY_ENTITY_TARGETS,
+                            default=ha_event_notify_entity_targets,
+                        ): selector.SelectSelector(
+                            selector.SelectSelectorConfig(options=notify_entity_options, multiple=True, custom_value=True)
                         ),
                     }
                 ),

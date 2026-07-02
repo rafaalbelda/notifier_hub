@@ -67,8 +67,10 @@
           "persons": "Persons",
           "location_tracker": "Location tracker",
           "text_events_section": "Text and events",
-          "notify_services": "Notify services",
-          "ha_event_notify_services": "Home Assistant event notify services",
+          "notify_service_targets": "Notify services",
+          "notify_entity_targets": "Notify entities",
+          "ha_event_notify_service_targets": "Home Assistant event notify services",
+          "ha_event_notify_entity_targets": "Home Assistant event notify entities",
           "alexa_section": "Alexa",
           "alexa_notifications": "Alexa notifications",
           "alexa_players": "Alexa players",
@@ -102,8 +104,10 @@
           "persons": "People considered for presence-aware notification routing.",
           "location_tracker": "Fallback entity used to decide if notifications should be sent when no persons are selected.",
           "text_events_section": "Settings for text notifications, persistent notifications and Home Assistant events.",
-          "notify_services": "Default notify services used for normal text notifications.",
-          "ha_event_notify_services": "Notify services used only for Home Assistant lifecycle events.",
+          "notify_service_targets": "Classic notify services used for normal text notifications.",
+          "notify_entity_targets": "Entity-based notify targets used for normal text notifications via notify.send_message.",
+          "ha_event_notify_service_targets": "Classic notify services used only for Home Assistant lifecycle events.",
+          "ha_event_notify_entity_targets": "Entity-based notify targets used only for Home Assistant lifecycle events via notify.send_message.",
           "alexa_section": "Alexa announcement configuration.",
           "alexa_notifications": "Enables or disables Alexa announcements from Notifier Hub.",
           "alexa_players": "Alexa media players that can receive voice announcements.",
@@ -158,16 +162,20 @@
             "data": {
               "text_notifications": "Text notifications",
               "screen_notifications": "Persistent notifications",
-              "notify_services": "Notify services",
+              "notify_service_targets": "Notify services",
+              "notify_entity_targets": "Notify entities",
               "ha_event_notifications": "Home Assistant event notifications",
-              "ha_event_notify_services": "Home Assistant event notify services"
+              "ha_event_notify_service_targets": "Home Assistant event notify services",
+              "ha_event_notify_entity_targets": "Home Assistant event notify entities"
             },
             "data_description": {
               "text_notifications": "Allows normal notify service messages.",
               "screen_notifications": "Allows persistent notifications in Home Assistant.",
-              "notify_services": "Default notify services used for normal text notifications.",
+              "notify_service_targets": "Classic notify services used for normal text notifications.",
+              "notify_entity_targets": "Entity-based notify targets used for normal text notifications via notify.send_message.",
               "ha_event_notifications": "Sends notifications for Home Assistant start, stop, restart and related events.",
-              "ha_event_notify_services": "Notify services used only for Home Assistant lifecycle events."
+              "ha_event_notify_service_targets": "Classic notify services used only for Home Assistant lifecycle events.",
+              "ha_event_notify_entity_targets": "Entity-based notify targets used only for Home Assistant lifecycle events via notify.send_message."
             }
           },
           "voice_section": {
@@ -251,8 +259,10 @@
           "persons": "Persons",
           "location_tracker": "Location tracker",
           "text_events_section": "Text and events",
-          "notify_services": "Notify services",
-          "ha_event_notify_services": "Home Assistant event notify services",
+          "notify_service_targets": "Notify services",
+          "notify_entity_targets": "Notify entities",
+          "ha_event_notify_service_targets": "Home Assistant event notify services",
+          "ha_event_notify_entity_targets": "Home Assistant event notify entities",
           "alexa_section": "Alexa",
           "alexa_notifications": "Alexa notifications",
           "alexa_players": "Alexa players",
@@ -286,8 +296,10 @@
           "persons": "People considered for presence-aware notification routing.",
           "location_tracker": "Fallback entity used to decide if notifications should be sent when no persons are selected.",
           "text_events_section": "Settings for text notifications, persistent notifications and Home Assistant events.",
-          "notify_services": "Default notify services used for normal text notifications.",
-          "ha_event_notify_services": "Notify services used only for Home Assistant lifecycle events.",
+          "notify_service_targets": "Classic notify services used for normal text notifications.",
+          "notify_entity_targets": "Entity-based notify targets used for normal text notifications via notify.send_message.",
+          "ha_event_notify_service_targets": "Classic notify services used only for Home Assistant lifecycle events.",
+          "ha_event_notify_entity_targets": "Entity-based notify targets used only for Home Assistant lifecycle events via notify.send_message.",
           "alexa_section": "Alexa announcement configuration.",
           "alexa_notifications": "Enables or disables Alexa announcements from Notifier Hub.",
           "alexa_players": "Alexa media players that can receive voice announcements.",
@@ -342,16 +354,20 @@
             "data": {
               "text_notifications": "Text notifications",
               "screen_notifications": "Persistent notifications",
-              "notify_services": "Notify services",
+              "notify_service_targets": "Notify services",
+              "notify_entity_targets": "Notify entities",
               "ha_event_notifications": "Home Assistant event notifications",
-              "ha_event_notify_services": "Home Assistant event notify services"
+              "ha_event_notify_service_targets": "Home Assistant event notify services",
+              "ha_event_notify_entity_targets": "Home Assistant event notify entities"
             },
             "data_description": {
               "text_notifications": "Allows normal notify service messages.",
               "screen_notifications": "Allows persistent notifications in Home Assistant.",
-              "notify_services": "Default notify services used for normal text notifications.",
+              "notify_service_targets": "Classic notify services used for normal text notifications.",
+              "notify_entity_targets": "Entity-based notify targets used for normal text notifications via notify.send_message.",
               "ha_event_notifications": "Sends notifications for Home Assistant start, stop, restart and related events.",
-              "ha_event_notify_services": "Notify services used only for Home Assistant lifecycle events."
+              "ha_event_notify_service_targets": "Classic notify services used only for Home Assistant lifecycle events.",
+              "ha_event_notify_entity_targets": "Entity-based notify targets used only for Home Assistant lifecycle events via notify.send_message."
             }
           },
           "voice_section": {

@@ -1,4 +1,17 @@
 {
+  "runtime": {
+    "dashboard_install": {
+      "title": "Notifier Hub dashboard",
+      "message": "The Notifier Hub dashboard has been copied to `/config/notifier_hub_dashboard.yaml`.\n\nTo show it in the sidebar, add this to `configuration.yaml` and restart Home Assistant:\n\n```yaml\nlovelace:\n  dashboards:\n    notifier-hub:\n      mode: yaml\n      title: Notifier Hub\n      icon: mdi:bell-ring\n      show_in_sidebar: true\n      filename: notifier_hub_dashboard.yaml\n```"
+    },
+    "ha_event": {
+      "started": "Home Assistant is running.",
+      "stop": "Home Assistant is stopping.",
+      "final_write": "Home Assistant has completed the final write.",
+      "close": "Home Assistant is closing.",
+      "restart": "Manual Home Assistant restart requested."
+    }
+  },
   "entity": {
     "sensor": {
       "day_period": {

@@ -11,7 +11,7 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME, Platform
 from homeassistant.core import HomeAssistant, ServiceCall
-from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import config_validation as cv, translation
 from homeassistant.helpers.event import async_track_state_change_event, async_track_time_interval
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import dt as dt_util
@@ -51,10 +51,7 @@ from .const import (
     CONF_TEXT_NOTIFICATIONS,
     CONF_SIP_SERVER_NAME,
     CONF_TTS_WAIT_TIME,
-    DASHBOARD_INSTALL_MESSAGES,
-    DASHBOARD_INSTALL_TITLES,
-    DASHBOARD_DEFAULT_LANGUAGE,
-    HA_EVENT_MESSAGES,
+    TRANSLATION_CATEGORY_RUNTIME,
     resolve_dashboard_language,
     DEFAULT_LANGUAGE,
     DEFAULT_PERSONAL_ASSISTANT,
@@ -293,6 +290,15 @@ class NotifierHub:
         self.set_debug("on", {})
         await self.async_apply_auto_volume()
 
+    async def _async_runtime_string(self, key: str) -> str:
+        strings = await translation.async_get_translations(
+            self.hass,
+            self.hass.config.language,
+            TRANSLATION_CATEGORY_RUNTIME,
+            integrations=[DOMAIN],
+        )
+        return strings[f"component.{DOMAIN}.{TRANSLATION_CATEGORY_RUNTIME}.{key}"]
+
     async def async_install_dashboard(self) -> None:
         if not self.config.get(CONF_INSTALL_DASHBOARD, True):
             return
@@ -310,8 +316,8 @@ class NotifierHub:
             "create",
             {
                 "notification_id": "notifier_hub_dashboard_install",
-                "title": DASHBOARD_INSTALL_TITLES.get(language, DASHBOARD_INSTALL_TITLES[DASHBOARD_DEFAULT_LANGUAGE]),
-                "message": DASHBOARD_INSTALL_MESSAGES.get(language, DASHBOARD_INSTALL_MESSAGES[DASHBOARD_DEFAULT_LANGUAGE]),
+                "title": await self._async_runtime_string("dashboard_install.title"),
+                "message": await self._async_runtime_string("dashboard_install.message"),
             },
             blocking=False,
         )
@@ -545,22 +551,20 @@ class NotifierHub:
             return
         await self.dispatch(data)
 
-    def _ha_event_message(self, key: str) -> str:
-        language = resolve_dashboard_language(self.hass.config.language)
-        messages = HA_EVENT_MESSAGES.get(language, HA_EVENT_MESSAGES[DASHBOARD_DEFAULT_LANGUAGE])
-        return messages[key]
+    async def _ha_event_message(self, key: str) -> str:
+        return await self._async_runtime_string(f"ha_event.{key}")
 
     async def _handle_ha_started(self, event) -> None:
-        await self._send_ha_event_notification("HomeAssistant Start!", self._ha_event_message("started"))
+        await self._send_ha_event_notification("HomeAssistant Start!", await self._ha_event_message("started"))
 
     async def _handle_ha_stop(self, event) -> None:
-        await self._send_ha_event_notification("HomeAssistant Stop!", self._ha_event_message("stop"))
+        await self._send_ha_event_notification("HomeAssistant Stop!", await self._ha_event_message("stop"))
 
     async def _handle_ha_final_write(self, event) -> None:
-        await self._send_ha_event_notification("HomeAssistant Final Write!", self._ha_event_message("final_write"))
+        await self._send_ha_event_notification("HomeAssistant Final Write!", await self._ha_event_message("final_write"))
 
     async def _handle_ha_close(self, event) -> None:
-        await self._send_ha_event_notification("HomeAssistant Close!", self._ha_event_message("close"))
+        await self._send_ha_event_notification("HomeAssistant Close!", await self._ha_event_message("close"))
 
     async def _handle_ha_call_service(self, event) -> None:
         data = event.data or {}
@@ -568,7 +572,7 @@ class NotifierHub:
             return
         service = data.get("service", data.get("action", ""))
         if service == "restart":
-            await self._send_ha_event_notification("HomeAssistant Restart!", self._ha_event_message("restart"))
+            await self._send_ha_event_notification("HomeAssistant Restart!", await self._ha_event_message("restart"))
 
     async def _send_ha_event_notification(self, title: str, message: str) -> None:
         if not self.config.get(CONF_HA_EVENT_NOTIFICATIONS, True):

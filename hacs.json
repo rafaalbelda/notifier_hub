@@ -1,4 +1,6 @@
 {
   "name": "Notifier Hub",
-  "render_readme": true
+  "render_readme": true,
+  "homeassistant": "2026.3.2",
+  "hacs": "2.0.5"  
 }

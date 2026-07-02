@@ -41,6 +41,12 @@ Es la conversion nativa de la aplicacion AppDaemon [`Centro Notifiche`](https://
 
 ## Instalacion
 
+### Requisito para Alexa
+
+El canal Alexa de Notifier Hub requiere actualmente el componente personalizado no oficial [Alexa Media Player](https://github.com/alandtse/alexa_media_player). Alexa Media Player proporciona el servicio `notify.alexa_media` y las entidades `media_player.*` que Notifier Hub usa para TTS de Alexa, anuncios, reproduccion multimedia, cambios temporales de volumen y restauracion de volumen.
+
+La integracion oficial Alexa Devices de Home Assistant usa un modelo de notificacion distinto, basado en `notify.send_message` y entidades `notify.*` por dispositivo. Ese modelo no es necesario para el canal Alexa actual.
+
 ### HACS
 
 Puedes instalar Notifier Hub desde HACS como repositorio personalizado:

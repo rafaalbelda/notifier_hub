@@ -10,6 +10,7 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers import selector
 
 from .const import (
+    CONF_ALEXA_NOTIFY_ENTITIES,
     CONF_ALEXA_PLAYERS,
     CONF_GOOGLE_NOTIFY_SERVICE,
     CONF_GOOGLE_PLAYERS,
@@ -280,6 +281,10 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                         vol.Optional(CONF_ALEXA_PLAYERS, default=default(CONF_ALEXA_PLAYERS, [])): selector.EntitySelector(
                             selector.EntitySelectorConfig(domain="media_player", multiple=True)
                         ),
+                        vol.Optional(
+                            CONF_ALEXA_NOTIFY_ENTITIES,
+                            default=default(CONF_ALEXA_NOTIFY_ENTITIES, []),
+                        ): selector.EntitySelector(selector.EntitySelectorConfig(domain="notify", multiple=True)),
                     }
                 ),
                 {"collapsed": False},

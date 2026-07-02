@@ -74,6 +74,7 @@
           "alexa_section": "Alexa",
           "alexa_notifications": "Alexa notifications",
           "alexa_players": "Alexa players",
+          "alexa_notify_entities": "Alexa notify entities",
           "google_section": "Google",
           "google_notifications": "Google notifications",
           "google_players": "Google players",
@@ -111,6 +112,7 @@
           "alexa_section": "Alexa announcement configuration.",
           "alexa_notifications": "Enables or disables Alexa announcements from Notifier Hub.",
           "alexa_players": "Alexa media players that can receive voice announcements.",
+          "alexa_notify_entities": "Alexa Devices notify entities, such as notify.echo_dot_speak or notify.echo_dot_announce.",
           "google_section": "Google or Cast announcement configuration.",
           "google_notifications": "Enables or disables Google/Cast announcements from Notifier Hub.",
           "google_players": "Google or Cast media players that can receive voice announcements.",
@@ -199,11 +201,13 @@
             "name": "Alexa",
             "data": {
               "alexa_notifications": "Alexa notifications",
-              "alexa_players": "Alexa players"
+              "alexa_players": "Alexa players",
+              "alexa_notify_entities": "Alexa notify entities"
             },
             "data_description": {
               "alexa_notifications": "Enables or disables Alexa announcements from Notifier Hub.",
-              "alexa_players": "Alexa media players that can receive voice announcements."
+              "alexa_players": "Alexa media players that can receive voice announcements.",
+              "alexa_notify_entities": "Alexa Devices notify entities, such as notify.echo_dot_speak or notify.echo_dot_announce."
             }
           },
           "google_section": {
@@ -266,6 +270,7 @@
           "alexa_section": "Alexa",
           "alexa_notifications": "Alexa notifications",
           "alexa_players": "Alexa players",
+          "alexa_notify_entities": "Alexa notify entities",
           "google_section": "Google",
           "google_notifications": "Google notifications",
           "google_players": "Google players",
@@ -303,6 +308,7 @@
           "alexa_section": "Alexa announcement configuration.",
           "alexa_notifications": "Enables or disables Alexa announcements from Notifier Hub.",
           "alexa_players": "Alexa media players that can receive voice announcements.",
+          "alexa_notify_entities": "Alexa Devices notify entities, such as notify.echo_dot_speak or notify.echo_dot_announce.",
           "google_section": "Google or Cast announcement configuration.",
           "google_notifications": "Enables or disables Google/Cast announcements from Notifier Hub.",
           "google_players": "Google or Cast media players that can receive voice announcements.",
@@ -391,11 +397,13 @@
             "name": "Alexa",
             "data": {
               "alexa_notifications": "Alexa notifications",
-              "alexa_players": "Alexa players"
+              "alexa_players": "Alexa players",
+              "alexa_notify_entities": "Alexa notify entities"
             },
             "data_description": {
               "alexa_notifications": "Enables or disables Alexa announcements from Notifier Hub.",
-              "alexa_players": "Alexa media players that can receive voice announcements."
+              "alexa_players": "Alexa media players that can receive voice announcements.",
+              "alexa_notify_entities": "Alexa Devices notify entities, such as notify.echo_dot_speak or notify.echo_dot_announce."
             }
           },
           "google_section": {

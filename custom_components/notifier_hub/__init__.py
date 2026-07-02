@@ -20,6 +20,7 @@ from . import helpers as h
 from .alexa_manager import AlexaManager
 from .google_manager import GoogleManager
 from .const import (
+    CONF_ALEXA_NOTIFY_ENTITIES,
     CONF_ALEXA_PLAYERS,
     CONF_GOOGLE_NOTIFY_SERVICE,
     CONF_GOOGLE_PLAYERS,
@@ -91,6 +92,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_PERSONS, default=[]): cv.ensure_list,
                 vol.Optional(CONF_NOTIFY_SERVICES, default=[]): cv.ensure_list,
                 vol.Optional(CONF_ALEXA_PLAYERS, default=[]): cv.ensure_list,
+                vol.Optional(CONF_ALEXA_NOTIFY_ENTITIES, default=[]): cv.ensure_list,
                 vol.Optional(CONF_GOOGLE_PLAYERS, default=[]): cv.ensure_list,
                 vol.Optional(CONF_GOOGLE_TTS_SERVICE, default=DEFAULT_GOOGLE_TTS_SERVICE): cv.string,
                 vol.Optional(CONF_GOOGLE_NOTIFY_SERVICE, default=DEFAULT_GOOGLE_NOTIFY_SERVICE): cv.string,
@@ -227,6 +229,7 @@ class NotifierHub:
         data.setdefault(CONF_PERSONS, [])
         data.setdefault(CONF_NOTIFY_SERVICES, [])
         data.setdefault(CONF_ALEXA_PLAYERS, [])
+        data.setdefault(CONF_ALEXA_NOTIFY_ENTITIES, [])
         data.setdefault(CONF_GOOGLE_PLAYERS, [])
         data.setdefault(CONF_GOOGLE_TTS_SERVICE, DEFAULT_GOOGLE_TTS_SERVICE)
         data.setdefault(CONF_GOOGLE_NOTIFY_SERVICE, DEFAULT_GOOGLE_NOTIFY_SERVICE)
@@ -504,6 +507,7 @@ class NotifierHub:
                     "period": self.state["day_period"],
                     "volume": self.state["day_period_volume"],
                     "alexa_players": h.return_list(self.config.get(CONF_ALEXA_PLAYERS, [])),
+                    "alexa_notify_entities": h.return_list(self.config.get(CONF_ALEXA_NOTIFY_ENTITIES, [])),
                     "google_players": h.return_list(self.config.get(CONF_GOOGLE_PLAYERS, [])),
                     "excluded_players": h.return_list(self.config.get(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, [])),
                 },

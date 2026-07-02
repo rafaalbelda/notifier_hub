@@ -41,11 +41,11 @@ It is a native integration conversion of the AppDaemon app [`Centro Notifiche`](
 
 ## Installation
 
-### Alexa requirement
+### Alexa support
 
-Notifier Hub's Alexa channel currently requires the unofficial [Alexa Media Player](https://github.com/alandtse/alexa_media_player) custom component. Alexa Media Player provides the `notify.alexa_media` service and the `media_player.*` entities that Notifier Hub uses for Alexa TTS, announcements, media playback, temporary volume changes, and volume restore.
+Notifier Hub can use the unofficial [Alexa Media Player](https://github.com/alandtse/alexa_media_player) custom component through `notify.alexa_media` and `media_player.*` entities. This mode supports Alexa TTS, announcements, push notifications, media playback, temporary volume changes, and volume restore.
 
-The official Home Assistant Alexa Devices integration uses a different notification model based on `notify.send_message` and per-device `notify.*` entities. Support for that model is not required for the current Alexa channel.
+Notifier Hub can also use the official Home Assistant Alexa Devices integration through `notify.send_message` and per-device `notify.*` entities, such as `notify.echo_dot_speak` or `notify.echo_dot_announce`. This mode supports speech/announce delivery, but temporary volume changes, volume restore, push notifications, and media playback remain available only through Alexa Media Player media players.
 
 ### HACS
 
@@ -112,6 +112,9 @@ notifier_hub:
   alexa_players:
     - media_player.living_room_echo
     - media_player.kitchen_echo
+  alexa_notify_entities:
+    - notify.living_room_echo_speak
+    - notify.kitchen_echo_announce
   google_players:
     - media_player.living_room_google_home
   google_tts_service: tts.google_en_com
@@ -170,6 +173,7 @@ These changes stay in memory until the configuration is reloaded or the integrat
 |---|---|---|
 | `notify_services` | `notify` | With `notify: true`, the global services are used. A service or list in `notify` replaces the global list for that message. |
 | `alexa_players` | `alexa.media_player` | If the message does not set Alexa players, the global players are used. |
+| `alexa_notify_entities` | `alexa.notify_entity` or `alexa.notify_entities` | If the message does not set Alexa notify entities, the global entities are used. |
 | `google_players` | `google.media_player` or `google.player` | If the message does not set Google/Cast players, the global players are used. |
 | `default_volume` | `alexa.volume` or `google.volume` | Used when there is no explicit volume and `auto_volume` is disabled. |
 | Current `auto_volume` period volume | `alexa.volume` or `google.volume` | When `auto_volume` is enabled, it replaces `default_volume`. An explicit volume has priority over both. |
@@ -389,6 +393,7 @@ When `alexa` is a dictionary, it accepts:
 | Field | Default value | Description |
 |---|---|---|
 | `media_player` | `alexa_players` | Player, list, group, friendly name, or `all`. |
+| `notify_entity` / `notify_entities` | `alexa_notify_entities` | Entity-based Alexa Devices targets called with `notify.send_message`. |
 | `message` | General `message` | Text to play. |
 | `message_tts` | Alexa `message` | Alternative TTS text with priority over `message`. |
 | `title` | General `title` | Title used for push. |

@@ -74,6 +74,7 @@
           "alexa_section": "Alexa",
           "alexa_notifications": "Notificaciones de Alexa",
           "alexa_players": "Reproductores Alexa",
+          "alexa_notify_entities": "Entidades notify de Alexa",
           "google_section": "Google",
           "google_notifications": "Notificaciones de Google",
           "google_players": "Reproductores Google",
@@ -111,6 +112,7 @@
           "alexa_section": "Configuracion de avisos por Alexa.",
           "alexa_notifications": "Activa o desactiva los anuncios de Alexa desde Notifier Hub.",
           "alexa_players": "Reproductores Alexa que pueden recibir avisos por voz.",
+          "alexa_notify_entities": "Entidades notify de Alexa Devices, como notify.echo_dot_speak o notify.echo_dot_announce.",
           "google_section": "Configuracion de avisos por Google o Cast.",
           "google_notifications": "Activa o desactiva los anuncios de Google/Cast desde Notifier Hub.",
           "google_players": "Reproductores Google o Cast que pueden recibir avisos por voz.",
@@ -199,11 +201,13 @@
             "name": "Alexa",
             "data": {
               "alexa_notifications": "Notificaciones de Alexa",
-              "alexa_players": "Reproductores Alexa"
+              "alexa_players": "Reproductores Alexa",
+              "alexa_notify_entities": "Entidades notify de Alexa"
             },
             "data_description": {
               "alexa_notifications": "Activa o desactiva los anuncios de Alexa desde Notifier Hub.",
-              "alexa_players": "Reproductores Alexa que pueden recibir avisos por voz."
+              "alexa_players": "Reproductores Alexa que pueden recibir avisos por voz.",
+              "alexa_notify_entities": "Entidades notify de Alexa Devices, como notify.echo_dot_speak o notify.echo_dot_announce."
             }
           },
           "google_section": {
@@ -266,6 +270,7 @@
           "alexa_section": "Alexa",
           "alexa_notifications": "Notificaciones de Alexa",
           "alexa_players": "Reproductores Alexa",
+          "alexa_notify_entities": "Entidades notify de Alexa",
           "google_section": "Google",
           "google_notifications": "Notificaciones de Google",
           "google_players": "Reproductores Google",
@@ -303,6 +308,7 @@
           "alexa_section": "Configuracion de avisos por Alexa.",
           "alexa_notifications": "Activa o desactiva los anuncios de Alexa desde Notifier Hub.",
           "alexa_players": "Reproductores Alexa que pueden recibir avisos por voz.",
+          "alexa_notify_entities": "Entidades notify de Alexa Devices, como notify.echo_dot_speak o notify.echo_dot_announce.",
           "google_section": "Configuracion de avisos por Google o Cast.",
           "google_notifications": "Activa o desactiva los anuncios de Google/Cast desde Notifier Hub.",
           "google_players": "Reproductores Google o Cast que pueden recibir avisos por voz.",
@@ -391,11 +397,13 @@
             "name": "Alexa",
             "data": {
               "alexa_notifications": "Notificaciones de Alexa",
-              "alexa_players": "Reproductores Alexa"
+              "alexa_players": "Reproductores Alexa",
+              "alexa_notify_entities": "Entidades notify de Alexa"
             },
             "data_description": {
               "alexa_notifications": "Activa o desactiva los anuncios de Alexa desde Notifier Hub.",
-              "alexa_players": "Reproductores Alexa que pueden recibir avisos por voz."
+              "alexa_players": "Reproductores Alexa que pueden recibir avisos por voz.",
+              "alexa_notify_entities": "Entidades notify de Alexa Devices, como notify.echo_dot_speak o notify.echo_dot_announce."
             }
           },
           "google_section": {

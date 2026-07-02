@@ -37,7 +37,7 @@ send:
       default: ""
     alexa:
       name: Alexa
-      description: true/on o diccionario con media_player, volume, type, method, voice, language, ssml, push, event_id, media_content_id...
+      description: true/on o diccionario con media_player, notify_entity/notify_entities, volume, type, method, voice, language, ssml, push, event_id, media_content_id...
       selector:
         object:
       default: false

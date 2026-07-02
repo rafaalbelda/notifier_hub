@@ -5,8 +5,10 @@ import re
 from typing import Any
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 
 from . import helpers as h
+from .const import CONF_ALEXA_NOTIFY_ENTITIES, CONF_ALEXA_PLAYERS
 
 ALEXA_SERVICE = "alexa_media"
 SUPPORTED_LANGUAGES = {
@@ -58,7 +60,7 @@ class AlexaManager:
     def _alexa_players_from_notify_services(self) -> list[str]:
         # La API pública de HA no lista servicios aquí de forma estable en todas las versiones.
         # Se usa la lista configurada y, si está vacía, todos los media_player con integración Alexa conocidos por nombre.
-        configured = h.return_list(self.hub.config.get("alexa_players", []))
+        configured = h.return_list(self.hub.config.get(CONF_ALEXA_PLAYERS, []))
         if configured:
             resolved = self._resolve_players(configured, fallback=False)
             if resolved:
@@ -86,6 +88,23 @@ class AlexaManager:
         if not resolved and fallback:
             resolved = self._alexa_players_from_notify_services()
         return sorted(set(resolved))
+
+    def _resolve_notify_entities(self, raw_entities: Any) -> list[str]:
+        registry = er.async_get(self.hass)
+        resolved: list[str] = []
+        for entity_id in h.return_list(raw_entities):
+            entity_id = entity_id.lower()
+            if not entity_id.startswith("notify."):
+                continue
+            if self.hass.states.get(entity_id) is not None or registry.async_get(entity_id):
+                resolved.append(entity_id)
+        return sorted(set(resolved))
+
+    def _raw_notify_entities(self, alexa: dict[str, Any]) -> Any:
+        for key in ("notify_entity", "notify_entities", "notify_target", "notify_targets"):
+            if key in alexa:
+                return alexa[key]
+        return self.hub.config.get(CONF_ALEXA_NOTIFY_ENTITIES, [])
 
     @staticmethod
     def _in_between(minv: float, value: float, maxv: float) -> float:
@@ -135,16 +154,25 @@ class AlexaManager:
         default_volume = float(self.hub.current_tts_volume())
         volume = float(alexa.get("volume", default_volume))
         auto_volumes = h.check_bool(alexa.get("auto_volumes", False))
-        if volume == 0.0 and not auto_volumes:
-            self.hub.set_debug("Alexa volume muted", {})
-            return
         message = str(alexa.get("message_tts", alexa.get("message", base_data.get("message", ""))))
-        media_player = self._resolve_players(alexa.get("media_player", self.hub.config.get("alexa_players", [])))
-        if not media_player:
-            self.hub.set_debug("Alexa media_player not found", {"alexa_error": "Configure alexa_players"})
+        notify_entities = self._resolve_notify_entities(self._raw_notify_entities(alexa))
+        media_player = self._resolve_players(alexa.get("media_player", self.hub.config.get(CONF_ALEXA_PLAYERS, [])), fallback=not notify_entities)
+        if volume == 0.0 and not auto_volumes and media_player:
+            if not notify_entities:
+                self.hub.set_debug("Alexa volume muted", {})
+                return
+            media_player = []
+        if not media_player and not notify_entities:
+            self.hub.set_debug(
+                "Alexa targets not found",
+                {"alexa_error": "Configure alexa_players or alexa_notify_entities"},
+            )
             return
 
         if h.check_bool(alexa.get("push", False)) or str(alexa.get("type", "")).lower() in {"push", "dropin", "dropin_notification"}:
+            if not media_player:
+                self.hub.set_debug("Alexa notify entities do not support push/dropin", {})
+                return
             await self.hass.services.async_call(
                 "notify",
                 ALEXA_SERVICE,
@@ -159,6 +187,9 @@ class AlexaManager:
             return
 
         if media_content_id := alexa.get("media_content_id"):
+            if not media_player:
+                self.hub.set_debug("Alexa notify entities do not support media playback", {})
+                return
             await self._save_and_set_volume(media_player, volume, default_volume)
             await self.hass.services.async_call(
                 "media_player",
@@ -174,7 +205,16 @@ class AlexaManager:
             return
 
         if message:
-            await self.queue.put({**alexa, "message": message, "media_player": media_player, "volume": volume, "default_volume": default_volume})
+            await self.queue.put(
+                {
+                    **alexa,
+                    "message": message,
+                    "media_player": media_player,
+                    "notify_entities": notify_entities,
+                    "volume": volume,
+                    "default_volume": default_volume,
+                }
+            )
 
     async def _save_and_set_volume(self, players: list[str], volume: float, default_volume: float) -> None:
         self.volumes_saved = {}
@@ -197,24 +237,38 @@ class AlexaManager:
             data = await self.queue.get()
             try:
                 self.hub.set_alexa_speak(True, data)
-                players = data["media_player"]
+                players = data.get("media_player", [])
+                notify_entities = data.get("notify_entities", [])
                 volume = float(data["volume"])
                 if h.check_bool(data.get("auto_volumes", False)):
-                    await self.hass.services.async_call("media_player", "volume_set", {"entity_id": players, "volume_level": volume}, blocking=False)
-                    continue
-                await self._save_and_set_volume(players, volume, float(data["default_volume"]))
+                    if players:
+                        await self.hass.services.async_call("media_player", "volume_set", {"entity_id": players, "volume_level": volume}, blocking=False)
+                    if not notify_entities:
+                        continue
+                elif players:
+                    await self._save_and_set_volume(players, volume, float(data["default_volume"]))
                 msg = h.replace_regular(data.get("message", ""), SUB_VOICE)
-                msg = self._build_ssml(msg, data)
+                legacy_msg = self._build_ssml(msg, data)
                 data_type = str(data.get("type", "tts")).lower().replace("dropin", "dropin_notification")
                 alexa_data = {"type": data_type, "method": data.get("method", "all")} if data_type == "announce" else {"type": "tts"}
-                await self.hass.services.async_call(
-                    "notify",
-                    str(data.get("notifier", ALEXA_SERVICE)),
-                    {"message": msg.strip(), "target": players, "data": alexa_data},
-                    blocking=False,
-                )
-                await asyncio.sleep(h.estimate_speech_duration(msg, float(data.get("wait_time", self.hub.config.get("tts_wait_time", 3.0)))))
-                await self._restore_volume()
+                if players:
+                    await self.hass.services.async_call(
+                        "notify",
+                        str(data.get("notifier", ALEXA_SERVICE)),
+                        {"message": legacy_msg.strip(), "target": players, "data": alexa_data},
+                        blocking=False,
+                    )
+                for entity_id in notify_entities:
+                    await self.hass.services.async_call(
+                        "notify",
+                        "send_message",
+                        {"message": h.remove_tags(msg).strip()},
+                        target={"entity_id": entity_id},
+                        blocking=False,
+                    )
+                await asyncio.sleep(h.estimate_speech_duration(legacy_msg, float(data.get("wait_time", self.hub.config.get("tts_wait_time", 3.0)))))
+                if players:
+                    await self._restore_volume()
                 self.hub.set_debug("OK", {})
             except Exception as err:  # noqa: BLE001
                 self.hub.set_debug("Alexa Manager - Worker Error", {"alexa_error": str(err)})

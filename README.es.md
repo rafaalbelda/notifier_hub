@@ -41,11 +41,11 @@ Es la conversion nativa de la aplicacion AppDaemon [`Centro Notifiche`](https://
 
 ## Instalacion
 
-### Requisito para Alexa
+### Soporte para Alexa
 
-El canal Alexa de Notifier Hub requiere actualmente el componente personalizado no oficial [Alexa Media Player](https://github.com/alandtse/alexa_media_player). Alexa Media Player proporciona el servicio `notify.alexa_media` y las entidades `media_player.*` que Notifier Hub usa para TTS de Alexa, anuncios, reproduccion multimedia, cambios temporales de volumen y restauracion de volumen.
+Notifier Hub puede usar el componente personalizado no oficial [Alexa Media Player](https://github.com/alandtse/alexa_media_player) mediante `notify.alexa_media` y entidades `media_player.*`. Este modo permite TTS de Alexa, anuncios, notificaciones push, reproduccion multimedia, cambios temporales de volumen y restauracion de volumen.
 
-La integracion oficial Alexa Devices de Home Assistant usa un modelo de notificacion distinto, basado en `notify.send_message` y entidades `notify.*` por dispositivo. Ese modelo no es necesario para el canal Alexa actual.
+Notifier Hub tambien puede usar la integracion oficial Alexa Devices de Home Assistant mediante `notify.send_message` y entidades `notify.*` por dispositivo, como `notify.echo_dot_speak` o `notify.echo_dot_announce`. Este modo permite voz/anuncios, pero los cambios temporales de volumen, la restauracion de volumen, las notificaciones push y la reproduccion multimedia siguen estando disponibles solo mediante reproductores de Alexa Media Player.
 
 ### HACS
 
@@ -112,6 +112,9 @@ notifier_hub:
   alexa_players:
     - media_player.echo_salon
     - media_player.echo_cocina
+  alexa_notify_entities:
+    - notify.echo_salon_speak
+    - notify.echo_cocina_announce
   google_players:
     - media_player.google_home_salon
   google_tts_service: tts.google_es_es
@@ -170,6 +173,7 @@ Estos cambios permanecen en memoria hasta que se recargue la configuracion o se 
 |---|---|---|
 | `notify_services` | `notify` | Con `notify: true`, se usan los servicios globales. Un servicio o lista en `notify` sustituye la lista global para ese mensaje. |
 | `alexa_players` | `alexa.media_player` | Si el mensaje no indica reproductores Alexa, se usan los globales. |
+| `alexa_notify_entities` | `alexa.notify_entity` o `alexa.notify_entities` | Si el mensaje no indica entidades notify de Alexa, se usan las globales. |
 | `google_players` | `google.media_player` o `google.player` | Si el mensaje no indica reproductores Google/Cast, se usan los globales. |
 | `default_volume` | `alexa.volume` o `google.volume` | Se usa si no hay volumen explicito y `auto_volume` esta desactivado. |
 | Volumen del periodo de `auto_volume` | `alexa.volume` o `google.volume` | Con `auto_volume` activo, sustituye a `default_volume`. Un volumen explicito tiene prioridad sobre ambos. |
@@ -389,6 +393,7 @@ Cuando `alexa` es un diccionario admite:
 | Campo | Valor por defecto | Descripcion |
 |---|---|---|
 | `media_player` | `alexa_players` | Reproductor, lista, grupo, nombre amigable o `all`. |
+| `notify_entity` / `notify_entities` | `alexa_notify_entities` | Destinos de Alexa Devices basados en entidades y llamados con `notify.send_message`. |
 | `message` | `message` general | Texto que se debe reproducir. |
 | `message_tts` | `message` de Alexa | Texto TTS alternativo con prioridad sobre `message`. |
 | `title` | `title` general | Titulo usado para push. |

@@ -67,8 +67,10 @@
           "persons": "Personas",
           "location_tracker": "Rastreador de ubicacion",
           "text_events_section": "Texto y eventos",
-          "notify_services": "Servicios de notificacion",
-          "ha_event_notify_services": "Servicios para eventos de Home Assistant",
+          "notify_service_targets": "Servicios de notificacion",
+          "notify_entity_targets": "Entidades de notificacion",
+          "ha_event_notify_service_targets": "Servicios para eventos de Home Assistant",
+          "ha_event_notify_entity_targets": "Entidades para eventos de Home Assistant",
           "alexa_section": "Alexa",
           "alexa_notifications": "Notificaciones de Alexa",
           "alexa_players": "Reproductores Alexa",
@@ -102,8 +104,10 @@
           "persons": "Personas usadas para decidir el envio de notificaciones segun presencia.",
           "location_tracker": "Entidad alternativa para decidir si se deben enviar notificaciones cuando no hay personas seleccionadas.",
           "text_events_section": "Ajustes para notificaciones de texto, persistentes y eventos de Home Assistant.",
-          "notify_services": "Servicios notify usados por defecto para notificaciones de texto normales.",
-          "ha_event_notify_services": "Servicios notify usados solo para eventos del ciclo de vida de Home Assistant.",
+          "notify_service_targets": "Servicios notify clasicos usados por defecto para notificaciones de texto normales.",
+          "notify_entity_targets": "Entidades notify usadas por defecto para notificaciones de texto normales mediante notify.send_message.",
+          "ha_event_notify_service_targets": "Servicios notify clasicos usados solo para eventos del ciclo de vida de Home Assistant.",
+          "ha_event_notify_entity_targets": "Entidades notify usadas solo para eventos del ciclo de vida de Home Assistant mediante notify.send_message.",
           "alexa_section": "Configuracion de avisos por Alexa.",
           "alexa_notifications": "Activa o desactiva los anuncios de Alexa desde Notifier Hub.",
           "alexa_players": "Reproductores Alexa que pueden recibir avisos por voz.",
@@ -158,16 +162,20 @@
             "data": {
               "text_notifications": "Notificaciones de texto",
               "screen_notifications": "Notificaciones persistentes",
-              "notify_services": "Servicios de notificacion",
+              "notify_service_targets": "Servicios de notificacion",
+              "notify_entity_targets": "Entidades de notificacion",
               "ha_event_notifications": "Notificaciones de eventos de Home Assistant",
-              "ha_event_notify_services": "Servicios para eventos de Home Assistant"
+              "ha_event_notify_service_targets": "Servicios para eventos de Home Assistant",
+              "ha_event_notify_entity_targets": "Entidades para eventos de Home Assistant"
             },
             "data_description": {
               "text_notifications": "Permite mensajes normales mediante servicios notify.",
               "screen_notifications": "Permite notificaciones persistentes en Home Assistant.",
-              "notify_services": "Servicios notify usados por defecto para notificaciones de texto normales.",
+              "notify_service_targets": "Servicios notify clasicos usados por defecto para notificaciones de texto normales.",
+              "notify_entity_targets": "Entidades notify usadas por defecto para notificaciones de texto normales mediante notify.send_message.",
               "ha_event_notifications": "Envia notificaciones para arranque, parada, reinicio y eventos relacionados de Home Assistant.",
-              "ha_event_notify_services": "Servicios notify usados solo para eventos del ciclo de vida de Home Assistant."
+              "ha_event_notify_service_targets": "Servicios notify clasicos usados solo para eventos del ciclo de vida de Home Assistant.",
+              "ha_event_notify_entity_targets": "Entidades notify usadas solo para eventos del ciclo de vida de Home Assistant mediante notify.send_message."
             }
           },
           "voice_section": {
@@ -251,8 +259,10 @@
           "persons": "Personas",
           "location_tracker": "Rastreador de ubicacion",
           "text_events_section": "Texto y eventos",
-          "notify_services": "Servicios de notificacion",
-          "ha_event_notify_services": "Servicios para eventos de Home Assistant",
+          "notify_service_targets": "Servicios de notificacion",
+          "notify_entity_targets": "Entidades de notificacion",
+          "ha_event_notify_service_targets": "Servicios para eventos de Home Assistant",
+          "ha_event_notify_entity_targets": "Entidades para eventos de Home Assistant",
           "alexa_section": "Alexa",
           "alexa_notifications": "Notificaciones de Alexa",
           "alexa_players": "Reproductores Alexa",
@@ -286,8 +296,10 @@
           "persons": "Personas usadas para decidir el envio de notificaciones segun presencia.",
           "location_tracker": "Entidad alternativa para decidir si se deben enviar notificaciones cuando no hay personas seleccionadas.",
           "text_events_section": "Ajustes para notificaciones de texto, persistentes y eventos de Home Assistant.",
-          "notify_services": "Servicios notify usados por defecto para notificaciones de texto normales.",
-          "ha_event_notify_services": "Servicios notify usados solo para eventos del ciclo de vida de Home Assistant.",
+          "notify_service_targets": "Servicios notify clasicos usados por defecto para notificaciones de texto normales.",
+          "notify_entity_targets": "Entidades notify usadas por defecto para notificaciones de texto normales mediante notify.send_message.",
+          "ha_event_notify_service_targets": "Servicios notify clasicos usados solo para eventos del ciclo de vida de Home Assistant.",
+          "ha_event_notify_entity_targets": "Entidades notify usadas solo para eventos del ciclo de vida de Home Assistant mediante notify.send_message.",
           "alexa_section": "Configuracion de avisos por Alexa.",
           "alexa_notifications": "Activa o desactiva los anuncios de Alexa desde Notifier Hub.",
           "alexa_players": "Reproductores Alexa que pueden recibir avisos por voz.",
@@ -342,16 +354,20 @@
             "data": {
               "text_notifications": "Notificaciones de texto",
               "screen_notifications": "Notificaciones persistentes",
-              "notify_services": "Servicios de notificacion",
+              "notify_service_targets": "Servicios de notificacion",
+              "notify_entity_targets": "Entidades de notificacion",
               "ha_event_notifications": "Notificaciones de eventos de Home Assistant",
-              "ha_event_notify_services": "Servicios para eventos de Home Assistant"
+              "ha_event_notify_service_targets": "Servicios para eventos de Home Assistant",
+              "ha_event_notify_entity_targets": "Entidades para eventos de Home Assistant"
             },
             "data_description": {
               "text_notifications": "Permite mensajes normales mediante servicios notify.",
               "screen_notifications": "Permite notificaciones persistentes en Home Assistant.",
-              "notify_services": "Servicios notify usados por defecto para notificaciones de texto normales.",
+              "notify_service_targets": "Servicios notify clasicos usados por defecto para notificaciones de texto normales.",
+              "notify_entity_targets": "Entidades notify usadas por defecto para notificaciones de texto normales mediante notify.send_message.",
               "ha_event_notifications": "Envia notificaciones para arranque, parada, reinicio y eventos relacionados de Home Assistant.",
-              "ha_event_notify_services": "Servicios notify usados solo para eventos del ciclo de vida de Home Assistant."
+              "ha_event_notify_service_targets": "Servicios notify clasicos usados solo para eventos del ciclo de vida de Home Assistant.",
+              "ha_event_notify_entity_targets": "Entidades notify usadas solo para eventos del ciclo de vida de Home Assistant mediante notify.send_message."
             }
           },
           "voice_section": {

@@ -151,11 +151,21 @@ HA_EVENT_STRINGS: dict[str, dict[str, str]] = {
 }
 
 
+def _normalize_language(language: str) -> str:
+    """Normalize a locale code to Home Assistant translation file casing."""
+    parts = (language or "").replace("_", "-").split("-", 1)
+    primary = parts[0].lower()
+    if len(parts) == 1:
+        return primary
+    return f"{primary}-{parts[1].upper()}"
+
+
 def resolve_dashboard_language(language: str) -> str:
     """Resolve a hass.config.language value to one of DASHBOARD_AVAILABLE_LANGUAGES."""
-    if language in DASHBOARD_AVAILABLE_LANGUAGES:
-        return language
-    primary = (language or "").split("-")[0]
+    normalized = _normalize_language(language)
+    if normalized in DASHBOARD_AVAILABLE_LANGUAGES:
+        return normalized
+    primary = normalized.split("-")[0]
     for candidate in DASHBOARD_AVAILABLE_LANGUAGES:
         if candidate.split("-")[0] == primary:
             return candidate

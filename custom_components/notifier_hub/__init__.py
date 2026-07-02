@@ -292,12 +292,16 @@ class NotifierHub:
         await self.async_apply_auto_volume()
 
     def _resolve_language(self, strings: dict[str, dict[str, str]]) -> dict[str, str]:
-        lang = self.hass.config.language
+        lang = self.hass.config.language.replace("_", "-")
         if lang in strings:
             return strings[lang]
-        primary = (lang or "").split("-")[0]
+        normalized = lang.lower()
         for key in strings:
-            if key.split("-")[0] == primary:
+            if key.lower() == normalized:
+                return strings[key]
+        primary = normalized.split("-")[0]
+        for key in strings:
+            if key.split("-")[0].lower() == primary:
                 return strings[key]
         return strings.get("en", {})
 

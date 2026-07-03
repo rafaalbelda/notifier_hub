@@ -30,6 +30,7 @@ GOOGLE_TRANSLATE_TLD_BY_LANGUAGE = {
     "en-za": "co.za",
     "fr-ca": "ca",
     "fr-fr": "fr",
+    "pt": "pt",
     "pt-br": "com.br",
     "pt-pt": "pt",
     "es-es": "es",

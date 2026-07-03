@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from time import time_ns
 from typing import Any
 
 import voluptuous as vol
@@ -30,6 +31,7 @@ from .const import (
     CONF_HA_EVENT_NOTIFY_SERVICES,
     CONF_AUTO_VOLUME,
     CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
+    CONF_DASHBOARD_COPY_REQUESTED,
     CONF_NIGHT_DND,
     CONF_INSTALL_DASHBOARD,
     CONF_SIP_SERVER_NAME,
@@ -91,6 +93,8 @@ class NotifierHubOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(self, user_input: dict[str, Any] | None = None):
         if user_input is not None:
             user_input = _flatten_sections(user_input)
+            if user_input.get(CONF_INSTALL_DASHBOARD, True):
+                user_input[CONF_DASHBOARD_COPY_REQUESTED] = time_ns()
             return self.async_create_entry(title="", data=user_input)
 
         data = dict(self._config_entry.data)

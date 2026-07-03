@@ -152,9 +152,9 @@ SEND_SCHEMA = vol.Schema(
 SET_CONFIG_SCHEMA = vol.Schema({vol.Required("config"): dict}, extra=vol.ALLOW_EXTRA)
 
 
-def _copy_dashboard_if_changed(source: Path, target: Path) -> bool:
+def _copy_dashboard_if_changed(source: Path, target: Path, force: bool = False) -> bool:
     source_bytes = source.read_bytes()
-    if target.exists() and target.read_bytes() == source_bytes:
+    if not force and target.exists() and target.read_bytes() == source_bytes:
         return False
     shutil.copyfile(source, target)
     return True
@@ -288,7 +288,7 @@ class NotifierHub:
         self.set_debug("on", {})
         await self.async_apply_auto_volume()
 
-    async def async_install_dashboard(self) -> None:
+    async def async_install_dashboard(self, force: bool = False) -> None:
         if not self.config.get(CONF_INSTALL_DASHBOARD, True):
             return
         source = Path(__file__).with_name("notifier_hub_dashboard.yaml")
@@ -296,7 +296,7 @@ class NotifierHub:
             _LOGGER.warning("Notifier Hub dashboard source not found: %s", source)
             return
         target = Path(self.hass.config.path("notifier_hub_dashboard.yaml"))
-        copied = await self.hass.async_add_executor_job(_copy_dashboard_if_changed, source, target)
+        copied = await self.hass.async_add_executor_job(_copy_dashboard_if_changed, source, target, force)
         if not copied:
             return
         await self.hass.services.async_call(
@@ -532,7 +532,7 @@ class NotifierHub:
         self.config.update(call.data.get("config", {}))
         self._async_update_presence_listener()
         self._refresh_entities()
-        await self.async_install_dashboard()
+        await self.async_install_dashboard(force=True)
         await self.async_apply_auto_volume()
         self.set_debug("config updated", {"config_keys": sorted(call.data.get("config", {}).keys())})
 
@@ -540,7 +540,7 @@ class NotifierHub:
         self.config = self._merged_config()
         self._async_update_presence_listener()
         self._refresh_entities()
-        await self.async_install_dashboard()
+        await self.async_install_dashboard(force=True)
         await self.async_apply_auto_volume()
         self.set_debug("config options updated", {"config_keys": sorted(self.config.keys())})
 

@@ -675,15 +675,17 @@ If `switch.notifier_hub_night_dnd` is enabled, the `Night` and `Late night` peri
 
 ## Dashboard
 
-The `notifier_hub_dashboard.yaml` file includes a Lovelace panel with status, TTS activity, test buttons, channels, and Auto Volume controls.
+The integration ships a Lovelace panel with status, TTS activity, test buttons, channels, and Auto Volume controls, available in English (`notifier_hub_dashboard.en.yaml`), Spanish (`notifier_hub_dashboard.es.yaml`), European Portuguese (`notifier_hub_dashboard.pt.yaml`) and Brazilian Portuguese (`notifier_hub_dashboard.pt-BR.yaml`).
 
-The `install_dashboard` option automatically copies the panel to:
+The `install_dashboard` option automatically picks the file matching your Home Assistant instance language (`hass.config.language`, falling back to English if there is no match) and copies it to:
 
 ```text
 /config/notifier_hub_dashboard.yaml
 ```
 
-It also creates a persistent notification with the block you need to add to `configuration.yaml`:
+Be careful if you edit `/config/notifier_hub_dashboard.yaml` manually. When `install_dashboard` is enabled, Notifier Hub may overwrite that file after configuration changes. Keep custom dashboard edits in a separate file, or disable `install_dashboard` after the initial copy.
+
+It also creates a persistent notification, in the same language, with the block you need to add to `configuration.yaml`:
 
 ```yaml
 lovelace:
@@ -696,7 +698,7 @@ lovelace:
       filename: notifier_hub_dashboard.yaml
 ```
 
-If you do not use `install_dashboard`, you can manually copy `notifier_hub_dashboard.yaml` to `/config/notifier_hub_dashboard.yaml` and register the same block.
+If you do not use `install_dashboard`, you can manually copy one of the `notifier_hub_dashboard.<lang>.yaml` files to `/config/notifier_hub_dashboard.yaml` and register the same block.
 
 ### Compact Card Example
 

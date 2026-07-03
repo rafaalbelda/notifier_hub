@@ -151,12 +151,35 @@ HA_EVENT_STRINGS: dict[str, dict[str, str]] = {
 }
 
 
+def normalize_locale(language: str) -> str:
+    """Normalize a locale code to ``ll`` or ``ll-CC`` form.
+
+    Home Assistant may report locales in a variety of shapes
+    (``pt_BR``, ``PT-br``, ``pt``). This normalizes the language subtag to
+    lower case and the region subtag to upper case, using ``-`` as separator.
+
+    Examples: ``pt_BR`` -> ``pt-BR``, ``PT-br`` -> ``pt-BR``, ``pt`` -> ``pt``.
+    """
+    if not language:
+        return ""
+    parts = language.replace("_", "-").split("-")
+    lang = parts[0].lower()
+    if len(parts) > 1 and parts[1]:
+        return f"{lang}-{parts[1].upper()}"
+    return lang
+
+
 def resolve_dashboard_language(language: str) -> str:
     """Resolve a hass.config.language value to one of DASHBOARD_AVAILABLE_LANGUAGES."""
-    if language in DASHBOARD_AVAILABLE_LANGUAGES:
-        return language
-    primary = (language or "").split("-")[0]
+    normalized = normalize_locale(language)
+    # Exact (normalized) match first: pt_BR / PT-br -> pt-BR.
     for candidate in DASHBOARD_AVAILABLE_LANGUAGES:
-        if candidate.split("-")[0] == primary:
+        if normalize_locale(candidate) == normalized:
             return candidate
+    # Fall back to the primary language subtag: pt-PT -> pt.
+    primary = normalized.split("-")[0]
+    for candidate in DASHBOARD_AVAILABLE_LANGUAGES:
+        if normalize_locale(candidate).split("-")[0] == primary:
+            return candidate
+    # Unsupported languages fall back to English.
     return DASHBOARD_DEFAULT_LANGUAGE

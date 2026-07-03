@@ -54,6 +54,7 @@ from .const import (
     DASHBOARD_INSTALL_STRINGS,
     HA_EVENT_STRINGS,
     resolve_dashboard_language,
+    normalize_locale,
     DEFAULT_LANGUAGE,
     DEFAULT_PERSONAL_ASSISTANT,
     DEFAULT_SIP_SERVER_NAME,
@@ -292,12 +293,15 @@ class NotifierHub:
         await self.async_apply_auto_volume()
 
     def _resolve_language(self, strings: dict[str, dict[str, str]]) -> dict[str, str]:
-        lang = self.hass.config.language
-        if lang in strings:
-            return strings[lang]
-        primary = (lang or "").split("-")[0]
+        # Use the same normalized locale matching as the dashboard resolver so
+        # pt_BR / PT-br / pt-PT all resolve consistently instead of falling to en.
+        normalized = normalize_locale(self.hass.config.language)
         for key in strings:
-            if key.split("-")[0] == primary:
+            if normalize_locale(key) == normalized:
+                return strings[key]
+        primary = normalized.split("-")[0]
+        for key in strings:
+            if normalize_locale(key).split("-")[0] == primary:
                 return strings[key]
         return strings.get("en", {})
 

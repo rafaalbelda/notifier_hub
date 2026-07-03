@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import entity_registry as er
 
 from . import helpers as h
 
@@ -26,6 +27,16 @@ class NotificationManager:
             prepared_title = f"*[{assistant} - {timestamp}] {title}*"
         substitutions = SUB_WRAP if self.hub.config.get("wrap_text", False) else SUB_NOWRAP
         return h.replace_regular(message, substitutions), prepared_title
+
+    def _notify_entity_id(self, raw: str, service: str) -> str | None:
+        entity_id = raw.strip().lower()
+        if not entity_id.startswith("notify."):
+            return None
+        if self.hass.services.has_service("notify", service):
+            return None
+        if self.hass.states.get(entity_id) is not None:
+            return entity_id
+        return entity_id if er.async_get(self.hass).async_get(entity_id) else None
 
     async def send_persistent(self, data: dict[str, Any]) -> None:
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -63,8 +74,24 @@ class NotificationManager:
             service = h.service_name(raw)
             if service in ["false", "off", "no", "0"]:
                 continue
+            notify_entity_id = self._notify_entity_id(raw, service)
             payload: dict[str, Any] = {}
             prepared_message, prepared_title = self._prepare_text(html, message, title)
+
+            if notify_entity_id:
+                if link:
+                    prepared_message = f"{prepared_message} {link}".strip()
+                entity_data = {"message": prepared_message}
+                if prepared_title:
+                    entity_data["title"] = prepared_title
+                await self.hass.services.async_call(
+                    "notify",
+                    "send_message",
+                    entity_data,
+                    target={"entity_id": notify_entity_id},
+                    blocking=False,
+                )
+                continue
 
             if "telegram" in service:
                 payload = dict(telegram) if isinstance(telegram, dict) else {}

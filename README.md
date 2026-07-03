@@ -678,6 +678,8 @@ The `install_dashboard` option automatically picks the file matching your Home A
 /config/notifier_hub_dashboard.yaml
 ```
 
+Be careful if you edit `/config/notifier_hub_dashboard.yaml` manually. When `install_dashboard` is enabled, Notifier Hub may overwrite that file after configuration changes. Keep custom dashboard edits in a separate file, or disable `install_dashboard` after the initial copy.
+
 It also creates a persistent notification, in the same language, with the block you need to add to `configuration.yaml`:
 
 ```yaml

@@ -678,6 +678,8 @@ La opcion `install_dashboard` elige automaticamente el archivo que coincide con 
 /config/notifier_hub_dashboard.yaml
 ```
 
+Ten cuidado si editas `/config/notifier_hub_dashboard.yaml` manualmente. Cuando `install_dashboard` esta activo, Notifier Hub puede sobrescribir ese archivo despues de cambios de configuracion. Guarda tus cambios personalizados en otro archivo o desactiva `install_dashboard` despues de la copia inicial.
+
 Tambien crea una notificacion persistente, en el mismo idioma, con el bloque que debes añadir a `configuration.yaml`:
 
 ```yaml

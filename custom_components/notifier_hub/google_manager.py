@@ -19,24 +19,6 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-GOOGLE_TRANSLATE_TLD_BY_LANGUAGE = {
-    "en-us": "com",
-    "en-gb": "co.uk",
-    "en-uk": "co.uk",
-    "en-au": "com.au",
-    "en-ca": "ca",
-    "en-in": "co.in",
-    "en-ie": "ie",
-    "en-za": "co.za",
-    "fr-ca": "ca",
-    "fr-fr": "fr",
-    "pt": "pt",
-    "pt-br": "com.br",
-    "pt-pt": "pt",
-    "es-es": "es",
-    "es-us": "com",
-}
-
 SUB_VOICE = [
     (r"[\U00010000-\U0010ffff]", r""),
     (r"[\?\.\!,]+(?=[\?\.\!,])", r""),
@@ -104,7 +86,9 @@ class GoogleManager:
             return
 
         message = str(google_data.get("message", parent_data.get("message", "")))
-        players = self._players(google_data.get("media_player", google_data.get("player", "")))
+        players = self._players(
+            google_data.get("media_player", google_data.get("entity_id", google_data.get("player", "")))
+        )
         notify_service = str(
             google_data.get(
                 "notify_service",
@@ -141,23 +125,29 @@ class GoogleManager:
             self.hub.set_debug("Google Manager - players not found", {"google_error": "No media_player configured"})
             return
 
+        tts_service = str(
+            google_data.get(
+                "tts_service",
+                google_data.get(
+                    "service",
+                    self.hub.config.get(CONF_GOOGLE_TTS_SERVICE, DEFAULT_GOOGLE_TTS_SERVICE),
+                ),
+            )
+        )
+        language = str(google_data.get("language", self.hub.config.get(CONF_DEFAULT_LANGUAGE, "es-ES")))
+        if not self._resolve_tts_entity(tts_service, google_data.get("tts_entity", google_data.get("engine_id", "")), language):
+            await self._call_legacy_tts_direct(tts_service, players, message, language)
+            return
+
         await self.queue.put(
             {
                 "message": h.replace_regular(message, SUB_VOICE),
                 "players": players,
                 "volume": float(google_data.get("volume", self.hub.current_tts_volume())),
                 "wait_time": float(google_data.get("wait_time", self.hub.config.get(CONF_TTS_WAIT_TIME, 3.0))),
-                "language": str(google_data.get("language", self.hub.config.get(CONF_DEFAULT_LANGUAGE, "es-ES"))),
+                "language": language,
                 "tts_entity": str(google_data.get("tts_entity", google_data.get("engine_id", ""))),
-                "tts_service": str(
-                    google_data.get(
-                        "tts_service",
-                        google_data.get(
-                            "service",
-                            self.hub.config.get(CONF_GOOGLE_TTS_SERVICE, DEFAULT_GOOGLE_TTS_SERVICE),
-                        ),
-                    )
-                ),
+                "tts_service": tts_service,
             }
         )
 
@@ -179,12 +169,7 @@ class GoogleManager:
                     state = self.hass.states.get(player)
                     if state is not None:
                         saved_volumes[player] = state.attributes.get("volume_level")
-                await self.hass.services.async_call(
-                    "media_player",
-                    "volume_set",
-                    {"entity_id": players, "volume_level": data["volume"]},
-                    blocking=False,
-                )
+                await self._try_set_volume(players, data["volume"], "Google Manager - Volume Set Error")
 
                 await self._call_tts(data)
 
@@ -195,20 +180,72 @@ class GoogleManager:
             finally:
                 for player, volume in saved_volumes.items():
                     if volume is not None:
-                        await self.hass.services.async_call(
-                            "media_player",
-                            "volume_set",
-                            {"entity_id": player, "volume_level": volume},
-                            blocking=False,
-                        )
+                        await self._try_set_volume(player, volume, "Google Manager - Volume Restore Error")
                 self.hub.set_google_speak(False, {})
                 self.queue.task_done()
+
+    async def _try_set_volume(self, players: Any, volume: Any, debug_state: str) -> None:
+        try:
+            await self.hass.services.async_call(
+                "media_player",
+                "volume_set",
+                {"entity_id": players, "volume_level": volume},
+                blocking=False,
+            )
+        except Exception as err:  # noqa: BLE001
+            _LOGGER.debug("Google Manager volume command skipped", exc_info=True)
+            self.hub.set_debug(
+                debug_state,
+                {
+                    "google_error": str(err),
+                    "players": players,
+                    "volume": volume,
+                },
+            )
 
     def _split_service(self, service_name: str) -> tuple[str, str]:
         if "." in service_name:
             domain, service = service_name.split(".", 1)
             return domain, service
         return "tts", service_name
+
+    async def _call_legacy_tts_direct(
+        self,
+        service_name: str,
+        players: list[str],
+        message: str,
+        language: str,
+    ) -> None:
+        domain, service = self._split_service(service_name)
+        service_data = {
+            "entity_id": players if len(players) > 1 else players[0],
+            "message": message,
+            "language": self._legacy_language_code(language),
+        }
+        self.hub.set_google_speak(
+            True,
+            {
+                "message": message,
+                "players": players,
+                "tts_service": f"{domain}.{service}",
+                "language": service_data["language"],
+                "mode": "legacy_direct",
+            },
+        )
+        try:
+            await self.hass.services.async_call(domain, service, service_data, blocking=True)
+        except Exception as err:  # noqa: BLE001
+            _LOGGER.exception("Google Manager legacy TTS error")
+            self.hub.set_debug(
+                "Google Manager - Legacy TTS Error",
+                {
+                    "google_error": str(err),
+                    "service": f"{domain}.{service}",
+                    "service_data": service_data,
+                },
+            )
+        finally:
+            self.hub.set_google_speak(False, {})
 
     async def _call_tts(self, data: dict[str, Any]) -> None:
         players = data["players"]
@@ -237,7 +274,7 @@ class GoogleManager:
         }
         # Legacy tts.*_say services expect short language codes in many installations.
         if language:
-            service_data["language"] = language[:2]
+            service_data["language"] = self._legacy_language_code(language)
         await self.hass.services.async_call(domain, service, service_data, blocking=False)
 
     def _resolve_tts_entity(self, service_name: Any, explicit_entity: Any, language: str) -> str | None:
@@ -249,27 +286,10 @@ class GoogleManager:
         if self._is_tts_entity(service):
             return service
 
-        if service.replace("tts.", "", 1) in {"google_translate_say", "google_say"}:
-            for candidate in self._google_translate_entity_candidates(language):
-                if self._is_tts_entity(candidate):
-                    return candidate
-
         return None
 
     def _is_tts_entity(self, entity_id: str) -> bool:
         return entity_id.startswith("tts.") and self.hass.states.get(entity_id) is not None
 
-    def _google_translate_entity_candidates(self, language: str) -> list[str]:
-        normalized = (language or "es-ES").lower().replace("_", "-")
-        lang = normalized.split("-", 1)[0]
-        tld = GOOGLE_TRANSLATE_TLD_BY_LANGUAGE.get(normalized)
-        if tld is None and "-" in normalized:
-            tld = normalized.split("-", 1)[1]
-        if tld is None:
-            tld = "com"
-
-        suffix = f"{lang}_{tld.replace('.', '_').replace('-', '_')}"
-        return [
-            f"tts.google_{suffix}",
-            f"tts.google_translate_{suffix}",
-        ]
+    def _legacy_language_code(self, language: str) -> str:
+        return (language or "es").lower().replace("_", "-").split("-", 1)[0]

@@ -162,6 +162,14 @@ data:
     default_volume: 0.25
 ```
 
+Auto Volume can also be toggled directly from a script or automation:
+
+```yaml
+action: notifier_hub.set_config
+data:
+  auto_volume: true
+```
+
 These changes stay in memory until the configuration is reloaded or the integration is restarted.
 
 ### Global fallback values

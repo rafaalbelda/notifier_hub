@@ -153,7 +153,13 @@ SEND_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
-SET_CONFIG_SCHEMA = vol.Schema({vol.Required("config"): dict}, extra=vol.ALLOW_EXTRA)
+SET_CONFIG_SCHEMA = vol.Schema(
+    {
+        vol.Optional("config", default={}): dict,
+        vol.Optional(CONF_AUTO_VOLUME): cv.boolean,
+    },
+    extra=vol.ALLOW_EXTRA,
+)
 
 
 def _copy_dashboard_if_changed(source: Path, target: Path, force: bool = False) -> bool:
@@ -534,12 +540,15 @@ class NotifierHub:
         await self.async_apply_auto_volume()
 
     async def _handle_set_config(self, call: ServiceCall) -> None:
-        self.config.update(call.data.get("config", {}))
+        updates = dict(call.data.get("config") or {})
+        if CONF_AUTO_VOLUME in call.data:
+            updates[CONF_AUTO_VOLUME] = call.data[CONF_AUTO_VOLUME]
+        self.config.update(updates)
         self._async_update_presence_listener()
         self._refresh_entities()
         await self.async_install_dashboard(force=True)
         await self.async_apply_auto_volume()
-        self.set_debug("config updated", {"config_keys": sorted(call.data.get("config", {}).keys())})
+        self.set_debug("config updated", {"config_keys": sorted(updates.keys())})
 
     async def async_update_config(self) -> None:
         self.config = self._merged_config()

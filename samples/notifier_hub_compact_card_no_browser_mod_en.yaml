@@ -306,6 +306,24 @@ cards:
       - type: custom:fold-entity-row
         clickable: true
         head:
+          entity: switch.notifier_hub_auto_volume
+          icon: mdi:volume-high
+          name: Auto Volume Levels
+          tap_action:
+            action: fire-dom-event
+            fold_row: true
+        entities:
+          - entity: switch.notifier_hub_auto_volume
+            name: Auto volume
+          - number.notifier_hub_altas_horas_volume
+          - number.notifier_hub_primera_hora_volume
+          - number.notifier_hub_manana_volume
+          - number.notifier_hub_tarde_volume
+          - number.notifier_hub_atardecer_volume
+          - number.notifier_hub_noche_volume
+      - type: custom:fold-entity-row
+        clickable: true
+        head:
           entity: sensor.notifier_hub_day_period
           icon: mdi:clock-time-four-outline
           name: Auto Volume Schedule
@@ -319,22 +337,6 @@ cards:
           - time.notifier_hub_tarde_start
           - time.notifier_hub_atardecer_start
           - time.notifier_hub_noche_start
-      - type: custom:fold-entity-row
-        clickable: true
-        head:
-          entity: sensor.notifier_hub_day_period_volume
-          icon: mdi:volume-high
-          name: Auto Volume Levels
-          tap_action:
-            action: fire-dom-event
-            fold_row: true
-        entities:
-          - number.notifier_hub_altas_horas_volume
-          - number.notifier_hub_primera_hora_volume
-          - number.notifier_hub_manana_volume
-          - number.notifier_hub_tarde_volume
-          - number.notifier_hub_atardecer_volume
-          - number.notifier_hub_noche_volume
       - type: custom:fold-entity-row
         clickable: true
         head:

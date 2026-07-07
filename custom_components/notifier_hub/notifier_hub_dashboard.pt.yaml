@@ -76,6 +76,8 @@ views:
         title: Volume Automático
         show_header_toggle: false
         entities:
+          - entity: switch.notifier_hub_auto_volume
+            name: Volume automático
           - entity: sensor.notifier_hub_day_period
             name: Período atual
           - entity: sensor.notifier_hub_day_period_volume

@@ -116,8 +116,13 @@ set_config:
   name: Actualizar configuración runtime
   description: Actualiza opciones de la integración sin reiniciar Home Assistant.
   fields:
+    auto_volume:
+      name: Auto Volumen
+      description: Activa o desactiva el Auto Volumen sin abrir la configuración de la integración.
+      selector:
+        boolean:
     config:
       name: Configuración
-      required: true
+      required: false
       selector:
         object:

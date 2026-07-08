@@ -30,6 +30,7 @@ from .const import (
     CONF_HA_EVENT_NOTIFICATIONS,
     CONF_HA_EVENT_NOTIFY_SERVICES,
     CONF_AUTO_VOLUME,
+    CONF_AUTO_VOLUME_CONTROL_PLAYERS,
     CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
     CONF_DASHBOARD_COPY_REQUESTED,
     CONF_NIGHT_DND,
@@ -326,6 +327,10 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                 vol.Schema(
                     {
                         vol.Optional(CONF_AUTO_VOLUME, default=default(CONF_AUTO_VOLUME, False)): selector.BooleanSelector(),
+                        vol.Optional(
+                            CONF_AUTO_VOLUME_CONTROL_PLAYERS,
+                            default=default(CONF_AUTO_VOLUME_CONTROL_PLAYERS, True),
+                        ): selector.BooleanSelector(),
                         vol.Optional(CONF_NIGHT_DND, default=default(CONF_NIGHT_DND, False)): selector.BooleanSelector(),
                         vol.Optional(
                             CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,

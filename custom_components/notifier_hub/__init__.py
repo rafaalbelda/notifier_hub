@@ -35,6 +35,7 @@ from .const import (
     CONF_HA_EVENT_NOTIFICATIONS,
     CONF_HA_EVENT_NOTIFY_SERVICES,
     CONF_AUTO_VOLUME,
+    CONF_AUTO_VOLUME_CONTROL_PLAYERS,
     CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
     CONF_NIGHT_DND,
     CONF_INSTALL_DASHBOARD,
@@ -113,6 +114,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_HA_EVENT_NOTIFICATIONS, default=True): cv.boolean,
                 vol.Optional(CONF_HA_EVENT_NOTIFY_SERVICES, default=[]): cv.ensure_list,
                 vol.Optional(CONF_AUTO_VOLUME, default=False): cv.boolean,
+                vol.Optional(CONF_AUTO_VOLUME_CONTROL_PLAYERS, default=True): cv.boolean,
                 vol.Optional(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, default=[]): cv.ensure_list,
                 vol.Optional(CONF_NIGHT_DND, default=False): cv.boolean,
                 vol.Optional(CONF_INSTALL_DASHBOARD, default=True): cv.boolean,
@@ -157,6 +159,7 @@ SET_CONFIG_SCHEMA = vol.Schema(
     {
         vol.Optional("config", default={}): dict,
         vol.Optional(CONF_AUTO_VOLUME): cv.boolean,
+        vol.Optional(CONF_AUTO_VOLUME_CONTROL_PLAYERS): cv.boolean,
     },
     extra=vol.ALLOW_EXTRA,
 )
@@ -254,6 +257,7 @@ class NotifierHub:
         data.setdefault(CONF_HA_EVENT_NOTIFICATIONS, True)
         data.setdefault(CONF_HA_EVENT_NOTIFY_SERVICES, [])
         data.setdefault(CONF_AUTO_VOLUME, False)
+        data.setdefault(CONF_AUTO_VOLUME_CONTROL_PLAYERS, True)
         data.setdefault(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, [])
         data.setdefault(CONF_NIGHT_DND, False)
         data.setdefault(CONF_INSTALL_DASHBOARD, True)
@@ -415,6 +419,10 @@ class NotifierHub:
         self._refresh_entities()
 
     def set_debug(self, state: str, attributes: dict[str, Any]) -> None:
+        if self.hass.config.language.startswith("es"):
+            state = {
+                "config options updated": "opciones de configuracion actualizadas",
+            }.get(state, state)
         self.state["debug"] = state
         self.state["debug_attributes"] = attributes
         self._refresh_entities()
@@ -507,6 +515,16 @@ class NotifierHub:
         self._refresh_entities()
         if not self.config.get(CONF_AUTO_VOLUME, False):
             return
+        if not self.config.get(CONF_AUTO_VOLUME_CONTROL_PLAYERS, True):
+            self.set_debug(
+                "auto volume message only",
+                {
+                    "period": self.state["day_period"],
+                    "volume": self.state["day_period_volume"],
+                    "volume_level": self.state["day_period_volume_level"],
+                },
+            )
+            return
         players = self.auto_volume_players()
         if not players:
             self.set_debug(
@@ -543,6 +561,8 @@ class NotifierHub:
         updates = dict(call.data.get("config") or {})
         if CONF_AUTO_VOLUME in call.data:
             updates[CONF_AUTO_VOLUME] = call.data[CONF_AUTO_VOLUME]
+        if CONF_AUTO_VOLUME_CONTROL_PLAYERS in call.data:
+            updates[CONF_AUTO_VOLUME_CONTROL_PLAYERS] = call.data[CONF_AUTO_VOLUME_CONTROL_PLAYERS]
         self.config.update(updates)
         self._async_update_presence_listener()
         self._refresh_entities()

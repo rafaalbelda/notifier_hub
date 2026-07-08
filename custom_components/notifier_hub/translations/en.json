@@ -93,6 +93,7 @@
           "ha_event_notifications": "Home Assistant event notifications",
           "auto_volume_section": "Auto Volume",
           "auto_volume": "Auto volume",
+          "auto_volume_control_players": "Control player volumes automatically",
           "night_dnd": "Enable DND during the night",
           "auto_volume_exclude_players": "Excluded media players",
           "install_dashboard": "Install dashboard"
@@ -130,6 +131,7 @@
           "ha_event_notifications": "Sends notifications for Home Assistant start, stop, restart and related events.",
           "auto_volume_section": "Automatic volume configuration by day period.",
           "auto_volume": "Automatically adjusts TTS volume based on the current day period.",
+          "auto_volume_control_players": "When enabled, Auto Volume also changes the configured media players automatically. When disabled, it is only used as the default volume for hub messages.",
           "night_dnd": "Automatically enables do not disturb while the current Auto Volume period is Night or Late night.",
           "auto_volume_exclude_players": "Media players that should not be controlled by auto volume.",
           "install_dashboard": "Copies the Notifier Hub dashboard YAML and shows the setup instructions."
@@ -236,11 +238,13 @@
             "name": "Auto Volume",
             "data": {
               "auto_volume": "Auto volume",
+              "auto_volume_control_players": "Control player volumes automatically",
               "night_dnd": "Enable DND during the night",
               "auto_volume_exclude_players": "Excluded media players"
             },
             "data_description": {
               "auto_volume": "Automatically adjusts TTS volume based on the current day period.",
+              "auto_volume_control_players": "When enabled, Auto Volume also changes the configured media players automatically. When disabled, it is only used as the default volume for hub messages.",
               "night_dnd": "Automatically enables do not disturb while the current Auto Volume period is Night or Late night.",
               "auto_volume_exclude_players": "Media players that should not be controlled by auto volume."
             }
@@ -285,6 +289,7 @@
           "ha_event_notifications": "Home Assistant event notifications",
           "auto_volume_section": "Auto Volume",
           "auto_volume": "Auto volume",
+          "auto_volume_control_players": "Control player volumes automatically",
           "night_dnd": "Enable DND during the night",
           "auto_volume_exclude_players": "Excluded media players",
           "install_dashboard": "Install dashboard"
@@ -322,6 +327,7 @@
           "ha_event_notifications": "Sends notifications for Home Assistant start, stop, restart and related events.",
           "auto_volume_section": "Automatic volume configuration by day period.",
           "auto_volume": "Automatically adjusts TTS volume based on the current day period.",
+          "auto_volume_control_players": "When enabled, Auto Volume also changes the configured media players automatically. When disabled, it is only used as the default volume for hub messages.",
           "night_dnd": "Automatically enables do not disturb while the current Auto Volume period is Night or Late night.",
           "auto_volume_exclude_players": "Media players that should not be controlled by auto volume.",
           "install_dashboard": "Copies the Notifier Hub dashboard YAML and shows the setup instructions."
@@ -428,11 +434,13 @@
             "name": "Auto Volume",
             "data": {
               "auto_volume": "Auto volume",
+              "auto_volume_control_players": "Control player volumes automatically",
               "night_dnd": "Enable DND during the night",
               "auto_volume_exclude_players": "Excluded media players"
             },
             "data_description": {
               "auto_volume": "Automatically adjusts TTS volume based on the current day period.",
+              "auto_volume_control_players": "When enabled, Auto Volume also changes the configured media players automatically. When disabled, it is only used as the default volume for hub messages.",
               "night_dnd": "Automatically enables do not disturb while the current Auto Volume period is Night or Late night.",
               "auto_volume_exclude_players": "Media players that should not be controlled by auto volume."
             }

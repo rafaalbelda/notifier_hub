@@ -5,6 +5,7 @@ from homeassistant.components.switch import SwitchEntity
 from .const import (
     CONF_ALEXA_NOTIFICATIONS,
     CONF_AUTO_VOLUME,
+    CONF_AUTO_VOLUME_CONTROL_PLAYERS,
     CONF_DND_MODE,
     CONF_GOOGLE_NOTIFICATIONS,
     CONF_GUEST_MODE,
@@ -29,6 +30,7 @@ SWITCHES = [
     (CONF_PHONE_NOTIFICATIONS, "Notifier Hub Phone Notifications", False, "mdi:phone-message"),
     (CONF_HA_EVENT_NOTIFICATIONS, "Notifier Hub Home Assistant Event Notifications", True, "mdi:home-assistant"),
     (CONF_AUTO_VOLUME, "Notifier Hub Auto Volume", False, "mdi:volume-high"),
+    (CONF_AUTO_VOLUME_CONTROL_PLAYERS, "Notifier Hub Auto Volume Controls Players", True, "mdi:volume-source"),
     (CONF_DND_MODE, "Notifier Hub DND", False, "mdi:bell-off"),
     (CONF_NIGHT_DND, "Notifier Hub Night DND", False, "mdi:weather-night"),
     (CONF_GUEST_MODE, "Notifier Hub Guest Mode", False, "mdi:account-group"),

@@ -121,6 +121,11 @@ set_config:
       description: Activa o desactiva el Auto Volumen sin abrir la configuración de la integración.
       selector:
         boolean:
+    auto_volume_control_players:
+      name: Auto Volumen controla reproductores
+      description: Si esta activo, Auto Volumen ajusta automaticamente los reproductores configurados. Si esta inactivo, solo se usa como volumen por defecto en mensajes del hub.
+      selector:
+        boolean:
     config:
       name: Configuración
       required: false

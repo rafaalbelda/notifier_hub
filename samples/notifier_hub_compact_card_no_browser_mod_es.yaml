@@ -315,6 +315,8 @@ cards:
         entities:
           - entity: switch.notifier_hub_auto_volume
             name: Auto Volumen
+          - entity: switch.notifier_hub_auto_volume_controls_players
+            name: Controlar reproductores
           - number.notifier_hub_altas_horas_volume
           - number.notifier_hub_primera_hora_volume
           - number.notifier_hub_manana_volume

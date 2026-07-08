@@ -57,6 +57,8 @@ views:
             name: Eventos HA
           - entity: switch.notifier_hub_auto_volume
             name: Volume automático
+          - entity: switch.notifier_hub_auto_volume_controls_players
+            name: Controlar leitores
 
       - type: entities
         title: Modos
@@ -78,6 +80,8 @@ views:
         entities:
           - entity: switch.notifier_hub_auto_volume
             name: Volume automático
+          - entity: switch.notifier_hub_auto_volume_controls_players
+            name: Controlar leitores
           - entity: sensor.notifier_hub_day_period
             name: Período atual
           - entity: sensor.notifier_hub_day_period_volume

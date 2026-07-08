@@ -132,6 +132,7 @@ notifier_hub:
   ha_event_notify_services:
     - notify.mobile_app_mi_telefono
   auto_volume: true
+  auto_volume_control_players: true
   night_dnd: false
   auto_volume_exclude_players:
     - media_player.echo_dormitorio
@@ -631,6 +632,7 @@ Notifier Hub crea interruptores que puedes usar desde la UI, el dashboard o auto
 | `switch.notifier_hub_phone_notifications` | `phone_notifications` | Llamadas telefonicas. |
 | `switch.notifier_hub_home_assistant_event_notifications` | `ha_event_notifications` | Avisos del ciclo de vida de Home Assistant. |
 | `switch.notifier_hub_auto_volume` | `auto_volume` | Volumen automatico segun periodo del dia. |
+| `switch.notifier_hub_auto_volume_controls_players` | `auto_volume_control_players` | Tambien cambia automaticamente el volumen de los reproductores configurados. Desactivalo para usar Auto Volume solo en mensajes del hub. |
 | `switch.notifier_hub_dnd` | `dnd_mode` | Modo no molestar. |
 | `switch.notifier_hub_night_dnd` | `night_dnd` | Aplica DND automaticamente durante los periodos `Noche` y `Altas horas` de Auto Volume. |
 | `switch.notifier_hub_guest_mode` | `guest_mode` | Permite voz cuando `location` no coincide. |
@@ -644,7 +646,8 @@ Cuando `auto_volume` esta activo:
 
 - Los mensajes Alexa y Google sin `volume` explicito usan el volumen del periodo actual.
 - Un `volume` explicito en el mensaje tiene prioridad.
-- La integracion actualiza periodicamente el volumen de los reproductores configurados.
+- Si `auto_volume_control_players` esta activo, la integracion actualiza periodicamente el volumen de los reproductores configurados.
+- Si `auto_volume_control_players` esta inactivo, Auto Volume solo se usa como volumen por defecto para mensajes enviados por el hub.
 - `auto_volume_exclude_players` permite excluir reproductores concretos.
 - `night_dnd` permite reutilizar los periodos `Noche` y `Altas horas` para activar automaticamente DND.
 

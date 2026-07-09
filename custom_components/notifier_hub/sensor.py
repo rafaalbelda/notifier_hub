@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from .entity import NotifierHubEntity
 
 
@@ -9,6 +9,13 @@ async def async_setup_entry(hass, entry, async_add_entities):
     entities = [
         NotifierHubSensor(hub, "debug_error", "Notifier Hub Debug", "debug"),
         NotifierHubSensor(hub, "last_message", "Notifier Hub Last Message", "last_message"),
+        NotifierHubSensor(hub, "confirmation", "Notifier Hub Confirmation", "confirmation"),
+        NotifierHubSensor(
+            hub,
+            "pending_confirmations",
+            "Notifier Hub Pending Confirmations",
+            "pending_confirmations",
+        ),
         NotifierHubPersonalAssistantSensor(hub),
         NotifierHubSensor(hub, "day_period", "Notifier Hub Day Period", "day_period"),
         NotifierHubSensor(hub, "day_period_volume", "Notifier Hub Day Period Volume", "day_period_volume"),
@@ -24,6 +31,13 @@ class NotifierHubSensor(NotifierHubEntity, SensorEntity):
         self.data_key = data_key
         if data_key in {"day_period", "day_period_volume"}:
             self._attr_translation_key = data_key
+        elif data_key == "confirmation":
+            self._attr_device_class = SensorDeviceClass.ENUM
+            self._attr_options = ["idle", "pending", "confirmed", "expired"]
+            self._attr_translation_key = "confirmation"
+            self._attr_icon = "mdi:message-check-outline"
+        elif data_key == "pending_confirmations":
+            self._attr_icon = "mdi:message-check-outline"
 
     @property
     def native_value(self):
@@ -35,6 +49,10 @@ class NotifierHubSensor(NotifierHubEntity, SensorEntity):
     def extra_state_attributes(self):
         if self.data_key == "debug":
             return self.coordinator.state.get("debug_attributes", {})
+        if self.data_key == "confirmation":
+            return self.coordinator.state.get("confirmation_attributes", {})
+        if self.data_key == "pending_confirmations":
+            return self.coordinator.state.get("pending_confirmation_attributes", {})
         if self.data_key == "day_period_volume":
             return {
                 "volume_level": self.coordinator.state.get("day_period_volume_level", 0.0),

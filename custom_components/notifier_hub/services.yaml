@@ -69,6 +69,12 @@ send:
       selector:
         object:
       default: []
+    confirmation:
+      name: Confirmación
+      description: true o un diccionario con id, random_id, action, title y timeout. Añade un botón y registra si el aviso se confirma o caduca.
+      selector:
+        object:
+      default: false
     # caption:
     #   name: Pie de foto
     #   description: Pie de foto para Telegram. Si está vacío, se genera a partir del título y el mensaje.

@@ -14,6 +14,15 @@
       },
       "day_period_volume": {
         "name": "Volumen del periodo"
+      },
+      "confirmation": {
+        "name": "Confirmación",
+        "state": {
+          "idle": "Inactiva",
+          "pending": "Pendiente",
+          "confirmed": "Confirmada",
+          "expired": "Caducada"
+        }
       }
     },
     "number": {

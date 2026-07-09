@@ -368,6 +368,7 @@ Reglas especiales:
 | `called_number` | cadena | Configuracion global | Numero al que llama ha-sip. Permite sobrescribir el numero global. |
 | `image` | cadena | `""` | Imagen para Telegram, Pushover, Discord o `mobile_app`. Puede ser una ruta local o una URL, segun el servicio. |
 | `actions` | lista de diccionarios | `[]` | Botones de accion para `notify.mobile_app_*`. Cada accion requiere `action` y `title`; se pasan opciones de Companion como `uri`, `icon` y `destructive`. Consulta todas las opciones en la [documentacion de notificaciones accionables de Home Assistant Companion](https://companion.home-assistant.io/docs/notifications/actionable-notifications/). |
+| `confirmation` | booleano o diccionario | `false` | Añade un boton de confirmacion y registra el resultado. El diccionario admite `id`, `random_id`, `action`, `title` y `timeout` en segundos. |
 | `caption` | cadena | `""` | Pie de foto para Telegram. Si esta vacio, se genera con el titulo y el mensaje. |
 | `link` | cadena | `""` | Enlace añadido al texto. En Discord con `embed` se usa como URL del contenido embebido. En la UI aparece como **Enlace**. |
 | `target` | cadena o lista | `""` | Destinatario concreto pasado a `notify.*`, por ejemplo uno o varios chats de Telegram. |
@@ -442,6 +443,60 @@ actions:
     target:
       entity_id: input_boolean.lavadora_pendiente
 ```
+
+### Confirmacion de avisos
+
+`confirmation` crea automaticamente un boton y sigue su estado:
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Puerta abierta"
+  message: "La puerta del garaje sigue abierta."
+  notify: notify.mobile_app_mi_telefono
+  confirmation:
+    id: "garaje_abierto"
+    title: "Enterado"
+    timeout: 600
+```
+
+El sensor `sensor.notifier_hub_confirmation` pasa a `pending` y despues a
+`confirmed` o `expired`. Sus atributos incluyen el identificador, mensaje,
+fechas, usuario y dispositivo que confirmo. Si no se indica `id`, Notifier Hub
+genera uno unico; si no se indica `timeout`, utiliza 300 segundos. Usa
+`timeout: 0` para esperar sin caducidad.
+
+Si quieres usar un prefijo legible pero evitar reemplazar una confirmacion
+pendiente con el mismo `id`, añade `random_id: true`. Por ejemplo,
+`id: "prueba_dashboard"` generara IDs del estilo
+`prueba_dashboard_a1b2c3d4`.
+
+Varias confirmaciones pueden permanecer pendientes a la vez. El estado de
+`sensor.notifier_hub_pending_confirmations` indica cuantas hay y su atributo
+`confirmations` contiene la lista completa. `sensor.notifier_hub_confirmation`
+continua mostrando la confirmacion creada o actualizada mas recientemente. No
+reutilices el mismo `id` o `action` para avisos simultaneos, ya que el nuevo
+aviso reemplazaria al anterior.
+
+Al confirmar o caducar tambien se emite el evento
+`notifier_hub_confirmation`, cuyo `event_data` contiene los mismos datos del
+sensor. Esto permite reaccionar sin vigilar cambios de estado:
+
+```yaml
+triggers:
+  - trigger: event
+    event_type: notifier_hub_confirmation
+    event_data:
+      id: "garaje_abierto"
+      status: "confirmed"
+actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.aviso_garaje_pendiente
+```
+
+La confirmacion solo se crea cuando el envio incluye al menos un servicio
+`notify.mobile_app_*`.
 
 ### Opciones de `alexa`
 

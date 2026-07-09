@@ -19,6 +19,34 @@ views:
             name: Debug
           - entity: sensor.notifier_hub_last_message
             name: Ultimo mensaje
+          - entity: sensor.notifier_hub_confirmation
+            name: Confirmacion
+          - type: attribute
+            entity: sensor.notifier_hub_confirmation
+            attribute: id
+            name: ID de confirmacion
+          - type: attribute
+            entity: sensor.notifier_hub_confirmation
+            attribute: confirmed_at
+            name: Confirmado el
+          - type: attribute
+            entity: sensor.notifier_hub_confirmation
+            attribute: confirmed_by
+            name: Confirmado por
+          - type: attribute
+            entity: sensor.notifier_hub_confirmation
+            attribute: user_id
+            name: ID de usuario
+          - type: attribute
+            entity: sensor.notifier_hub_confirmation
+            attribute: device_id
+            name: ID de dispositivo
+          - entity: sensor.notifier_hub_pending_confirmations
+            name: Confirmaciones pendientes
+          - type: attribute
+            entity: sensor.notifier_hub_pending_confirmations
+            attribute: confirmations
+            name: Avisos pendientes
           - entity: sensor.notifier_hub_personal_assistant
             name: Asistente
           - entity: sensor.notifier_hub_home_people
@@ -193,6 +221,8 @@ views:
         entities:
           - sensor.notifier_hub_debug
           - sensor.notifier_hub_last_message
+          - sensor.notifier_hub_confirmation
+          - sensor.notifier_hub_pending_confirmations
           - sensor.notifier_hub_personal_assistant
           - sensor.notifier_hub_home_people
           - binary_sensor.notifier_hub_home_occupied

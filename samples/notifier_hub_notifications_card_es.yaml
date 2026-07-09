@@ -1,0 +1,126 @@
+type: vertical-stack
+cards:
+  - type: entities
+    title: Notificaciones
+    show_header_toggle: false
+    state_color: true
+    entities:
+      - entity: sensor.notifier_hub_last_message
+        name: Ultimo mensaje
+      - entity: sensor.notifier_hub_confirmation
+        name: Confirmacion
+      - entity: sensor.notifier_hub_pending_confirmations
+        name: Confirmaciones pendientes
+
+  - type: conditional
+    conditions:
+      - entity: sensor.notifier_hub_confirmation
+        state_not: idle
+      - entity: sensor.notifier_hub_confirmation
+        state_not: inactiva
+      - entity: sensor.notifier_hub_confirmation
+        state_not: Inactiva
+    card:
+      type: entities
+      title: Ultima confirmacion
+      show_header_toggle: false
+      state_color: true
+      entities:
+        - entity: sensor.notifier_hub_confirmation
+          name: Estado
+        - type: attribute
+          entity: sensor.notifier_hub_confirmation
+          attribute: id
+          name: ID de confirmacion
+        - type: attribute
+          entity: sensor.notifier_hub_confirmation
+          attribute: action
+          name: Accion
+        - type: attribute
+          entity: sensor.notifier_hub_confirmation
+          attribute: title
+          name: Titulo
+        - type: attribute
+          entity: sensor.notifier_hub_confirmation
+          attribute: message
+          name: Mensaje
+        - type: attribute
+          entity: sensor.notifier_hub_confirmation
+          attribute: created_at
+          name: Creada el
+        - type: attribute
+          entity: sensor.notifier_hub_confirmation
+          attribute: expires_at
+          name: Caduca el
+        - type: attribute
+          entity: sensor.notifier_hub_confirmation
+          attribute: confirmed_at
+          name: Confirmada el
+        - type: attribute
+          entity: sensor.notifier_hub_confirmation
+          attribute: confirmed_by
+          name: Confirmada por
+        - type: attribute
+          entity: sensor.notifier_hub_confirmation
+          attribute: user_id
+          name: ID de usuario
+        - type: attribute
+          entity: sensor.notifier_hub_confirmation
+          attribute: device_id
+          name: ID de dispositivo
+
+  - type: conditional
+    conditions:
+      - entity: sensor.notifier_hub_pending_confirmations
+        state_not: "0"
+      - entity: sensor.notifier_hub_pending_confirmations
+        state_not: unavailable
+      - entity: sensor.notifier_hub_pending_confirmations
+        state_not: unknown
+    card:
+      type: markdown
+      title: Confirmaciones pendientes
+      entity_id: sensor.notifier_hub_pending_confirmations
+      content: |
+        {% set confirmations = state_attr('sensor.notifier_hub_pending_confirmations', 'confirmations') or [] %}
+        {% set rows = namespace(value='') %}
+        {% for confirmation in confirmations %}
+          {% set title = (confirmation.title or 'Sin titulo') | replace('|', '\\|') %}
+          {% set message = (confirmation.message or 'Sin mensaje') | replace('|', '\\|') %}
+          {% set expires_at = confirmation.expires_at or 'Sin caducidad' %}
+          {% set rows.value = rows.value ~ '| ' ~ title ~ ' | ' ~ message ~ ' | `' ~ confirmation.id ~ '` | ' ~ expires_at ~ ' |\n' %}
+        {% endfor %}
+
+        **{{ states('sensor.notifier_hub_pending_confirmations') }} pendiente{{ '' if states('sensor.notifier_hub_pending_confirmations') == '1' else 's' }}**
+
+        {{ '| Titulo | Mensaje | ID | Caduca |\n|---|---|---|---|\n' ~ rows.value }}
+
+
+  - type: horizontal-stack
+    cards:
+      - type: button
+        name: Prueba texto
+        icon: mdi:message-text
+        tap_action:
+          action: call-service
+          service: notifier_hub.send
+          data:
+            title: Dashboard
+            message: Prueba de notificacion desde Notifier Hub
+            notify: true
+
+      - type: button
+        name: Prueba confirmacion
+        icon: mdi:message-check-outline
+        tap_action:
+          action: call-service
+          service: notifier_hub.send
+          data:
+            title: Confirmacion
+            message: Pulsa Confirmar para probar las notificaciones accionables.
+            notify: true
+            confirmation:
+              id: prueba_dashboard
+              random_id: true
+              title: Confirmar
+              timeout: 300

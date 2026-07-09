@@ -2,17 +2,20 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 from pathlib import Path
 import shutil
 from datetime import time as dt_time, timedelta
 from typing import Any
+from uuid import uuid4
 
 import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME, Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.event import async_track_state_change_event, async_track_time_interval
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.event import async_call_later, async_track_state_change_event, async_track_time_interval
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import dt as dt_util
 
@@ -64,6 +67,7 @@ from .const import (
     DEFAULT_GOOGLE_NOTIFY_SERVICE,
     DEFAULT_GOOGLE_TTS_SERVICE,
     DOMAIN,
+    EVENT_CONFIRMATION,
     EVENT_NOTIFIER,
     SERVICE_SEND,
     SERVICE_SET_CONFIG,
@@ -145,6 +149,7 @@ SEND_SCHEMA = vol.Schema(
         vol.Optional("target", default=""): object,
         vol.Optional("image", default=""): cv.string,
         vol.Optional("actions", default=[]): [dict],
+        vol.Optional("confirmation", default=False): object,
         vol.Optional("caption", default=""): cv.string,
         vol.Optional("link", default=""): cv.string,
         vol.Optional("html", default=False): object,
@@ -214,6 +219,10 @@ class NotifierHub:
             "debug": "off",
             "debug_attributes": {},
             "last_message": "",
+            "confirmation": "idle",
+            "confirmation_attributes": {},
+            "pending_confirmations": 0,
+            "pending_confirmation_attributes": {"confirmations": []},
             "alexa_speak": False,
             "alexa_attributes": {},
             "google_speak": False,
@@ -233,6 +242,9 @@ class NotifierHub:
         self._remove_ha_event_listeners: list[Any] = []
         self._remove_auto_volume_listener = None
         self._remove_presence_listener = None
+        self._remove_confirmation_listener = None
+        self._confirmation_timeouts: dict[str, Any] = {}
+        self._confirmations: dict[str, dict[str, Any]] = {}
 
     def _merged_config(self) -> dict[str, Any]:
         data = dict(self.entry.data)
@@ -287,6 +299,10 @@ class NotifierHub:
         self.hass.services.async_register(DOMAIN, SERVICE_SEND, self._handle_send, schema=SEND_SCHEMA)
         self.hass.services.async_register(DOMAIN, SERVICE_SET_CONFIG, self._handle_set_config, schema=SET_CONFIG_SCHEMA)
         self._remove_listener = self.hass.bus.async_listen(EVENT_NOTIFIER, self._handle_notifier_event)
+        self._remove_confirmation_listener = self.hass.bus.async_listen(
+            "mobile_app_notification_action",
+            self._handle_confirmation_action,
+        )
         self._remove_ha_event_listeners = [
             self.hass.bus.async_listen("homeassistant_started", self._handle_ha_started),
             self.hass.bus.async_listen("homeassistant_stop", self._handle_ha_stop),
@@ -351,6 +367,12 @@ class NotifierHub:
         if self._remove_presence_listener:
             self._remove_presence_listener()
             self._remove_presence_listener = None
+        if self._remove_confirmation_listener:
+            self._remove_confirmation_listener()
+            self._remove_confirmation_listener = None
+        for cancel_timeout in self._confirmation_timeouts.values():
+            cancel_timeout()
+        self._confirmation_timeouts.clear()
         if self.hass.services.has_service(DOMAIN, SERVICE_SEND):
             self.hass.services.async_remove(DOMAIN, SERVICE_SEND)
         if self.hass.services.has_service(DOMAIN, SERVICE_SET_CONFIG):
@@ -587,6 +609,139 @@ class NotifierHub:
             return
         await self.dispatch(data)
 
+    def _confirmation_title(self) -> str:
+        language = normalize_locale(self.hass.config.language).split("-")[0]
+        return {
+            "es": "Confirmar",
+            "pt": "Confirmar",
+        }.get(language, "Confirm")
+
+    def _is_mobile_notify_service(self, raw: str) -> bool:
+        service = h.service_name(raw)
+        if "mobile" in service:
+            return True
+        entity_id = raw.strip().lower()
+        if not entity_id.startswith("notify."):
+            return False
+        if self.hass.services.has_service("notify", service):
+            return False
+        entity_entry = er.async_get(self.hass).async_get(entity_id)
+        return entity_entry is not None and entity_entry.platform == "mobile_app"
+
+    def _set_confirmation_state(self, record: dict[str, Any]) -> None:
+        self.state["confirmation"] = record["status"]
+        self.state["confirmation_attributes"] = {
+            key: value for key, value in record.items() if key != "status"
+        }
+        pending = [
+            dict(confirmation)
+            for confirmation in self._confirmations.values()
+            if confirmation["status"] == "pending"
+        ]
+        self.state["pending_confirmations"] = len(pending)
+        self.state["pending_confirmation_attributes"] = {
+            "confirmations": pending,
+        }
+        self._refresh_entities()
+
+    def _prepare_confirmation(self, data: dict[str, Any]) -> None:
+        confirmation = data.get("confirmation", False)
+        if not isinstance(confirmation, dict) and (
+            confirmation in (None, "") or not h.check_notify(confirmation)
+        ):
+            return
+
+        options = dict(confirmation) if isinstance(confirmation, dict) else {}
+        confirmation_id = str(options.get("id") or uuid4().hex)
+        if options.get("id") and h.check_bool(options.get("random_id", False)):
+            confirmation_id = f"{confirmation_id}_{uuid4().hex[:8]}"
+        action_id = str(options.get("action") or f"NOTIFIER_HUB_CONFIRM_{confirmation_id}")
+        button_title = str(options.get("title") or self._confirmation_title())
+        try:
+            timeout = max(0.0, float(options.get("timeout", 300)))
+        except (TypeError, ValueError):
+            timeout = 300.0
+        if not math.isfinite(timeout):
+            timeout = 300.0
+
+        action = {"action": action_id, "title": button_title}
+        mobile = data.get("mobile")
+        if isinstance(mobile, dict) and "actions" in mobile:
+            mobile = dict(mobile)
+            existing_actions = mobile.get("actions")
+            if not isinstance(existing_actions, (list, tuple)):
+                existing_actions = []
+            mobile["actions"] = [*existing_actions, action]
+            data["mobile"] = mobile
+        else:
+            data["actions"] = [*data.get("actions", []), action]
+
+        created_at = dt_util.utcnow()
+        record = {
+            "status": "pending",
+            "id": confirmation_id,
+            "action": action_id,
+            "button_title": button_title,
+            "title": str(data.get("title", "")),
+            "message": str(data.get("message", "")),
+            "created_at": created_at.isoformat(),
+            "expires_at": (created_at + timedelta(seconds=timeout)).isoformat() if timeout else None,
+            "confirmed_at": None,
+            "confirmed_by": None,
+            "user_id": None,
+            "device_id": None,
+        }
+        previous_timeout = self._confirmation_timeouts.pop(action_id, None)
+        if previous_timeout:
+            previous_timeout()
+        if len(self._confirmations) >= 100:
+            for old_action, old_record in list(self._confirmations.items()):
+                if old_record["status"] != "pending":
+                    self._confirmations.pop(old_action, None)
+                if len(self._confirmations) < 100:
+                    break
+        self._confirmations[action_id] = record
+        self._set_confirmation_state(record)
+        if timeout:
+            self._confirmation_timeouts[action_id] = async_call_later(
+                self.hass,
+                timeout,
+                lambda _now: self.hass.async_create_task(self._expire_confirmation(action_id)),
+            )
+
+    async def _expire_confirmation(self, action_id: str) -> None:
+        self._confirmation_timeouts.pop(action_id, None)
+        record = self._confirmations.get(action_id)
+        if record is None or record["status"] != "pending":
+            return
+        record["status"] = "expired"
+        self._set_confirmation_state(record)
+        self.hass.bus.async_fire(EVENT_CONFIRMATION, dict(record))
+
+    async def _handle_confirmation_action(self, event) -> None:
+        action_id = str((event.data or {}).get("action", ""))
+        record = self._confirmations.get(action_id)
+        if record is None or record["status"] != "pending":
+            return
+
+        cancel_timeout = self._confirmation_timeouts.pop(action_id, None)
+        if cancel_timeout:
+            cancel_timeout()
+        user_id = event.context.user_id
+        user = await self.hass.auth.async_get_user(user_id) if user_id else None
+        device_id = (event.data or {}).get("device_id") or (event.data or {}).get("sourceDeviceID")
+        record.update(
+            {
+                "status": "confirmed",
+                "confirmed_at": dt_util.utcnow().isoformat(),
+                "confirmed_by": user.name if user else device_id or user_id or "unknown",
+                "user_id": user_id,
+                "device_id": device_id,
+            }
+        )
+        self._set_confirmation_state(record)
+        self.hass.bus.async_fire(EVENT_CONFIRMATION, dict(record))
+
     def _ha_event_message(self, key: str) -> str:
         return self._resolve_language(HA_EVENT_STRINGS).get(key, "")
 
@@ -688,6 +843,8 @@ class NotifierHub:
             if use_persistent:
                 await self.notification_manager.send_persistent(data)
             if use_notification and notify_services:
+                if any(self._is_mobile_notify_service(service) for service in notify_services):
+                    self._prepare_confirmation(data)
                 await self.notification_manager.send_notify(data, notify_services)
             if use_phone:
                 await self.phone_manager.send_voice_call(data)

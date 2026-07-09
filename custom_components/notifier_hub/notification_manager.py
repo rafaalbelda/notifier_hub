@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 
 from . import helpers as h
@@ -37,6 +38,39 @@ class NotificationManager:
         if self.hass.states.get(entity_id) is not None:
             return entity_id
         return entity_id if er.async_get(self.hass).async_get(entity_id) else None
+
+    def _is_mobile_notify_target(self, service: str, notify_entity_id: str | None = None) -> bool:
+        if "mobile" in service:
+            return True
+        if not notify_entity_id:
+            return False
+        entity_entry = er.async_get(self.hass).async_get(notify_entity_id)
+        return entity_entry is not None and entity_entry.platform == "mobile_app"
+
+    def _mobile_app_service_for_entity(self, service: str, notify_entity_id: str) -> str | None:
+        notify_services = self.hass.services.async_services().get("notify", {})
+        candidates = [
+            service,
+            f"mobile_app_{service}",
+        ]
+
+        entity_registry = er.async_get(self.hass)
+        entity_entry = entity_registry.async_get(notify_entity_id)
+        if entity_entry is not None:
+            for name in (entity_entry.name, entity_entry.original_name):
+                if name:
+                    candidates.append(f"mobile_app_{h.service_name(name)}")
+            if entity_entry.device_id:
+                device_entry = dr.async_get(self.hass).async_get(entity_entry.device_id)
+                if device_entry is not None:
+                    for name in (device_entry.name_by_user, device_entry.name):
+                        if name:
+                            candidates.append(f"mobile_app_{h.service_name(name)}")
+
+        for candidate in candidates:
+            if candidate in notify_services:
+                return candidate
+        return None
 
     async def send_persistent(self, data: dict[str, Any]) -> None:
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -82,17 +116,37 @@ class NotificationManager:
             if notify_entity_id:
                 if link:
                     prepared_message = f"{prepared_message} {link}".strip()
+                is_mobile_notify = self._is_mobile_notify_target(service, notify_entity_id)
                 entity_data = {"message": prepared_message}
                 if prepared_title:
                     entity_data["title"] = prepared_title
-                if "mobile_app" in service:
+                if is_mobile_notify:
                     payload = dict(mobile) if isinstance(mobile, dict) else {}
                     if actions:
                         payload.setdefault("actions", actions)
                     if image:
                         payload["image"] = image.replace("config/www", "local")
                     if payload:
-                        entity_data["data"] = payload
+                        mobile_service = self._mobile_app_service_for_entity(service, notify_entity_id)
+                        if mobile_service:
+                            await self.hass.services.async_call(
+                                "notify",
+                                mobile_service,
+                                {
+                                    "message": prepared_message,
+                                    "title": prepared_title,
+                                    "data": payload,
+                                },
+                                blocking=False,
+                            )
+                            continue
+                        self.hub.set_debug(
+                            "mobile notify data ignored",
+                            {
+                                "notify_entity": notify_entity_id,
+                                "reason": "notify.send_message does not accept data and no notify.mobile_app_* service was found",
+                            },
+                        )
                 await self.hass.services.async_call(
                     "notify",
                     "send_message",
@@ -134,7 +188,7 @@ class NotificationManager:
                         payload["images"] = image.replace("config/www", "local")
                     prepared_message = ""
 
-            elif "mobile" in service:
+            elif self._is_mobile_notify_target(service):
                 prepared_title = f"[{self.hub.config.get('personal_assistant', 'Assistant')} - {datetime.now().strftime('%H:%M:%S')}] {title}"
                 payload = dict(mobile) if isinstance(mobile, dict) else {}
                 if actions:

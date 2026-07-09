@@ -62,6 +62,7 @@ DEFAULT_HA_SIP_ADDON = "c7744bff_ha-sip"
 SERVICE_SEND = "send"
 SERVICE_SET_CONFIG = "set_config"
 EVENT_NOTIFIER = "notifier"
+EVENT_CONFIRMATION = "notifier_hub_confirmation"
 
 DASHBOARD_DEFAULT_LANGUAGE = "en"
 DASHBOARD_AVAILABLE_LANGUAGES = ("en", "es", "pt", "pt-BR")

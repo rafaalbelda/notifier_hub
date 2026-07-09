@@ -376,6 +376,7 @@ Special rules:
 | `called_number` | string | Global configuration | Number called by ha-sip. Overrides the global number. |
 | `image` | string | `""` | Image for Telegram, Pushover, Discord, or `mobile_app`. Can be a local path or URL depending on the service. |
 | `actions` | list of dictionaries | `[]` | Action buttons for `notify.mobile_app_*`. Each action requires `action` and `title`; Companion options such as `uri`, `icon`, and `destructive` are passed through. See every supported option in the [Home Assistant Companion actionable notifications documentation](https://companion.home-assistant.io/docs/notifications/actionable-notifications/). |
+| `confirmation` | boolean or dictionary | `false` | Adds a confirmation button and tracks its result. The dictionary accepts `id`, `random_id`, `action`, `title`, and a `timeout` in seconds. |
 | `caption` | string | `""` | Telegram photo caption. If empty, it is generated from the title and message. |
 | `link` | string | `""` | Link added to the text. In Discord with `embed`, it is used as the embedded content URL. In the UI it appears as **Link**. |
 | `target` | string or list | `""` | Specific target passed to `notify.*`, for example one or more Telegram chats. |
@@ -448,6 +449,59 @@ actions:
     target:
       entity_id: input_boolean.washing_pending
 ```
+
+### Notification confirmation
+
+`confirmation` automatically creates a button and tracks its state:
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Door open"
+  message: "The garage door is still open."
+  notify: notify.mobile_app_my_phone
+  confirmation:
+    id: "garage_open"
+    title: "Acknowledged"
+    timeout: 600
+```
+
+The `sensor.notifier_hub_confirmation` state changes to `pending`, then to
+`confirmed` or `expired`. Its attributes include the identifier, message,
+timestamps, and the user or device that confirmed it. Notifier Hub generates
+a unique `id` when omitted and uses a 300-second timeout by default. Use
+`timeout: 0` to wait indefinitely.
+
+If you want a readable prefix without replacing a pending confirmation that
+uses the same `id`, add `random_id: true`. For example, `id: "dashboard_test"`
+generates IDs such as `dashboard_test_a1b2c3d4`.
+
+Several confirmations can remain pending simultaneously.
+`sensor.notifier_hub_pending_confirmations` reports their count and its
+`confirmations` attribute contains the complete list.
+`sensor.notifier_hub_confirmation` continues to show the most recently
+created or updated confirmation. Do not reuse the same `id` or `action` for
+simultaneous notifications because the newer one replaces the previous one.
+
+When the notification is confirmed or expires, Notifier Hub also fires a
+`notifier_hub_confirmation` event whose `event_data` contains the same details
+as the sensor. This allows automations to react without tracking state changes:
+
+```yaml
+triggers:
+  - trigger: event
+    event_type: notifier_hub_confirmation
+    event_data:
+      id: "garage_open"
+      status: "confirmed"
+actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.garage_alert_pending
+```
+
+A confirmation is only created when the delivery includes at least one
+`notify.mobile_app_*` service.
 
 ### `alexa` options
 

@@ -376,7 +376,7 @@ Special rules:
 | `called_number` | string | Global configuration | Number called by ha-sip. Overrides the global number. |
 | `image` | string | `""` | Image for Telegram, Pushover, Discord, or `mobile_app`. Can be a local path or URL depending on the service. |
 | `actions` | list of dictionaries | `[]` | Action buttons for `notify.mobile_app_*`. Each action requires `action` and `title`; Companion options such as `uri`, `icon`, and `destructive` are passed through. See every supported option in the [Home Assistant Companion actionable notifications documentation](https://companion.home-assistant.io/docs/notifications/actionable-notifications/). |
-| `confirmation` | boolean or dictionary | `false` | Adds a confirmation button and tracks its result. The dictionary accepts `id`, `random_id`, `action`, `title`, and a `timeout` in seconds. |
+| `confirmation` | boolean or dictionary | `false` | Adds a confirmation button and tracks its result. The dictionary accepts `id`, `random_id`, `action`, `title`, a `timeout` in seconds, `tag`, `persistent_notification_id`, and `escalate`/`escalation`. |
 | `caption` | string | `""` | Telegram photo caption. If empty, it is generated from the title and message. |
 | `link` | string | `""` | Link added to the text. In Discord with `embed`, it is used as the embedded content URL. In the UI it appears as **Link**. |
 | `target` | string or list | `""` | Specific target passed to `notify.*`, for example one or more Telegram chats. |
@@ -472,9 +472,54 @@ timestamps, and the user or device that confirmed it. Notifier Hub generates
 a unique `id` when omitted and uses a 300-second timeout by default. Use
 `timeout: 0` to wait indefinitely.
 
+When a confirmation is confirmed or expires, Notifier Hub also tries to clear
+the related notifications. For mobile it sends `clear_notification` to the same
+`notify.mobile_app_*` service using the same `tag`. For Home Assistant it
+creates a dedicated persistent notification and dismisses it with
+`persistent_notification.dismiss`. Use `confirmation.tag` and
+`confirmation.persistent_notification_id` if you want to control those
+identifiers.
+
 If you want a readable prefix without replacing a pending confirmation that
 uses the same `id`, add `random_id: true`. For example, `id: "dashboard_test"`
 generates IDs such as `dashboard_test_a1b2c3d4`.
+
+To escalate a notification that expires without confirmation, add `escalate`
+or `escalation`. It can be `true`, a dictionary, or a list of dictionaries
+using `notifier_hub.send` payloads. Notifier Hub removes `confirmation` from
+those payloads to avoid accidental loops.
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Freezer"
+  message: "The freezer temperature is too high."
+  notify: notify.mobile_app_my_phone
+  confirmation:
+    id: "freezer_high"
+    title: "Checked"
+    timeout: 300
+    escalate:
+      title: "Freezer not confirmed"
+      message: "Nobody confirmed the freezer alert."
+      notify: true
+      alexa: true
+      priority: true
+```
+
+You can also define several escalation steps at once:
+
+```yaml
+confirmation:
+  id: "garage_open"
+  timeout: 600
+  escalate:
+    - message: "Nobody confirmed the garage door alert."
+      notify: notify.mobile_app_other_phone
+    - message: "The garage door is still unconfirmed."
+      alexa: true
+      phone: true
+```
 
 Several confirmations can remain pending simultaneously.
 `sensor.notifier_hub_pending_confirmations` reports their count and its

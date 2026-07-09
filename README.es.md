@@ -368,7 +368,7 @@ Reglas especiales:
 | `called_number` | cadena | Configuracion global | Numero al que llama ha-sip. Permite sobrescribir el numero global. |
 | `image` | cadena | `""` | Imagen para Telegram, Pushover, Discord o `mobile_app`. Puede ser una ruta local o una URL, segun el servicio. |
 | `actions` | lista de diccionarios | `[]` | Botones de accion para `notify.mobile_app_*`. Cada accion requiere `action` y `title`; se pasan opciones de Companion como `uri`, `icon` y `destructive`. Consulta todas las opciones en la [documentacion de notificaciones accionables de Home Assistant Companion](https://companion.home-assistant.io/docs/notifications/actionable-notifications/). |
-| `confirmation` | booleano o diccionario | `false` | Añade un boton de confirmacion y registra el resultado. El diccionario admite `id`, `random_id`, `action`, `title` y `timeout` en segundos. |
+| `confirmation` | booleano o diccionario | `false` | Añade un boton de confirmacion y registra el resultado. El diccionario admite `id`, `random_id`, `action`, `title`, `timeout` en segundos, `tag`, `persistent_notification_id` y `escalate`/`escalation`. |
 | `caption` | cadena | `""` | Pie de foto para Telegram. Si esta vacio, se genera con el titulo y el mensaje. |
 | `link` | cadena | `""` | Enlace añadido al texto. En Discord con `embed` se usa como URL del contenido embebido. En la UI aparece como **Enlace**. |
 | `target` | cadena o lista | `""` | Destinatario concreto pasado a `notify.*`, por ejemplo uno o varios chats de Telegram. |
@@ -466,10 +466,79 @@ fechas, usuario y dispositivo que confirmo. Si no se indica `id`, Notifier Hub
 genera uno unico; si no se indica `timeout`, utiliza 300 segundos. Usa
 `timeout: 0` para esperar sin caducidad.
 
+Cuando una confirmacion se confirma o caduca, Notifier Hub tambien intenta
+limpiar las notificaciones relacionadas. Para el movil envia
+`clear_notification` al mismo `notify.mobile_app_*` usando el mismo `tag`.
+Para Home Assistant crea una notificacion persistente propia y la descarta con
+`persistent_notification.dismiss`. Puedes controlar esos identificadores con
+`confirmation.tag` y `confirmation.persistent_notification_id`.
+
 Si quieres usar un prefijo legible pero evitar reemplazar una confirmacion
 pendiente con el mismo `id`, añade `random_id: true`. Por ejemplo,
 `id: "prueba_dashboard"` generara IDs del estilo
 `prueba_dashboard_a1b2c3d4`.
+
+Para escalar un aviso que caduca sin confirmacion, añade `escalate` o
+`escalation`. Puede ser `true`, un diccionario o una lista de diccionarios con
+payloads de `notifier_hub.send`. Notifier Hub elimina `confirmation` de esos
+payloads para evitar bucles accidentales.
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Congelador"
+  message: "La temperatura del congelador es demasiado alta."
+  notify: notify.mobile_app_mi_telefono
+  confirmation:
+    id: "congelador_alto"
+    title: "Revisado"
+    timeout: 300
+    escalate:
+      title: "Congelador sin confirmar"
+      message: "Nadie confirmo el aviso del congelador."
+      notify: true
+      alexa: true
+      priority: true
+```
+
+Tambien puedes definir varios pasos a la vez:
+
+```yaml
+confirmation:
+  id: "garaje_abierto"
+  timeout: 600
+  escalate:
+    - message: "Nadie confirmo la puerta del garaje."
+      notify: notify.mobile_app_otro_telefono
+    - message: "La puerta del garaje sigue sin confirmar."
+      alexa: true
+      phone: true
+```
+
+Ejemplo escalando a una Alexa concreta si nadie confirma:
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Puerta abierta"
+  message: "La puerta del garaje sigue abierta."
+  notify: notify.mobile_app_mi_telefono
+  confirmation:
+    id: "garaje_abierto"
+    title: "Enterado"
+    timeout: 300
+    escalate:
+      title: "Puerta sin confirmar"
+      message: "Nadie confirmo el aviso de la puerta del garaje."
+      notify: false
+      no_show: true
+      alexa:
+        media_player: media_player.alexa_salon
+        message: "Atencion. Nadie ha confirmado el aviso de la puerta del garaje."
+        type: announce
+        volume: 0.45
+        priority: true
+```
 
 Varias confirmaciones pueden permanecer pendientes a la vez. El estado de
 `sensor.notifier_hub_pending_confirmations` indica cuantas hay y su atributo

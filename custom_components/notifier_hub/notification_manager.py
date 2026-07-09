@@ -75,6 +75,21 @@ class NotificationManager:
     async def send_persistent(self, data: dict[str, Any]) -> None:
         timestamp = datetime.now().strftime("%H:%M:%S")
         message = h.replace_regular(data.get("message", ""), SUB_WRAP if self.hub.config.get("wrap_text") else SUB_NOWRAP)
+        persistent_notification_id = data.get("persistent_notification_id")
+        if persistent_notification_id:
+            await self.hass.services.async_call(
+                "persistent_notification",
+                "create",
+                {
+                    "notification_id": persistent_notification_id,
+                    "title": data.get("title") or self.hub.config.get("personal_assistant", "Notifier Hub"),
+                    "message": message,
+                },
+                blocking=False,
+            )
+            data["_persistent_notification_created"] = True
+            return
+
         line = f"{timestamp} - {message}"
         self.buffer = f"{self.buffer}\n{line}" if len(self.buffer) < 2500 else line
         await self.hass.services.async_call(
@@ -102,6 +117,7 @@ class NotificationManager:
         telegram = data.get("telegram", "")
         pushover = data.get("pushover", "")
         discord = data.get("discord", "")
+        persistent_notification_id = data.get("persistent_notification_id")
 
         self.hub.set_last_message(message[:245])
 
@@ -152,6 +168,21 @@ class NotificationManager:
                     "send_message",
                     entity_data,
                     target={"entity_id": notify_entity_id},
+                    blocking=False,
+                )
+                continue
+
+            if service == "persistent_notification" and persistent_notification_id:
+                if h.check_bool(data.get("_persistent_notification_created", False)):
+                    continue
+                await self.hass.services.async_call(
+                    "persistent_notification",
+                    "create",
+                    {
+                        "notification_id": persistent_notification_id,
+                        "title": prepared_title.replace("*", ""),
+                        "message": prepared_message,
+                    },
                     blocking=False,
                 )
                 continue

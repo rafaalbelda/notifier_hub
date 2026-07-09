@@ -644,7 +644,43 @@ class NotifierHub:
         }
         self._refresh_entities()
 
-    def _prepare_confirmation(self, data: dict[str, Any]) -> None:
+    def _confirmation_escalations(
+        self,
+        options: dict[str, Any],
+        data: dict[str, Any],
+        confirmation_id: str,
+    ) -> list[dict[str, Any]]:
+        escalation = options.get("escalate", options.get("escalation", False))
+        if escalation in (None, "") or not h.check_notify(escalation):
+            return []
+
+        title = str(data.get("title", "")).strip()
+        message = str(data.get("message", "")).strip()
+        default_payload = {
+            "title": f"{title} sin confirmar" if title else "Aviso sin confirmar",
+            "message": f"No se confirmo a tiempo: {message}" if message else "Un aviso no fue confirmado a tiempo.",
+            "notify": True,
+            "no_show": True,
+            "priority": True,
+        }
+
+        if isinstance(escalation, dict):
+            raw_payloads = [escalation]
+        elif isinstance(escalation, (list, tuple)):
+            raw_payloads = [item for item in escalation if isinstance(item, dict)]
+        else:
+            raw_payloads = [default_payload]
+
+        payloads: list[dict[str, Any]] = []
+        for raw_payload in raw_payloads:
+            payload = dict(default_payload)
+            payload.update(raw_payload)
+            payload.pop("confirmation", None)
+            payload.setdefault("confirmation_id", confirmation_id)
+            payloads.append(payload)
+        return payloads
+
+    def _prepare_confirmation(self, data: dict[str, Any], notify_services: list[str]) -> None:
         confirmation = data.get("confirmation", False)
         if not isinstance(confirmation, dict) and (
             confirmation in (None, "") or not h.check_notify(confirmation)
@@ -664,8 +700,22 @@ class NotifierHub:
         if not math.isfinite(timeout):
             timeout = 300.0
 
+        mobile = dict(data.get("mobile")) if isinstance(data.get("mobile"), dict) else {}
+        notification_tag = str(
+            options.get("tag")
+            or options.get("notification_tag")
+            or mobile.get("tag")
+            or f"notifier_hub_confirmation_{confirmation_id}"
+        )
+        persistent_notification_id = str(
+            options.get("persistent_notification_id")
+            or f"notifier_hub_confirmation_{confirmation_id}"
+        )
+        mobile.setdefault("tag", notification_tag)
+        data["mobile"] = mobile
+        data["persistent_notification_id"] = persistent_notification_id
+
         action = {"action": action_id, "title": button_title}
-        mobile = data.get("mobile")
         if isinstance(mobile, dict) and "actions" in mobile:
             mobile = dict(mobile)
             existing_actions = mobile.get("actions")
@@ -690,6 +740,12 @@ class NotifierHub:
             "confirmed_by": None,
             "user_id": None,
             "device_id": None,
+            "escalations": self._confirmation_escalations(options, data, confirmation_id),
+            "escalated_at": None,
+            "escalated": False,
+            "notification_tag": notification_tag,
+            "persistent_notification_id": persistent_notification_id,
+            "notify_services": list(notify_services),
         }
         previous_timeout = self._confirmation_timeouts.pop(action_id, None)
         if previous_timeout:
@@ -706,8 +762,13 @@ class NotifierHub:
             self._confirmation_timeouts[action_id] = async_call_later(
                 self.hass,
                 timeout,
-                lambda _now: self.hass.async_create_task(self._expire_confirmation(action_id)),
+                lambda _now: self._schedule_expire_confirmation(action_id),
             )
+
+    def _schedule_expire_confirmation(self, action_id: str) -> None:
+        self.hass.loop.call_soon_threadsafe(
+            lambda: self.hass.async_create_task(self._expire_confirmation(action_id))
+        )
 
     async def _expire_confirmation(self, action_id: str) -> None:
         self._confirmation_timeouts.pop(action_id, None)
@@ -715,8 +776,55 @@ class NotifierHub:
         if record is None or record["status"] != "pending":
             return
         record["status"] = "expired"
+        record["escalated_at"] = dt_util.utcnow().isoformat() if record.get("escalations") else None
+        record["escalated"] = bool(record.get("escalations"))
         self._set_confirmation_state(record)
         self.hass.bus.async_fire(EVENT_CONFIRMATION, dict(record))
+        await self._clear_confirmation_notification(record)
+        await self._clear_confirmation_persistent_notification(record)
+        for escalation in record.get("escalations", []):
+            await self.dispatch(dict(escalation))
+
+    async def _clear_confirmation_notification(self, record: dict[str, Any]) -> None:
+        notification_tag = record.get("notification_tag")
+        if not notification_tag:
+            return
+        for raw in record.get("notify_services", []):
+            service = h.service_name(str(raw))
+            if not self.hass.services.has_service("notify", service):
+                continue
+            if not self._is_mobile_notify_service(str(raw)):
+                continue
+            await self.hass.services.async_call(
+                "notify",
+                service,
+                {"message": "clear_notification", "data": {"tag": notification_tag}},
+                blocking=False,
+            )
+
+    async def _clear_confirmation_persistent_notification(self, record: dict[str, Any]) -> None:
+        notification_ids = [
+            record.get("persistent_notification_id"),
+            record.get("notification_tag"),
+            f"notifier_hub_confirmation_{record.get('id')}" if record.get("id") else None,
+        ]
+        notification_ids = list(dict.fromkeys(str(item) for item in notification_ids if item))
+        if not notification_ids:
+            return
+        for notification_id in notification_ids:
+            await self.hass.services.async_call(
+                "persistent_notification",
+                "dismiss",
+                {"notification_id": notification_id},
+                blocking=True,
+            )
+        self.set_debug(
+            "confirmation notification dismissed",
+            {
+                "id": record.get("id"),
+                "persistent_notification_ids": notification_ids,
+            },
+        )
 
     async def _handle_confirmation_action(self, event) -> None:
         action_id = str((event.data or {}).get("action", ""))
@@ -741,6 +849,8 @@ class NotifierHub:
         )
         self._set_confirmation_state(record)
         self.hass.bus.async_fire(EVENT_CONFIRMATION, dict(record))
+        await self._clear_confirmation_notification(record)
+        await self._clear_confirmation_persistent_notification(record)
 
     def _ha_event_message(self, key: str) -> str:
         return self._resolve_language(HA_EVENT_STRINGS).get(key, "")
@@ -840,11 +950,12 @@ class NotifierHub:
 
         self.set_debug("OK", {})
         try:
+            if use_notification and notify_services:
+                if any(self._is_mobile_notify_service(service) for service in notify_services):
+                    self._prepare_confirmation(data, notify_services)
             if use_persistent:
                 await self.notification_manager.send_persistent(data)
             if use_notification and notify_services:
-                if any(self._is_mobile_notify_service(service) for service in notify_services):
-                    self._prepare_confirmation(data)
                 await self.notification_manager.send_notify(data, notify_services)
             if use_phone:
                 await self.phone_manager.send_voice_call(data)

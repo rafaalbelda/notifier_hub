@@ -71,7 +71,7 @@ send:
       default: []
     confirmation:
       name: Confirmación
-      description: true o un diccionario con id, random_id, action, title y timeout. Añade un botón y registra si el aviso se confirma o caduca.
+      description: true o un diccionario con id, random_id, action, title, timeout, tag, persistent_notification_id y escalate/escalation. Añade un botón, registra si el aviso se confirma o caduca, limpia notificaciones al confirmar/caducar y puede escalar.
       selector:
         object:
       default: false

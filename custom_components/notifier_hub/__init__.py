@@ -144,6 +144,7 @@ SEND_SCHEMA = vol.Schema(
         vol.Optional("called_number", default=""): cv.string,
         vol.Optional("target", default=""): object,
         vol.Optional("image", default=""): cv.string,
+        vol.Optional("actions", default=[]): [dict],
         vol.Optional("caption", default=""): cv.string,
         vol.Optional("link", default=""): cv.string,
         vol.Optional("html", default=False): object,

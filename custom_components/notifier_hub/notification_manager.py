@@ -59,6 +59,7 @@ class NotificationManager:
         title = str(data.get("title", ""))
         html = h.check_bool(data.get("html", False))
         image = str(data.get("image", ""))
+        actions = data.get("actions", [])
         link = str(data.get("link", ""))
         target = data.get("target", "")
         caption = str(data.get("caption", ""))
@@ -84,6 +85,14 @@ class NotificationManager:
                 entity_data = {"message": prepared_message}
                 if prepared_title:
                     entity_data["title"] = prepared_title
+                if "mobile_app" in service:
+                    payload = dict(mobile) if isinstance(mobile, dict) else {}
+                    if actions:
+                        payload.setdefault("actions", actions)
+                    if image:
+                        payload["image"] = image.replace("config/www", "local")
+                    if payload:
+                        entity_data["data"] = payload
                 await self.hass.services.async_call(
                     "notify",
                     "send_message",
@@ -128,6 +137,8 @@ class NotificationManager:
             elif "mobile" in service:
                 prepared_title = f"[{self.hub.config.get('personal_assistant', 'Assistant')} - {datetime.now().strftime('%H:%M:%S')}] {title}"
                 payload = dict(mobile) if isinstance(mobile, dict) else {}
+                if actions:
+                    payload.setdefault("actions", actions)
                 if payload.pop("tts", False):
                     payload["tts_text"] = f"{title} {message}".strip()
                     prepared_message = "TTS"

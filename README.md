@@ -375,6 +375,7 @@ Special rules:
 | `phone` | boolean | `false` | Requests a call through ha-sip. The channel must be enabled or the message must be priority. |
 | `called_number` | string | Global configuration | Number called by ha-sip. Overrides the global number. |
 | `image` | string | `""` | Image for Telegram, Pushover, Discord, or `mobile_app`. Can be a local path or URL depending on the service. |
+| `actions` | list of dictionaries | `[]` | Action buttons for `notify.mobile_app_*`. Each action requires `action` and `title`; Companion options such as `uri`, `icon`, and `destructive` are passed through. See every supported option in the [Home Assistant Companion actionable notifications documentation](https://companion.home-assistant.io/docs/notifications/actionable-notifications/). |
 | `caption` | string | `""` | Telegram photo caption. If empty, it is generated from the title and message. |
 | `link` | string | `""` | Link added to the text. In Discord with `embed`, it is used as the embedded content URL. In the UI it appears as **Link**. |
 | `target` | string or list | `""` | Specific target passed to `notify.*`, for example one or more Telegram chats. |
@@ -390,6 +391,63 @@ These fields allow provider-specific options:
 | `pushover` | dictionary | Additional payload for Pushover. Automatically receives `image` and `priority` when set. |
 | `mobile` | dictionary | Additional payload for `notify.mobile_app_*`. With `tts: true`, it sends the text through `tts_text`. |
 | `discord` | dictionary | Additional payload for Discord. If it includes the `embed` key, it uses `title`, `description`, `link`, and `image` to create embedded content. |
+
+### Actionable mobile notification
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Washing machine"
+  message: "The washing cycle has finished."
+  notify: notify.mobile_app_my_phone
+  actions:
+    - action: "WASHING_ACK"
+      title: "Done"
+    - action: "URI"
+      title: "Open laundry room"
+      uri: "/lovelace/laundry"
+```
+
+Home Assistant emits the usual `mobile_app_notification_action` event when a
+button is pressed. Use the value from `action` to handle it in an automation.
+
+`mobile.actions` means the `actions` key inside the advanced `mobile`
+dictionary. It sends the native Home Assistant Companion payload directly:
+
+```yaml
+mobile:
+  actions:
+    - action: "WASHING_ACK"
+      title: "Done"
+```
+
+It is equivalent to the top-level `actions` shortcut. If both are supplied,
+`mobile.actions` takes precedence.
+
+`action: "WASHING_ACK"` is the button's internal identifier. You choose this
+name; it should be unique, descriptive, and contain no spaces. It does not
+call a service directly. When **Done** is pressed, the mobile app emits a
+`mobile_app_notification_action` event containing that identifier:
+
+```yaml
+event_type: mobile_app_notification_action
+data:
+  action: WASHING_ACK
+```
+
+An automation can listen for the event and perform the desired action:
+
+```yaml
+triggers:
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: WASHING_ACK
+actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.washing_pending
+```
 
 ### `alexa` options
 

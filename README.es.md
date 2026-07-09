@@ -367,6 +367,7 @@ Reglas especiales:
 | `phone` | booleano | `false` | Solicita una llamada mediante ha-sip. El canal debe estar activado o el mensaje debe ser prioritario. |
 | `called_number` | cadena | Configuracion global | Numero al que llama ha-sip. Permite sobrescribir el numero global. |
 | `image` | cadena | `""` | Imagen para Telegram, Pushover, Discord o `mobile_app`. Puede ser una ruta local o una URL, segun el servicio. |
+| `actions` | lista de diccionarios | `[]` | Botones de accion para `notify.mobile_app_*`. Cada accion requiere `action` y `title`; se pasan opciones de Companion como `uri`, `icon` y `destructive`. Consulta todas las opciones en la [documentacion de notificaciones accionables de Home Assistant Companion](https://companion.home-assistant.io/docs/notifications/actionable-notifications/). |
 | `caption` | cadena | `""` | Pie de foto para Telegram. Si esta vacio, se genera con el titulo y el mensaje. |
 | `link` | cadena | `""` | Enlace añadido al texto. En Discord con `embed` se usa como URL del contenido embebido. En la UI aparece como **Enlace**. |
 | `target` | cadena o lista | `""` | Destinatario concreto pasado a `notify.*`, por ejemplo uno o varios chats de Telegram. |
@@ -382,6 +383,65 @@ Los siguientes campos permiten añadir opciones propias de cada proveedor:
 | `pushover` | diccionario | Payload adicional para Pushover. Recibe automaticamente `image` y `priority` cuando se indican. |
 | `mobile` | diccionario | Payload adicional para `notify.mobile_app_*`. Con `tts: true`, envia el texto mediante `tts_text`. |
 | `discord` | diccionario | Payload adicional para Discord. Si incluye la clave `embed`, utiliza `title`, `description`, `link` e `image` para crear contenido embebido. |
+
+### Notificacion movil accionable
+
+```yaml
+action: notifier_hub.send
+data:
+  title: "Lavadora"
+  message: "El ciclo de lavado ha terminado."
+  notify: notify.mobile_app_mi_telefono
+  actions:
+    - action: "LAVADORA_CONFIRMADA"
+      title: "Hecho"
+    - action: "URI"
+      title: "Abrir lavadero"
+      uri: "/lovelace/lavadero"
+```
+
+Home Assistant emite el evento habitual `mobile_app_notification_action`
+cuando se pulsa un boton. Usa el valor de `action` para gestionarlo en una
+automatizacion.
+
+`mobile.actions` significa la clave `actions` dentro del diccionario avanzado
+`mobile`. Permite enviar directamente el payload nativo de Home Assistant
+Companion:
+
+```yaml
+mobile:
+  actions:
+    - action: "LAVADORA_CONFIRMADA"
+      title: "Hecho"
+```
+
+Es equivalente al campo superior `actions`, que actua como atajo. Si se
+indican los dos, `mobile.actions` tiene prioridad.
+
+`action: "LAVADORA_CONFIRMADA"` es el identificador interno del boton. El
+nombre lo eliges tu; conviene que sea unico, descriptivo y sin espacios. No
+ejecuta directamente ningun servicio. Al pulsar **Hecho**, la aplicacion movil
+genera un evento `mobile_app_notification_action` con ese identificador:
+
+```yaml
+event_type: mobile_app_notification_action
+data:
+  action: LAVADORA_CONFIRMADA
+```
+
+Una automatizacion puede escuchar el evento y ejecutar la accion deseada:
+
+```yaml
+triggers:
+  - trigger: event
+    event_type: mobile_app_notification_action
+    event_data:
+      action: LAVADORA_CONFIRMADA
+actions:
+  - action: input_boolean.turn_off
+    target:
+      entity_id: input_boolean.lavadora_pendiente
+```
 
 ### Opciones de `alexa`
 

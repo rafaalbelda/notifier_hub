@@ -63,6 +63,12 @@ send:
       selector:
         text:
       default: ""
+    actions:
+      name: Acciones
+      description: Botones para notify.mobile_app_*. Cada elemento requiere action y title; también admite uri y otras opciones de Companion.
+      selector:
+        object:
+      default: []
     # caption:
     #   name: Pie de foto
     #   description: Pie de foto para Telegram. Si está vacío, se genera a partir del título y el mensaje.

@@ -2,7 +2,7 @@
 
 [English](README.md) | [Espanol](README.es.md)
 
-Home Assistant custom integration for centralizing text notifications, persistent notifications, Alexa, Google/Cast, and phone calls.
+Home Assistant custom integration for centralizing and intelligently routing notifications across text services, persistent notifications, Alexa TTS, Google/Cast TTS, phone calls, Home Assistant alerts, and Auto Volume controls.
 
 It is a native integration conversion of the AppDaemon app [`Centro Notifiche`](https://github.com/caiosweet/Package-Notification-HUB-AppDaemon) / [`Notifier`](https://github.com/jumping2000/notifier). It keeps compatibility with the legacy `notifier` event, but new automations should use the `notifier_hub.send` service.
 

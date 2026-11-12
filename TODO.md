@@ -50,7 +50,7 @@ This document tracks feature requests, suggestions, and architectural improvemen
     - [x] Create a GitHub Release using semantic versioning (e.g. `1.0.4` or `v1.0.4`) matching the version in `manifest.json`.
     - [x] Add GitHub repository topics (`home-assistant`, `hacs`, `custom-component`, `alexa`, `tts`, `notifications`).
     - [x] Ensure GitHub Issues are enabled and consider adding standard `.github/ISSUE_TEMPLATE/` files (bug report, feature request).
-    - [ ] *(Optional but recommended)* Submit logo & icon to the [home-assistant/brands](https://github.com/home-assistant/brands) repository under `custom_integrations/notifier_hub/` (`icon.png`, `icon@2x.png`, `logo.png`, `logo@2x.png`).
+    - [x] Submit logo & icon to the [home-assistant/brands](https://github.com/home-assistant/brands) repository under `custom_integrations/notifier_hub/` (PR [#11432](https://github.com/home-assistant/brands/pull/11432)).
   - **Submission Steps**:
     1. Fork the official [hacs/default](https://github.com/hacs/default) repository.
     2. Edit `repositories/integration` and add `"rafaalbelda/notifier_hub"` in alphabetical order.

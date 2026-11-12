@@ -54,7 +54,7 @@ This document tracks feature requests, suggestions, and architectural improvemen
   - **Submission Steps**:
     - [x] Fork the official [hacs/default](https://github.com/hacs/default) repository.
     - [x] Edit `integration` and add `"rafaalbelda/notifier_hub"` in alphabetical order.
-    - [x] Open a Pull Request against `hacs/default` (PR [#14031](https://github.com/hacs/default/pull/14031)).
+    - [x] Open a Pull Request against `hacs/default` (PR [#14032](https://github.com/hacs/default/pull/14032)).
     - [ ] Wait for automated CI action checks (`hacs.json`, `manifest.json`, repository release checks) to pass.
     - [ ] Await HACS maintainer review and merge.
 

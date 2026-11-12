@@ -1,0 +1,86 @@
+name: Bug Report
+description: Create a report to help us improve Notifier Hub
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue!
+        Please fill out the information below to help us diagnose and fix the issue.
+
+  - type: input
+    id: version
+    attributes:
+      label: Notifier Hub Version
+      description: What version of Notifier Hub are you using? (Check HACS or custom_components/notifier_hub/manifest.json)
+      placeholder: e.g. 1.0.2
+    validations:
+      required: true
+
+  - type: input
+    id: ha_version
+    attributes:
+      label: Home Assistant Version
+      description: What version of Home Assistant Core are you running?
+      placeholder: e.g. 2026.3.2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: installation_type
+    attributes:
+      label: Installation Type
+      description: How is your Home Assistant instance deployed?
+      options:
+        - Home Assistant OS
+        - Home Assistant Supervised
+        - Home Assistant Container (Docker)
+        - Home Assistant Core (Python venv)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description of the Bug
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Call service 'notifier_hub.send' with ...
+        2. Set config ...
+        3. See error ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Log Output / Traceback
+      description: Please paste any relevant error logs from Home Assistant (Settings -> System -> Logs).
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context or screenshots about the problem here.
+    validations:
+      required: false

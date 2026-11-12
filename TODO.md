@@ -59,18 +59,19 @@ This document tracks feature requests, suggestions, and architectural improvemen
     - [ ] Await HACS maintainer review and merge.
 
 ## 8. Bug Fix: Telegram Markdown Entity Parsing / Reserved Character Escaping
-- [ ] **Escape Reserved MarkdownV2 Characters in Telegram Notifications (Lifecycle & Generic)**:
+- [x] **Escape Reserved MarkdownV2 Characters in Telegram Notifications (Lifecycle & Generic)**:
   - **Symptom**: When routing Home Assistant lifecycle events (or messages containing markdown titles like `*[Jarvis - 23:20:35] HomeAssistant Start!*`) to a Telegram notify service, Telegram fails with:
     ```text
     telegram.error.BadRequest: Can't parse entities: character '-' is reserved and must be escaped with the preceding '\'
     homeassistant.exceptions.HomeAssistantError: Action failed. Can't parse entities: character '-' is reserved and must be escaped with the preceding '\'
     ```
   - **Root Cause**:
-    - In `notification_manager.py`, when `html` is false, `prepared_title` with formatting (such as `*[time - tag]*`) is passed directly without escaping reserved MarkdownV2 characters (e.g. `-`, `.`, `!`, `[`, `]`, `(`, `)`). Only `_` is currently escaped in `prepared_message`.
-    - Lifecycle messages (`_send_ha_event_notification`) send formatted titles like `*[Jarvis - HH:MM:SS] HomeAssistant Start!*` with `html: False`, which triggers Telegram's strict Markdown/MarkdownV2 entity parser on unescaped hyphens and exclamation marks.
-  - **Fix Required**:
-    - Properly sanitize / escape Telegram Markdown reserved characters in both `title` and `message` when targeting `telegram`, or default Telegram messages to `parse_mode: html` / strip unsupported markdown syntax if Markdown parsing fails.
-  - **Open issue in Github**:
+    - In `notification_manager.py`, when `html` was false, `prepared_title` with formatting (`*[assistant - timestamp] title*`) was passed directly without escaping reserved MarkdownV2 characters (e.g. `-`, `.`, `!`, `[`, `]`, `(`, `)`). Only `_` was previously escaped in `prepared_message`.
+    - Lifecycle messages (`_send_ha_event_notification`) send formatted titles like `*[Jarvis - HH:MM:SS] HomeAssistant Start!*` with `html: False`, which triggered Telegram's strict Markdown/MarkdownV2 entity parser on unescaped hyphens and exclamation marks.
+  - **Resolution**:
+    - Updated `notification_manager.py` to route Telegram messages with `parse_mode: html` by default (`<b>[Assistant - HH:MM:SS] Title</b>` and `html.escape()`), eliminating entity collision on special characters (`-`, `!`, etc.).
+    - If `parse_mode: markdownv2` or `markdown` is explicitly passed in the telegram payload, reserved characters are sanitized with regex character escaping.
+  - **Issue in Github**:
     https://github.com/rafaalbelda/notifier_hub/issues/6
 
 

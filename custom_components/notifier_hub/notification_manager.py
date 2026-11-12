@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from datetime import datetime
+import html as html_lib
+import re
 from typing import Any
 
 from homeassistant.core import HomeAssistant
@@ -189,6 +191,28 @@ class NotificationManager:
 
             if "telegram" in service:
                 payload = dict(telegram) if isinstance(telegram, dict) else {}
+                assistant = self.hub.config.get("personal_assistant", "Assistant")
+                timestamp = datetime.now().strftime("%H:%M:%S")
+                parse_mode = str(payload.get("parse_mode", "")).lower()
+
+                if parse_mode == "markdownv2":
+                    def esc_v2(s: str) -> str:
+                        return re.sub(r"([_\\*\[\]()~`>#+\-=|{}.!\\])", r"\\\1", s)
+
+                    prepared_title = f"*[{esc_v2(assistant)} \\- {timestamp}] {esc_v2(title)}*" if title else f"*[{esc_v2(assistant)} \\- {timestamp}]*"
+                    prepared_message = esc_v2(prepared_message)
+                elif parse_mode == "markdown":
+                    def esc_md(s: str) -> str:
+                        return re.sub(r"([_\\*`\[])", r"\\\1", s)
+
+                    prepared_title = f"*[{esc_md(assistant)} - {timestamp}] {esc_md(title)}*" if title else f"*[{esc_md(assistant)} - {timestamp}]*"
+                    prepared_message = esc_md(prepared_message)
+                else:
+                    payload["parse_mode"] = "html"
+                    prepared_title = f"<b>[{html_lib.escape(assistant)} - {timestamp}] {html_lib.escape(title)}</b>" if title else f"<b>[{html_lib.escape(assistant)} - {timestamp}]</b>"
+                    if not html:
+                        prepared_message = html_lib.escape(prepared_message)
+
                 if link and image:
                     prepared_message = f"{prepared_message} {link}"
                 if image:
@@ -196,10 +220,6 @@ class NotificationManager:
                     payload["photo"] = {key: image, "caption": caption or f"{prepared_title}\n{prepared_message}", "timeout": 90}
                     await self.hass.services.async_call("notify", service, {"message": "", "data": payload}, blocking=False)
                     continue
-                if html:
-                    payload["parse_mode"] = "html"
-                elif prepared_message:
-                    prepared_message = prepared_message.replace("_", r"\_")
 
             elif "pushover" in service:
                 prepared_title = prepared_title.replace("*", "")

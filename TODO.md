@@ -52,11 +52,11 @@ This document tracks feature requests, suggestions, and architectural improvemen
     - [x] Ensure GitHub Issues are enabled and consider adding standard `.github/ISSUE_TEMPLATE/` files (bug report, feature request).
     - [x] Submit logo & icon to the [home-assistant/brands](https://github.com/home-assistant/brands) repository under `custom_integrations/notifier_hub/` (PR [#11432](https://github.com/home-assistant/brands/pull/11432)).
   - **Submission Steps**:
-    1. Fork the official [hacs/default](https://github.com/hacs/default) repository.
-    2. Edit `repositories/integration` and add `"rafaalbelda/notifier_hub"` in alphabetical order.
-    3. Open a Pull Request against `hacs/default`.
-    4. Wait for automated CI action checks (`hacs.json`, `manifest.json`, repository release checks) to pass.
-    5. Await HACS maintainer review and merge.
+    - [x] Fork the official [hacs/default](https://github.com/hacs/default) repository.
+    - [x] Edit `integration` and add `"rafaalbelda/notifier_hub"` in alphabetical order.
+    - [x] Open a Pull Request against `hacs/default` (PR [#14031](https://github.com/hacs/default/pull/14031)).
+    - [ ] Wait for automated CI action checks (`hacs.json`, `manifest.json`, repository release checks) to pass.
+    - [ ] Await HACS maintainer review and merge.
 
 ## 8. Bug Fix: Telegram Markdown Entity Parsing / Reserved Character Escaping
 - [ ] **Escape Reserved MarkdownV2 Characters in Telegram Notifications (Lifecycle & Generic)**:

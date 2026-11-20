@@ -48,6 +48,13 @@ Messages are routed through state checks:
 - **Priority**: Bypasses all toggles if `priority_message_entity` is "on"
 - **Toggles**: `text_notifications`, `screen_notifications`, `speech_notifications`, `alexa_notifications`, `google_notifications`, `phone_notifications`, `ha_event_notifications`, `auto_volume`
 
+### Actionable Confirmations & Escalation
+- Supports actionable mobile notifications with tracking of states: `idle`, `pending`, `confirmed`, `expired`.
+- **Sensors**: `sensor.notifier_hub_confirmation` (enum: idle, pending, confirmed, expired) and `sensor.notifier_hub_pending_confirmations`.
+- **Event**: Fires `notifier_hub_confirmation` event upon confirmation or timeout.
+- **Escalation**: Configurable timeout can automatically escalate unanswered notifications to voice/media players (e.g. Alexa announcement) or alternative channels.
+- **Auto-Cleanup**: Automatically clears mobile app notifications (by tag) and dismisses associated persistent notifications when confirmed or expired.
+
 ### Auto Volume
 - Auto Volume uses editable `time.*` period starts and `number.*` period volumes
 - Period state is exposed by `sensor.notifier_hub_day_period` and `sensor.notifier_hub_day_period_volume`
@@ -72,12 +79,13 @@ Messages are routed through state checks:
 
 ### Updating Text Notification Services
 - [notification_manager.py](custom_components/notifier_hub/notification_manager.py) handles dispatch to `notify.*` services
-- Each service has a payload builder: Telegram (photos), Pushover (priority), Discord (embeds), mobile_app (TTS injection), generic
+- Each service has a payload builder: Telegram (photos, captions, parse_mode HTML/MarkdownV2 sanitization), Pushover (priority), Discord (embeds), mobile_app (TTS injection, actionable callbacks), generic
+- **Telegram Formatting**: Telegram messages default to `parse_mode: html` with escaped HTML entities to prevent MarkdownV2 reserved character errors (e.g., `-`, `!`). If `markdown` or `markdownv2` is explicitly requested, characters are sanitized with regex.
 - Text substitution chains apply regex replacements before sending (see `SUB_NOWRAP`, `SUB_WRAP`)
 
 ### Adding Entities
 - Extend `NotifierHubEntity` from [entity.py](custom_components/notifier_hub/entity.py)
-- Sensors go in [sensor.py](custom_components/notifier_hub/sensor.py) (debug status, last message, presence, Auto Volume period)
+- Sensors go in [sensor.py](custom_components/notifier_hub/sensor.py) (debug status, last message, presence, Auto Volume period, confirmation status, pending confirmations)
 - Binary sensors go in [binary_sensor.py](custom_components/notifier_hub/binary_sensor.py) (Alexa/Google speaking states)
 - Switches go in [switch.py](custom_components/notifier_hub/switch.py) (channel toggles, DND, guest mode, priority, Auto Volume)
 - Numbers go in [number.py](custom_components/notifier_hub/number.py) (Auto Volume period volumes)
@@ -109,7 +117,12 @@ Messages are routed through state checks:
 | [helpers.py](custom_components/notifier_hub/helpers.py) | Utility functions (text processing, normalization, duration estimation) |
 | [services.yaml](custom_components/notifier_hub/services.yaml) | Service schema definitions |
 | [manifest.json](custom_components/notifier_hub/manifest.json) | Integration metadata |
-| [notifier_hub_dashboard.yaml](custom_components/notifier_hub/notifier_hub_dashboard.yaml) | Bundled Lovelace dashboard |
+| [notifier_hub_dashboard.es.yaml](custom_components/notifier_hub/notifier_hub_dashboard.es.yaml) | Bundled Lovelace dashboard (Spanish) |
+| [notifier_hub_dashboard.en.yaml](custom_components/notifier_hub/notifier_hub_dashboard.en.yaml) | Bundled Lovelace dashboard (English) |
+| [notifier_hub_dashboard.pt.yaml](custom_components/notifier_hub/notifier_hub_dashboard.pt.yaml) | Bundled Lovelace dashboard (Portuguese) |
+| [notifier_hub_dashboard.pt-BR.yaml](custom_components/notifier_hub/notifier_hub_dashboard.pt-BR.yaml) | Bundled Lovelace dashboard (Portuguese BR) |
+| [brand/](custom_components/notifier_hub/brand/) | Integration brand assets (icon, logo, and 2x/SVG variants) served via Brands Proxy API |
+| [TODO.md](TODO.md) | Project roadmap, community feature requests, and tracked tasks |
 
 ## Testing & Debugging
 

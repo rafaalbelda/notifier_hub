@@ -55,8 +55,20 @@ This document tracks feature requests, suggestions, and architectural improvemen
     - [x] Fork the official [hacs/default](https://github.com/hacs/default) repository.
     - [x] Edit `integration` and add `"rafaalbelda/notifier_hub"` in alphabetical order.
     - [x] Open a Pull Request against `hacs/default` (PR [#14032](https://github.com/hacs/default/pull/14032)).
-    - [ ] Wait for automated CI action checks (`hacs.json`, `manifest.json`, repository release checks) to pass.
-    - [ ] Await HACS maintainer review and merge.
+    - [x] Wait for automated CI action checks (`hacs.json`, `manifest.json`, repository release checks) to pass.
+    - [ ] Address review feedback from HACS maintainer (`@frenck`):
+      - [ ] **Remove `/config` dashboard YAML overwrite**:
+        - Drop automatic copy of dashboard YAML to `/config/notifier_hub_dashboard.yaml` (integrations should not write arbitrary YAML files into the config directory, and `source.exists()` blocks the event loop).
+        - Remove `install_dashboard` file copying logic, and guide users to add dashboards manually via provided samples/docs or explore storage-mode dashboard registration.
+      - [ ] **Secure `notifier_hub.set_config` service**:
+        - Register using `homeassistant.helpers.service.async_register_admin_service` so non-admin users cannot alter integration configuration.
+        - Whitelist and strictly validate accepted keys instead of arbitrary dict merging.
+      - [ ] **Prevent service injection in `notifier_hub.send`**:
+        - Validate `google.tts_service` / `google.service` to ensure it only calls services in the `tts` domain, rejecting other domains.
+      - [ ] **README Update**:
+        - Highlight installing directly via HACS search once accepted as a default repository before the custom repository instructions.
+    - [ ] Create and release new version tag (e.g., `v1.0.5`), update PR, and re-request review.
+    - [ ] Await HACS maintainer approval and merge.
 
 ## 8. Bug Fix: Telegram Markdown Entity Parsing / Reserved Character Escaping
 - [x] **Escape Reserved MarkdownV2 Characters in Telegram Notifications (Lifecycle & Generic)**:

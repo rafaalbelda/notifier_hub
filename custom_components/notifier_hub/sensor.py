@@ -27,14 +27,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 class NotifierHubSensor(NotifierHubEntity, SensorEntity):
     def __init__(self, coordinator, key: str, name: str, data_key: str) -> None:
-        super().__init__(coordinator, key, name)
+        super().__init__(coordinator, key, translation_key=data_key)
         self.data_key = data_key
-        if data_key in {"day_period", "day_period_volume"}:
-            self._attr_translation_key = data_key
-        elif data_key == "confirmation":
+        if data_key == "confirmation":
             self._attr_device_class = SensorDeviceClass.ENUM
             self._attr_options = ["idle", "pending", "confirmed", "expired"]
-            self._attr_translation_key = "confirmation"
             self._attr_icon = "mdi:message-check-outline"
         elif data_key == "pending_confirmations":
             self._attr_icon = "mdi:message-check-outline"
@@ -71,7 +68,7 @@ class NotifierHubPersonalAssistantSensor(NotifierHubEntity, SensorEntity):
     _attr_icon = "mdi:account-voice"
 
     def __init__(self, coordinator) -> None:
-        super().__init__(coordinator, "personal_assistant", "Notifier Hub Personal Assistant")
+        super().__init__(coordinator, "personal_assistant", translation_key="personal_assistant")
 
     @property
     def native_value(self):
@@ -82,7 +79,7 @@ class NotifierHubHomePeopleSensor(NotifierHubEntity, SensorEntity):
     _attr_icon = "mdi:account-multiple-check"
 
     def __init__(self, coordinator) -> None:
-        super().__init__(coordinator, "home_people", "Notifier Hub Home People")
+        super().__init__(coordinator, "home_people", translation_key="home_people")
 
     @property
     def native_value(self):

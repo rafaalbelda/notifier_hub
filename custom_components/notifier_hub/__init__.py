@@ -3,8 +3,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import math
-from pathlib import Path
-import shutil
 from datetime import time as dt_time, timedelta
 from typing import Any
 from uuid import uuid4
@@ -13,15 +11,17 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME, Platform
 from homeassistant.core import HomeAssistant, ServiceCall
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.event import async_call_later, async_track_state_change_event, async_track_time_interval
+from homeassistant.helpers.service import async_register_admin_service
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import dt as dt_util
 
 from . import helpers as h
 from .alexa_manager import AlexaManager
-from .google_manager import GoogleManager
+from .google_manager import GoogleManager, validate_tts_service
 from .const import (
     CONF_ALEXA_PLAYERS,
     CONF_GOOGLE_NOTIFY_SERVICE,
@@ -41,7 +41,6 @@ from .const import (
     CONF_AUTO_VOLUME_CONTROL_PLAYERS,
     CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
     CONF_NIGHT_DND,
-    CONF_INSTALL_DASHBOARD,
     CONF_DND_ENTITY,
     CONF_DND_MODE,
     CONF_GUEST_MODE,
@@ -55,9 +54,7 @@ from .const import (
     CONF_TEXT_NOTIFICATIONS,
     CONF_SIP_SERVER_NAME,
     CONF_TTS_WAIT_TIME,
-    DASHBOARD_INSTALL_STRINGS,
     HA_EVENT_STRINGS,
-    resolve_dashboard_language,
     normalize_locale,
     DEFAULT_LANGUAGE,
     DEFAULT_PERSONAL_ASSISTANT,
@@ -121,7 +118,6 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Optional(CONF_AUTO_VOLUME_CONTROL_PLAYERS, default=True): cv.boolean,
                 vol.Optional(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, default=[]): cv.ensure_list,
                 vol.Optional(CONF_NIGHT_DND, default=False): cv.boolean,
-                vol.Optional(CONF_INSTALL_DASHBOARD, default=True): cv.boolean,
                 vol.Optional(CONF_DND_ENTITY, default=DEFAULT_DND_ENTITY): cv.string,
                 vol.Optional(CONF_GUEST_MODE_ENTITY, default=DEFAULT_GUEST_MODE_ENTITY): cv.string,
                 vol.Optional(CONF_PRIORITY_MESSAGE_ENTITY, default=DEFAULT_PRIORITY_MESSAGE_ENTITY): cv.string,
@@ -161,22 +157,74 @@ SEND_SCHEMA = vol.Schema(
     extra=vol.ALLOW_EXTRA,
 )
 
+def _validate_tts_service_config(value: Any) -> str:
+    raw = cv.string(value).strip()
+    try:
+        validate_tts_service(raw)
+    except ServiceValidationError as err:
+        raise vol.Invalid(str(err)) from err
+    return raw
+
+
+SET_CONFIG_FIELDS: dict[Any, Any] = {
+    vol.Optional(CONF_PERSONAL_ASSISTANT): cv.string,
+    vol.Optional(CONF_PERSONS): vol.All(cv.ensure_list, [cv.entity_id]),
+    vol.Optional(CONF_NOTIFY_SERVICES): vol.All(cv.ensure_list, [cv.string]),
+    vol.Optional(CONF_ALEXA_PLAYERS): vol.All(cv.ensure_list, [cv.string]),
+    vol.Optional(CONF_GOOGLE_PLAYERS): vol.All(cv.ensure_list, [cv.string]),
+    vol.Optional(CONF_GOOGLE_TTS_SERVICE): _validate_tts_service_config,
+    vol.Optional(CONF_GOOGLE_NOTIFY_SERVICE): cv.string,
+    vol.Optional(CONF_SIP_SERVER_NAME): cv.string,
+    vol.Optional(CONF_DEFAULT_LANGUAGE): cv.string,
+    vol.Optional(CONF_DEFAULT_VOLUME): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=1.0)),
+    vol.Optional(CONF_TTS_WAIT_TIME): vol.All(vol.Coerce(float), vol.Range(min=0.0, max=60.0)),
+    vol.Optional(CONF_DEBUG): cv.boolean,
+    vol.Optional(CONF_TEXT_NOTIFICATIONS): cv.boolean,
+    vol.Optional(CONF_SCREEN_NOTIFICATIONS): cv.boolean,
+    vol.Optional(CONF_SPEECH_NOTIFICATIONS): cv.boolean,
+    vol.Optional(CONF_SPEECH_HOME_ONLY): cv.boolean,
+    vol.Optional(CONF_ALEXA_NOTIFICATIONS): cv.boolean,
+    vol.Optional(CONF_GOOGLE_NOTIFICATIONS): cv.boolean,
+    vol.Optional(CONF_PHONE_NOTIFICATIONS): cv.boolean,
+    vol.Optional(CONF_HA_EVENT_NOTIFICATIONS): cv.boolean,
+    vol.Optional(CONF_HA_EVENT_NOTIFY_SERVICES): vol.All(cv.ensure_list, [cv.string]),
+    vol.Optional(CONF_AUTO_VOLUME): cv.boolean,
+    vol.Optional(CONF_AUTO_VOLUME_CONTROL_PLAYERS): cv.boolean,
+    vol.Optional(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS): vol.All(cv.ensure_list, [cv.string]),
+    vol.Optional(CONF_NIGHT_DND): cv.boolean,
+    vol.Optional(CONF_DND_ENTITY): vol.Any("", cv.entity_id),
+    vol.Optional(CONF_GUEST_MODE_ENTITY): vol.Any("", cv.entity_id),
+    vol.Optional(CONF_PRIORITY_MESSAGE_ENTITY): vol.Any("", cv.entity_id),
+    vol.Optional(CONF_DND_MODE): cv.boolean,
+    vol.Optional(CONF_GUEST_MODE): cv.boolean,
+    vol.Optional(CONF_PRIORITY_MESSAGE): cv.boolean,
+    vol.Optional("location_tracker"): vol.Any("", cv.entity_id),
+    vol.Optional("wrap_text"): cv.boolean,
+    vol.Optional("called_number"): cv.string,
+    **{
+        vol.Optional(f"auto_volume_{period}_time"): vol.All(
+            cv.string, vol.Match(r"^(?:[01]?\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$")
+        )
+        for period in AUTO_VOLUME_PERIODS
+    },
+    **{
+        vol.Optional(f"auto_volume_{period}_volume"): vol.All(vol.Coerce(int), vol.Range(min=0, max=100))
+        for period in AUTO_VOLUME_PERIODS
+    },
+}
+
+ALLOWED_SET_CONFIG_KEYS: frozenset[str] = frozenset(marker.schema for marker in SET_CONFIG_FIELDS)
+
+SET_CONFIG_DATA_SCHEMA = vol.Schema(SET_CONFIG_FIELDS, extra=vol.PREVENT_EXTRA)
+
 SET_CONFIG_SCHEMA = vol.Schema(
     {
-        vol.Optional("config", default={}): dict,
+        vol.Optional("config", default={}): SET_CONFIG_DATA_SCHEMA,
         vol.Optional(CONF_AUTO_VOLUME): cv.boolean,
         vol.Optional(CONF_AUTO_VOLUME_CONTROL_PLAYERS): cv.boolean,
     },
-    extra=vol.ALLOW_EXTRA,
+    extra=vol.PREVENT_EXTRA,
 )
-
-
-def _copy_dashboard_if_changed(source: Path, target: Path, force: bool = False) -> bool:
-    source_bytes = source.read_bytes()
-    if not force and target.exists() and target.read_bytes() == source_bytes:
-        return False
-    shutil.copyfile(source, target)
-    return True
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -273,7 +321,6 @@ class NotifierHub:
         data.setdefault(CONF_AUTO_VOLUME_CONTROL_PLAYERS, True)
         data.setdefault(CONF_AUTO_VOLUME_EXCLUDE_PLAYERS, [])
         data.setdefault(CONF_NIGHT_DND, False)
-        data.setdefault(CONF_INSTALL_DASHBOARD, True)
         data.setdefault(CONF_DND_ENTITY, DEFAULT_DND_ENTITY)
         data.setdefault(CONF_GUEST_MODE_ENTITY, DEFAULT_GUEST_MODE_ENTITY)
         data.setdefault(CONF_PRIORITY_MESSAGE_ENTITY, DEFAULT_PRIORITY_MESSAGE_ENTITY)
@@ -295,9 +342,14 @@ class NotifierHub:
 
     async def async_setup(self) -> None:
         self._update_auto_volume_state()
-        await self.async_install_dashboard()
         self.hass.services.async_register(DOMAIN, SERVICE_SEND, self._handle_send, schema=SEND_SCHEMA)
-        self.hass.services.async_register(DOMAIN, SERVICE_SET_CONFIG, self._handle_set_config, schema=SET_CONFIG_SCHEMA)
+        async_register_admin_service(
+            self.hass,
+            DOMAIN,
+            SERVICE_SET_CONFIG,
+            self._handle_set_config,
+            schema=SET_CONFIG_SCHEMA,
+        )
         self._remove_listener = self.hass.bus.async_listen(EVENT_NOTIFIER, self._handle_notifier_event)
         self._remove_confirmation_listener = self.hass.bus.async_listen(
             "mobile_app_notification_action",
@@ -320,8 +372,8 @@ class NotifierHub:
         await self.async_apply_auto_volume()
 
     def _resolve_language(self, strings: dict[str, dict[str, str]]) -> dict[str, str]:
-        # Use the same normalized locale matching as the dashboard resolver so
-        # pt_BR / PT-br / pt-PT all resolve consistently instead of falling to en.
+        # Match normalized locales so pt_BR / PT-br / pt-PT resolve consistently
+        # instead of falling back to English.
         normalized = normalize_locale(self.hass.config.language)
         for key in strings:
             if normalize_locale(key) == normalized:
@@ -331,29 +383,6 @@ class NotifierHub:
             if normalize_locale(key).split("-")[0] == primary:
                 return strings[key]
         return strings.get("en", {})
-
-    async def async_install_dashboard(self, force: bool = False) -> None:
-        if not self.config.get(CONF_INSTALL_DASHBOARD, True):
-            return
-        language = resolve_dashboard_language(self.hass.config.language)
-        source = Path(__file__).with_name(f"notifier_hub_dashboard.{language}.yaml")
-        if not source.exists():
-            _LOGGER.warning("Notifier Hub dashboard source not found: %s", source)
-            return
-        target = Path(self.hass.config.path("notifier_hub_dashboard.yaml"))
-        copied = await self.hass.async_add_executor_job(_copy_dashboard_if_changed, source, target, force)
-        if not copied:
-            return
-        await self.hass.services.async_call(
-            "persistent_notification",
-            "create",
-            {
-                "notification_id": "notifier_hub_dashboard_install",
-                "title": self._resolve_language(DASHBOARD_INSTALL_STRINGS).get("title", ""),
-                "message": self._resolve_language(DASHBOARD_INSTALL_STRINGS).get("message", ""),
-            },
-            blocking=False,
-        )
 
     async def async_unload(self) -> None:
         if self._remove_listener:
@@ -581,7 +610,12 @@ class NotifierHub:
         await self.async_apply_auto_volume()
 
     async def _handle_set_config(self, call: ServiceCall) -> None:
-        updates = dict(call.data.get("config") or {})
+        raw_config = call.data.get("config") or {}
+        updates = {
+            key: value
+            for key, value in raw_config.items()
+            if key in ALLOWED_SET_CONFIG_KEYS
+        }
         if CONF_AUTO_VOLUME in call.data:
             updates[CONF_AUTO_VOLUME] = call.data[CONF_AUTO_VOLUME]
         if CONF_AUTO_VOLUME_CONTROL_PLAYERS in call.data:
@@ -589,7 +623,6 @@ class NotifierHub:
         self.config.update(updates)
         self._async_update_presence_listener()
         self._refresh_entities()
-        await self.async_install_dashboard(force=True)
         await self.async_apply_auto_volume()
         self.set_debug("config updated", {"config_keys": sorted(updates.keys())})
 
@@ -597,7 +630,6 @@ class NotifierHub:
         self.config = self._merged_config()
         self._async_update_presence_listener()
         self._refresh_entities()
-        await self.async_install_dashboard(force=True)
         await self.async_apply_auto_volume()
         self.set_debug("config options updated", {"config_keys": sorted(self.config.keys())})
 

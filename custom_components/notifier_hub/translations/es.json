@@ -23,6 +23,21 @@
           "confirmed": "Confirmada",
           "expired": "Caducada"
         }
+      },
+      "debug": {
+        "name": "Depuración"
+      },
+      "last_message": {
+        "name": "Último mensaje"
+      },
+      "pending_confirmations": {
+        "name": "Confirmaciones pendientes"
+      },
+      "personal_assistant": {
+        "name": "Asistente personal"
+      },
+      "home_people": {
+        "name": "Personas en casa"
       }
     },
     "number": {
@@ -64,6 +79,71 @@
       "auto_volume_night_time": {
         "name": "Noche inicio"
       }
+    },
+    "binary_sensor": {
+      "alexa_speak": {
+        "name": "Alexa hablando"
+      },
+      "google_speak": {
+        "name": "Google hablando"
+      },
+      "home_occupied": {
+        "name": "Casa ocupada"
+      }
+    },
+    "switch": {
+      "text_notifications": {
+        "name": "Notificaciones de texto"
+      },
+      "screen_notifications": {
+        "name": "Notificaciones en pantalla"
+      },
+      "speech_notifications": {
+        "name": "Notificaciones de voz"
+      },
+      "speech_home_only": {
+        "name": "Voz solo en casa"
+      },
+      "alexa_notifications": {
+        "name": "Notificaciones de Alexa"
+      },
+      "google_notifications": {
+        "name": "Notificaciones de Google"
+      },
+      "phone_notifications": {
+        "name": "Notificaciones por teléfono"
+      },
+      "ha_event_notifications": {
+        "name": "Notificaciones de eventos de Home Assistant"
+      },
+      "auto_volume": {
+        "name": "Auto volumen"
+      },
+      "auto_volume_control_players": {
+        "name": "Auto volumen controla reproductores"
+      },
+      "dnd_mode": {
+        "name": "No molestar"
+      },
+      "night_dnd": {
+        "name": "No molestar nocturno"
+      },
+      "guest_mode": {
+        "name": "Modo invitado"
+      },
+      "priority_message": {
+        "name": "Mensaje prioritario"
+      }
+    },
+    "text": {
+      "dashboard_message": {
+        "name": "Mensaje del panel"
+      }
+    },
+    "button": {
+      "send_dashboard_message": {
+        "name": "Enviar mensaje del panel"
+      }
     }
   },
   "config": {
@@ -104,8 +184,7 @@
           "auto_volume": "Volumen automatico",
           "auto_volume_control_players": "Controlar volumen de reproductores automaticamente",
           "night_dnd": "Activar DND durante la noche",
-          "auto_volume_exclude_players": "Reproductores excluidos",
-          "install_dashboard": "Instalar dashboard"
+          "auto_volume_exclude_players": "Reproductores excluidos"
         },
         "data_description": {
           "personal_assistant": "Nombre usado en los mensajes generados cuando se menciona al asistente.",
@@ -142,19 +221,16 @@
           "auto_volume": "Ajusta automaticamente el volumen TTS segun el periodo actual del dia.",
           "auto_volume_control_players": "Si esta activo, Auto Volumen tambien cambia automaticamente los reproductores configurados. Si esta inactivo, solo se usa como volumen por defecto en mensajes del hub.",
           "night_dnd": "Activa el modo no molestar automaticamente mientras el periodo actual de Auto Volumen sea Noche o Altas horas.",
-          "auto_volume_exclude_players": "Reproductores que no deben ser controlados por el volumen automatico.",
-          "install_dashboard": "Copia el YAML del dashboard de Notifier Hub y muestra las instrucciones de configuracion."
+          "auto_volume_exclude_players": "Reproductores que no deben ser controlados por el volumen automatico."
         },
         "sections": {
           "general_section": {
             "name": "General",
             "data": {
-              "personal_assistant": "Asistente personal",
-              "install_dashboard": "Instalar dashboard"
+              "personal_assistant": "Asistente personal"
             },
             "data_description": {
-              "personal_assistant": "Nombre usado en los mensajes generados cuando se menciona al asistente.",
-              "install_dashboard": "Copia el YAML del dashboard de Notifier Hub y muestra las instrucciones de configuracion."
+              "personal_assistant": "Nombre usado en los mensajes generados cuando se menciona al asistente."
             }
           },
           "persons_section": {
@@ -300,8 +376,7 @@
           "auto_volume": "Volumen automatico",
           "auto_volume_control_players": "Controlar volumen de reproductores automaticamente",
           "night_dnd": "Activar DND durante la noche",
-          "auto_volume_exclude_players": "Reproductores excluidos",
-          "install_dashboard": "Instalar dashboard"
+          "auto_volume_exclude_players": "Reproductores excluidos"
         },
         "data_description": {
           "personal_assistant": "Nombre usado en los mensajes generados cuando se menciona al asistente.",
@@ -338,19 +413,16 @@
           "auto_volume": "Ajusta automaticamente el volumen TTS segun el periodo actual del dia.",
           "auto_volume_control_players": "Si esta activo, Auto Volumen tambien cambia automaticamente los reproductores configurados. Si esta inactivo, solo se usa como volumen por defecto en mensajes del hub.",
           "night_dnd": "Activa el modo no molestar automaticamente mientras el periodo actual de Auto Volumen sea Noche o Altas horas.",
-          "auto_volume_exclude_players": "Reproductores que no deben ser controlados por el volumen automatico.",
-          "install_dashboard": "Copia el YAML del dashboard de Notifier Hub y muestra las instrucciones de configuracion."
+          "auto_volume_exclude_players": "Reproductores que no deben ser controlados por el volumen automatico."
         },
         "sections": {
           "general_section": {
             "name": "General",
             "data": {
-              "personal_assistant": "Asistente personal",
-              "install_dashboard": "Instalar dashboard"
+              "personal_assistant": "Asistente personal"
             },
             "data_description": {
-              "personal_assistant": "Nombre usado en los mensajes generados cuando se menciona al asistente.",
-              "install_dashboard": "Copia el YAML del dashboard de Notifier Hub y muestra las instrucciones de configuracion."
+              "personal_assistant": "Nombre usado en los mensajes generados cuando se menciona al asistente."
             }
           },
           "persons_section": {

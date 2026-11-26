@@ -5,6 +5,7 @@ import logging
 from typing import Any
 
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ServiceValidationError
 
 from . import helpers as h
 from .const import (
@@ -46,6 +47,27 @@ SUB_VOICE = [
     (r"[\n\*]", r" "),
     (r" +", r" "),
 ]
+
+
+def validate_tts_service(service_name: str) -> tuple[str, str]:
+    """Validate and split a TTS service name, allowing only the 'tts' domain."""
+    raw = str(service_name or "").strip()
+    if not raw:
+        raise ServiceValidationError("Invalid Google TTS service: value cannot be empty")
+    if "." in raw:
+        domain, service = raw.split(".", 1)
+        domain = domain.strip().lower()
+        service = service.strip()
+        if domain != "tts" or not service or "." in service or any(ch.isspace() for ch in service):
+            raise ServiceValidationError(
+                f"Invalid Google TTS service '{raw}': only services in the 'tts' domain are allowed"
+            )
+        return "tts", service
+    if any(ch.isspace() for ch in raw):
+        raise ServiceValidationError(
+            f"Invalid Google TTS service '{raw}': only services in the 'tts' domain are allowed"
+        )
+    return "tts", raw
 
 
 class GoogleManager:
@@ -141,6 +163,18 @@ class GoogleManager:
             self.hub.set_debug("Google Manager - players not found", {"google_error": "No media_player configured"})
             return
 
+        tts_service = str(
+            google_data.get(
+                "tts_service",
+                google_data.get(
+                    "service",
+                    self.hub.config.get(CONF_GOOGLE_TTS_SERVICE, DEFAULT_GOOGLE_TTS_SERVICE),
+                ),
+            )
+            or DEFAULT_GOOGLE_TTS_SERVICE
+        )
+        validate_tts_service(tts_service)
+
         await self.queue.put(
             {
                 "message": h.replace_regular(message, SUB_VOICE),
@@ -149,15 +183,7 @@ class GoogleManager:
                 "wait_time": float(google_data.get("wait_time", self.hub.config.get(CONF_TTS_WAIT_TIME, 3.0))),
                 "language": str(google_data.get("language", self.hub.config.get(CONF_DEFAULT_LANGUAGE, "es-ES"))),
                 "tts_entity": str(google_data.get("tts_entity", google_data.get("engine_id", ""))),
-                "tts_service": str(
-                    google_data.get(
-                        "tts_service",
-                        google_data.get(
-                            "service",
-                            self.hub.config.get(CONF_GOOGLE_TTS_SERVICE, DEFAULT_GOOGLE_TTS_SERVICE),
-                        ),
-                    )
-                ),
+                "tts_service": tts_service,
             }
         )
 
@@ -205,10 +231,7 @@ class GoogleManager:
                 self.queue.task_done()
 
     def _split_service(self, service_name: str) -> tuple[str, str]:
-        if "." in service_name:
-            domain, service = service_name.split(".", 1)
-            return domain, service
-        return "tts", service_name
+        return validate_tts_service(service_name)
 
     async def _call_tts(self, data: dict[str, Any]) -> None:
         players = data["players"]

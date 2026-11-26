@@ -23,6 +23,21 @@
           "confirmed": "Confirmada",
           "expired": "Expirada"
         }
+      },
+      "debug": {
+        "name": "Depuração"
+      },
+      "last_message": {
+        "name": "Última mensagem"
+      },
+      "pending_confirmations": {
+        "name": "Confirmações pendentes"
+      },
+      "personal_assistant": {
+        "name": "Assistente pessoal"
+      },
+      "home_people": {
+        "name": "Pessoas em casa"
       }
     },
     "number": {
@@ -64,6 +79,71 @@
       "auto_volume_night_time": {
         "name": "Início da noite"
       }
+    },
+    "binary_sensor": {
+      "alexa_speak": {
+        "name": "Alexa a falar"
+      },
+      "google_speak": {
+        "name": "Google a falar"
+      },
+      "home_occupied": {
+        "name": "Casa ocupada"
+      }
+    },
+    "switch": {
+      "text_notifications": {
+        "name": "Notificações de texto"
+      },
+      "screen_notifications": {
+        "name": "Notificações no ecrã"
+      },
+      "speech_notifications": {
+        "name": "Notificações de voz"
+      },
+      "speech_home_only": {
+        "name": "Voz apenas em casa"
+      },
+      "alexa_notifications": {
+        "name": "Notificações Alexa"
+      },
+      "google_notifications": {
+        "name": "Notificações Google"
+      },
+      "phone_notifications": {
+        "name": "Notificações por telefone"
+      },
+      "ha_event_notifications": {
+        "name": "Notificações de eventos do Home Assistant"
+      },
+      "auto_volume": {
+        "name": "Volume automático"
+      },
+      "auto_volume_control_players": {
+        "name": "Volume automático controla leitores"
+      },
+      "dnd_mode": {
+        "name": "Não incomodar"
+      },
+      "night_dnd": {
+        "name": "Não incomodar noturno"
+      },
+      "guest_mode": {
+        "name": "Modo convidado"
+      },
+      "priority_message": {
+        "name": "Mensagem prioritária"
+      }
+    },
+    "text": {
+      "dashboard_message": {
+        "name": "Mensagem do painel"
+      }
+    },
+    "button": {
+      "send_dashboard_message": {
+        "name": "Enviar mensagem do painel"
+      }
     }
   },
   "config": {
@@ -101,8 +181,7 @@
           "auto_volume_section": "Volume Automático",
           "auto_volume": "Volume automático",
           "night_dnd": "Ativar DND durante a noite",
-          "auto_volume_exclude_players": "Leitores multimédia excluídos",
-          "install_dashboard": "Instalar painel"
+          "auto_volume_exclude_players": "Leitores multimédia excluídos"
         },
         "data_description": {
           "personal_assistant": "Nome utilizado nas mensagens geradas quando o assistente é mencionado.",
@@ -136,19 +215,16 @@
           "auto_volume_section": "Configuração automática do volume por período do dia.",
           "auto_volume": "Ajusta automaticamente o volume do TTS com base no período do dia atual.",
           "night_dnd": "Ativa automaticamente o modo não incomodar enquanto o período de Volume Automático atual for Noite ou Madrugada.",
-          "auto_volume_exclude_players": "Leitores multimédia que não devem ser controlados pelo volume automático.",
-          "install_dashboard": "Copia o YAML do painel do Notifier Hub e mostra as instruções de configuração."
+          "auto_volume_exclude_players": "Leitores multimédia que não devem ser controlados pelo volume automático."
         },
         "sections": {
           "general_section": {
             "name": "Geral",
             "data": {
-              "personal_assistant": "Assistente pessoal",
-              "install_dashboard": "Instalar painel"
+              "personal_assistant": "Assistente pessoal"
             },
             "data_description": {
-              "personal_assistant": "Nome utilizado nas mensagens geradas quando o assistente é mencionado.",
-              "install_dashboard": "Copia o YAML do painel do Notifier Hub e mostra as instruções de configuração."
+              "personal_assistant": "Nome utilizado nas mensagens geradas quando o assistente é mencionado."
             }
           },
           "persons_section": {
@@ -285,8 +361,7 @@
           "auto_volume_section": "Volume Automático",
           "auto_volume": "Volume automático",
           "night_dnd": "Ativar DND durante a noite",
-          "auto_volume_exclude_players": "Leitores multimédia excluídos",
-          "install_dashboard": "Instalar painel"
+          "auto_volume_exclude_players": "Leitores multimédia excluídos"
         },
         "data_description": {
           "personal_assistant": "Nome utilizado nas mensagens geradas quando o assistente é mencionado.",
@@ -320,19 +395,16 @@
           "auto_volume_section": "Configuração automática do volume por período do dia.",
           "auto_volume": "Ajusta automaticamente o volume do TTS com base no período do dia atual.",
           "night_dnd": "Ativa automaticamente o modo não incomodar enquanto o período de Volume Automático atual for Noite ou Madrugada.",
-          "auto_volume_exclude_players": "Leitores multimédia que não devem ser controlados pelo volume automático.",
-          "install_dashboard": "Copia o YAML do painel do Notifier Hub e mostra as instruções de configuração."
+          "auto_volume_exclude_players": "Leitores multimédia que não devem ser controlados pelo volume automático."
         },
         "sections": {
           "general_section": {
             "name": "Geral",
             "data": {
-              "personal_assistant": "Assistente pessoal",
-              "install_dashboard": "Instalar painel"
+              "personal_assistant": "Assistente pessoal"
             },
             "data_description": {
-              "personal_assistant": "Nome utilizado nas mensagens geradas quando o assistente é mencionado.",
-              "install_dashboard": "Copia o YAML do painel do Notifier Hub e mostra as instruções de configuração."
+              "personal_assistant": "Nome utilizado nas mensagens geradas quando o assistente é mencionado."
             }
           },
           "persons_section": {

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from time import time_ns
 from typing import Any
 
 import voluptuous as vol
@@ -32,9 +31,7 @@ from .const import (
     CONF_AUTO_VOLUME,
     CONF_AUTO_VOLUME_CONTROL_PLAYERS,
     CONF_AUTO_VOLUME_EXCLUDE_PLAYERS,
-    CONF_DASHBOARD_COPY_REQUESTED,
     CONF_NIGHT_DND,
-    CONF_INSTALL_DASHBOARD,
     CONF_SIP_SERVER_NAME,
     CONF_TTS_WAIT_TIME,
     DEFAULT_LANGUAGE,
@@ -94,8 +91,6 @@ class NotifierHubOptionsFlow(config_entries.OptionsFlow):
     async def async_step_init(self, user_input: dict[str, Any] | None = None):
         if user_input is not None:
             user_input = _flatten_sections(user_input)
-            if user_input.get(CONF_INSTALL_DASHBOARD, True):
-                user_input[CONF_DASHBOARD_COPY_REQUESTED] = time_ns()
             return self.async_create_entry(title="", data=user_input)
 
         data = dict(self._config_entry.data)
@@ -199,10 +194,6 @@ def _schema(hass, defaults: dict[str, Any] | None = None):
                             CONF_PERSONAL_ASSISTANT,
                             default=default(CONF_PERSONAL_ASSISTANT, DEFAULT_PERSONAL_ASSISTANT),
                         ): str,
-                        vol.Optional(
-                            CONF_INSTALL_DASHBOARD,
-                            default=default(CONF_INSTALL_DASHBOARD, True),
-                        ): selector.BooleanSelector(),
                     }
                 ),
                 {"collapsed": False},

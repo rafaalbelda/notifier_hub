@@ -12,7 +12,7 @@ NotifierHub (coordinator)
 └── PhoneManager (voice calls)
 ```
 
-**Entry Point**: [__init__.py](custom_components/notifier_hub/__init__.py) initializes the hub, registers services/events, creates runtime entities, installs the optional dashboard, and coordinates message dispatch.
+**Entry Point**: [__init__.py](custom_components/notifier_hub/__init__.py) initializes the hub, registers services/events, creates runtime entities, and coordinates message dispatch.
 
 ## Key Patterns & Conventions
 
@@ -37,7 +37,7 @@ NotifierHub (coordinator)
 - **Constants**: All magic strings in [const.py](custom_components/notifier_hub/const.py)
 - **Validation**: Voluptuous schemas with sensible defaults
 - **Config Flow**: [config_flow.py](custom_components/notifier_hub/config_flow.py) uses entity selectors for media players
-- **Dashboard Install**: `install_dashboard` copies the bundled Lovelace YAML to `/config/notifier_hub_dashboard.yaml`
+- **Dashboard Templates**: Bundled Lovelace YAML templates are located in `custom_components/notifier_hub/notifier_hub_dashboard.<lang>.yaml` for manual setup
 
 ### State-Based Routing
 Messages are routed through state checks:
@@ -140,7 +140,7 @@ event_data:
 
 **Service Call**: Primary interface is `notifier_hub.send` service with full payload options.
 
-**Runtime Config**: `notifier_hub.set_config` updates in-memory/runtime options without requiring a reload.
+**Runtime Config**: `notifier_hub.set_config` is registered as an admin-only service (`async_register_admin_service`) and validates updates against a strict whitelist of config keys without requiring a reload.
 
 **Queue Processing**: Both Alexa and Google managers process TTS sequentially—use binary sensors to monitor when playback is happening.
 

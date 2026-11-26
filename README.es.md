@@ -49,20 +49,27 @@ La integracion oficial Alexa Devices de Home Assistant usa un modelo de notifica
 
 ### HACS
 
-Puedes instalar Notifier Hub desde HACS como repositorio personalizado:
-
 [![Abrir tu instancia de Home Assistant y abrir este repositorio en HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rafaalbelda&repository=notifier_hub&category=integration)
 
-1. Abre HACS en Home Assistant.
-2. Pulsa los tres puntos de la esquina superior derecha y entra en **Repositorios personalizados**.
-3. Añade `https://github.com/rafaalbelda/notifier_hub`.
-4. Selecciona la categoria **Integracion**.
-5. Instala **Notifier Hub** y reinicia Home Assistant.
-6. Añade la integracion desde:
+#### Recomendado (repositorio por defecto de HACS)
+
+1. Abre **HACS** en Home Assistant.
+2. Busca **Notifier Hub** y abre la integracion.
+3. Pulsa **Descargar** y reinicia Home Assistant.
+4. Añade la integracion desde:
 
 ```text
 Ajustes > Dispositivos y servicios > Añadir integracion > Notifier Hub
 ```
+
+#### Alternativa (Repositorio personalizado)
+
+Si **Notifier Hub** aun no aparece en la busqueda de HACS, puedes añadirlo manualmente como repositorio personalizado:
+
+1. Abre **HACS** en Home Assistant.
+2. Pulsa los tres puntos de la esquina superior derecha y entra en **Repositorios personalizados**.
+3. Añade `https://github.com/rafaalbelda/notifier_hub` y selecciona la categoria **Integracion**.
+4. Descarga **Notifier Hub**, reinicia Home Assistant y añade la integracion en **Ajustes > Dispositivos y servicios > Añadir integracion > Notifier Hub**.
 
 ### Instalacion manual
 
@@ -140,7 +147,6 @@ notifier_hub:
   guest_mode_entity: switch.notifier_hub_guest_mode
   priority_message_entity: switch.notifier_hub_priority_message
   location_tracker: group.notifier_location_tracker
-  install_dashboard: true
 ```
 
 ### Orden de precedencia
@@ -859,15 +865,17 @@ Si `switch.notifier_hub_night_dnd` esta activo, los periodos `Noche` y `Altas ho
 
 La integracion incluye un panel Lovelace con estado, actividad TTS, botones de prueba, canales y controles de Auto Volume, disponible en ingles (`notifier_hub_dashboard.en.yaml`), español (`notifier_hub_dashboard.es.yaml`), portugues europeo (`notifier_hub_dashboard.pt.yaml`) y portugues de Brasil (`notifier_hub_dashboard.pt-BR.yaml`).
 
-La opcion `install_dashboard` elige automaticamente el archivo que coincide con el idioma de tu instancia de Home Assistant (`hass.config.language`, con ingles como idioma de respaldo si no hay coincidencia) y lo copia a:
+Para anadir el panel a Home Assistant, tienes dos opciones:
 
-```text
-/config/notifier_hub_dashboard.yaml
-```
+### Opcion 1: Dashboard desde la interfaz (Recomendado)
+1. En Home Assistant, ve a **Ajustes -> Paneles de control**.
+2. Pulsa en **Anadir panel de control** (ej. Titulo: "Notifier Hub", Icono: `mdi:bell-ring`, URL: `notifier-hub`).
+3. Abre el panel recien creado, pulsa en los tres puntos de la esquina superior derecha y selecciona **Editar panel de control**.
+4. Pulsa de nuevo en los tres puntos y selecciona **Editor de configuracion sin formato**.
+5. Copia el contenido del archivo de tu idioma desde `custom_components/notifier_hub/` (ej. `notifier_hub_dashboard.es.yaml`), pegalo sustituyendo el contenido del editor y pulsa **Guardar**.
 
-Ten cuidado si editas `/config/notifier_hub_dashboard.yaml` manualmente. Cuando `install_dashboard` esta activo, Notifier Hub puede sobrescribir ese archivo despues de cambios de configuracion. Guarda tus cambios personalizados en otro archivo o desactiva `install_dashboard` despues de la copia inicial.
-
-Tambien crea una notificacion persistente, en el mismo idioma, con el bloque que debes añadir a `configuration.yaml`:
+### Opcion 2: Dashboard en modo YAML
+Copia el archivo `notifier_hub_dashboard.<lang>.yaml` de tu preferencia a `/config/notifier_hub_dashboard.yaml` y anade el siguiente bloque a tu `configuration.yaml`:
 
 ```yaml
 lovelace:
@@ -879,8 +887,6 @@ lovelace:
       show_in_sidebar: true
       filename: notifier_hub_dashboard.yaml
 ```
-
-Si no usas `install_dashboard`, puedes copiar manualmente uno de los archivos `notifier_hub_dashboard.<lang>.yaml` a `/config/notifier_hub_dashboard.yaml` y registrar el mismo bloque.
 
 ### Ejemplo De Tarjeta Compacta
 

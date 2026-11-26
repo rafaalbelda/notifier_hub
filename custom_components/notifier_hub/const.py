@@ -25,8 +25,6 @@ CONF_AUTO_VOLUME = "auto_volume"
 CONF_AUTO_VOLUME_CONTROL_PLAYERS = "auto_volume_control_players"
 CONF_AUTO_VOLUME_EXCLUDE_PLAYERS = "auto_volume_exclude_players"
 CONF_NIGHT_DND = "night_dnd"
-CONF_INSTALL_DASHBOARD = "install_dashboard"
-CONF_DASHBOARD_COPY_REQUESTED = "_dashboard_copy_requested"
 CONF_DND_ENTITY = "dnd_entity"
 CONF_GUEST_MODE_ENTITY = "guest_mode_entity"
 CONF_PRIORITY_MESSAGE_ENTITY = "priority_message_entity"
@@ -63,64 +61,6 @@ SERVICE_SEND = "send"
 SERVICE_SET_CONFIG = "set_config"
 EVENT_NOTIFIER = "notifier"
 EVENT_CONFIRMATION = "notifier_hub_confirmation"
-
-DASHBOARD_DEFAULT_LANGUAGE = "en"
-DASHBOARD_AVAILABLE_LANGUAGES = ("en", "es", "pt", "pt-BR")
-
-DASHBOARD_INSTALL_STRINGS: dict[str, dict[str, str]] = {
-    "en": {
-        "title": "Notifier Hub dashboard",
-        "message": (
-            "The Notifier Hub dashboard has been copied to"
-            " `/config/notifier_hub_dashboard.yaml`.\n\n"
-            "To show it in the sidebar, add this to `configuration.yaml`"
-            " and restart Home Assistant:\n\n"
-            "```yaml\nlovelace:\n  dashboards:\n    notifier-hub:\n"
-            "      mode: yaml\n      title: Notifier Hub\n"
-            "      icon: mdi:bell-ring\n      show_in_sidebar: true\n"
-            "      filename: notifier_hub_dashboard.yaml\n```"
-        ),
-    },
-    "es": {
-        "title": "Panel de Notifier Hub",
-        "message": (
-            "El dashboard de Notifier Hub se ha copiado a"
-            " `/config/notifier_hub_dashboard.yaml`.\n\n"
-            "Para mostrarlo en la barra lateral, anade esto a `configuration.yaml`"
-            " y reinicia Home Assistant:\n\n"
-            "```yaml\nlovelace:\n  dashboards:\n    notifier-hub:\n"
-            "      mode: yaml\n      title: Notifier Hub\n"
-            "      icon: mdi:bell-ring\n      show_in_sidebar: true\n"
-            "      filename: notifier_hub_dashboard.yaml\n```"
-        ),
-    },
-    "pt": {
-        "title": "Painel do Notifier Hub",
-        "message": (
-            "O painel do Notifier Hub foi copiado para"
-            " `/config/notifier_hub_dashboard.yaml`.\n\n"
-            "Para o mostrar na barra lateral, adicione isto ao `configuration.yaml`"
-            " e reinicie o Home Assistant:\n\n"
-            "```yaml\nlovelace:\n  dashboards:\n    notifier-hub:\n"
-            "      mode: yaml\n      title: Notifier Hub\n"
-            "      icon: mdi:bell-ring\n      show_in_sidebar: true\n"
-            "      filename: notifier_hub_dashboard.yaml\n```"
-        ),
-    },
-    "pt-BR": {
-        "title": "Painel do Notifier Hub",
-        "message": (
-            "O painel do Notifier Hub foi copiado para"
-            " `/config/notifier_hub_dashboard.yaml`.\n\n"
-            "Para exibi-lo na barra lateral, adicione isto ao `configuration.yaml`"
-            " e reinicie o Home Assistant:\n\n"
-            "```yaml\nlovelace:\n  dashboards:\n    notifier-hub:\n"
-            "      mode: yaml\n      title: Notifier Hub\n"
-            "      icon: mdi:bell-ring\n      show_in_sidebar: true\n"
-            "      filename: notifier_hub_dashboard.yaml\n```"
-        ),
-    },
-}
 
 HA_EVENT_STRINGS: dict[str, dict[str, str]] = {
     "en": {
@@ -170,19 +110,3 @@ def normalize_locale(language: str) -> str:
     if len(parts) > 1 and parts[1]:
         return f"{lang}-{parts[1].upper()}"
     return lang
-
-
-def resolve_dashboard_language(language: str) -> str:
-    """Resolve a hass.config.language value to one of DASHBOARD_AVAILABLE_LANGUAGES."""
-    normalized = normalize_locale(language)
-    # Exact (normalized) match first: pt_BR / PT-br -> pt-BR.
-    for candidate in DASHBOARD_AVAILABLE_LANGUAGES:
-        if normalize_locale(candidate) == normalized:
-            return candidate
-    # Fall back to the primary language subtag: pt-PT -> pt.
-    primary = normalized.split("-")[0]
-    for candidate in DASHBOARD_AVAILABLE_LANGUAGES:
-        if normalize_locale(candidate).split("-")[0] == primary:
-            return candidate
-    # Unsupported languages fall back to English.
-    return DASHBOARD_DEFAULT_LANGUAGE

@@ -20,12 +20,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 class NotifierHubPeriodTime(NotifierHubEntity, TimeEntity):
     _attr_icon = "mdi:clock-time-four-outline"
-    _attr_has_entity_name = True
 
     def __init__(self, coordinator, key: str, label: str, default_time: str) -> None:
-        super().__init__(coordinator, f"auto_volume_{key}_time", f"Notifier Hub {label} Start")
-        self._attr_name = None
-        self._attr_translation_key = f"auto_volume_{key}_time"
+        entity_key = f"auto_volume_{key}_time"
+        super().__init__(coordinator, entity_key, translation_key=entity_key)
         self.default_time = default_time
 
     @property

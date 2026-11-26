@@ -13,7 +13,7 @@
         }
       },
       "day_period_volume": {
-        "name": "Period volume"
+        "name": "Day period volume"
       },
       "confirmation": {
         "name": "Confirmation",
@@ -23,6 +23,21 @@
           "confirmed": "Confirmed",
           "expired": "Expired"
         }
+      },
+      "debug": {
+        "name": "Debug"
+      },
+      "last_message": {
+        "name": "Last message"
+      },
+      "pending_confirmations": {
+        "name": "Pending confirmations"
+      },
+      "personal_assistant": {
+        "name": "Personal assistant"
+      },
+      "home_people": {
+        "name": "Home people"
       }
     },
     "number": {
@@ -64,6 +79,71 @@
       "auto_volume_night_time": {
         "name": "Night start"
       }
+    },
+    "binary_sensor": {
+      "alexa_speak": {
+        "name": "Alexa speak"
+      },
+      "google_speak": {
+        "name": "Google speak"
+      },
+      "home_occupied": {
+        "name": "Home occupied"
+      }
+    },
+    "switch": {
+      "text_notifications": {
+        "name": "Text notifications"
+      },
+      "screen_notifications": {
+        "name": "Screen notifications"
+      },
+      "speech_notifications": {
+        "name": "Speech notifications"
+      },
+      "speech_home_only": {
+        "name": "Speech home only"
+      },
+      "alexa_notifications": {
+        "name": "Alexa notifications"
+      },
+      "google_notifications": {
+        "name": "Google notifications"
+      },
+      "phone_notifications": {
+        "name": "Phone notifications"
+      },
+      "ha_event_notifications": {
+        "name": "Home Assistant event notifications"
+      },
+      "auto_volume": {
+        "name": "Auto volume"
+      },
+      "auto_volume_control_players": {
+        "name": "Auto volume controls players"
+      },
+      "dnd_mode": {
+        "name": "DND"
+      },
+      "night_dnd": {
+        "name": "Night DND"
+      },
+      "guest_mode": {
+        "name": "Guest mode"
+      },
+      "priority_message": {
+        "name": "Priority message"
+      }
+    },
+    "text": {
+      "dashboard_message": {
+        "name": "Dashboard message"
+      }
+    },
+    "button": {
+      "send_dashboard_message": {
+        "name": "Send dashboard message"
+      }
     }
   },
   "config": {
@@ -104,8 +184,7 @@
           "auto_volume": "Auto volume",
           "auto_volume_control_players": "Control player volumes automatically",
           "night_dnd": "Enable DND during the night",
-          "auto_volume_exclude_players": "Excluded media players",
-          "install_dashboard": "Install dashboard"
+          "auto_volume_exclude_players": "Excluded media players"
         },
         "data_description": {
           "personal_assistant": "Name used in generated messages when the assistant is mentioned.",
@@ -142,19 +221,16 @@
           "auto_volume": "Automatically adjusts TTS volume based on the current day period.",
           "auto_volume_control_players": "When enabled, Auto Volume also changes the configured media players automatically. When disabled, it is only used as the default volume for hub messages.",
           "night_dnd": "Automatically enables do not disturb while the current Auto Volume period is Night or Late night.",
-          "auto_volume_exclude_players": "Media players that should not be controlled by auto volume.",
-          "install_dashboard": "Copies the Notifier Hub dashboard YAML and shows the setup instructions."
+          "auto_volume_exclude_players": "Media players that should not be controlled by auto volume."
         },
         "sections": {
           "general_section": {
             "name": "General",
             "data": {
-              "personal_assistant": "Personal assistant",
-              "install_dashboard": "Install dashboard"
+              "personal_assistant": "Personal assistant"
             },
             "data_description": {
-              "personal_assistant": "Name used in generated messages when the assistant is mentioned.",
-              "install_dashboard": "Copies the Notifier Hub dashboard YAML and shows the setup instructions."
+              "personal_assistant": "Name used in generated messages when the assistant is mentioned."
             }
           },
           "persons_section": {
@@ -300,8 +376,7 @@
           "auto_volume": "Auto volume",
           "auto_volume_control_players": "Control player volumes automatically",
           "night_dnd": "Enable DND during the night",
-          "auto_volume_exclude_players": "Excluded media players",
-          "install_dashboard": "Install dashboard"
+          "auto_volume_exclude_players": "Excluded media players"
         },
         "data_description": {
           "personal_assistant": "Name used in generated messages when the assistant is mentioned.",
@@ -338,19 +413,16 @@
           "auto_volume": "Automatically adjusts TTS volume based on the current day period.",
           "auto_volume_control_players": "When enabled, Auto Volume also changes the configured media players automatically. When disabled, it is only used as the default volume for hub messages.",
           "night_dnd": "Automatically enables do not disturb while the current Auto Volume period is Night or Late night.",
-          "auto_volume_exclude_players": "Media players that should not be controlled by auto volume.",
-          "install_dashboard": "Copies the Notifier Hub dashboard YAML and shows the setup instructions."
+          "auto_volume_exclude_players": "Media players that should not be controlled by auto volume."
         },
         "sections": {
           "general_section": {
             "name": "General",
             "data": {
-              "personal_assistant": "Personal assistant",
-              "install_dashboard": "Install dashboard"
+              "personal_assistant": "Personal assistant"
             },
             "data_description": {
-              "personal_assistant": "Name used in generated messages when the assistant is mentioned.",
-              "install_dashboard": "Copies the Notifier Hub dashboard YAML and shows the setup instructions."
+              "personal_assistant": "Name used in generated messages when the assistant is mentioned."
             }
           },
           "persons_section": {

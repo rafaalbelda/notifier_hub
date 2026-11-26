@@ -19,7 +19,7 @@ class NotifierHubSendDashboardMessageButton(NotifierHubEntity, ButtonEntity):
         super().__init__(
             coordinator,
             "send_dashboard_message",
-            "Notifier Hub Send Dashboard Message",
+            translation_key="send_dashboard_message",
         )
 
     async def async_press(self) -> None:

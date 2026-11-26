@@ -126,7 +126,7 @@ send:
 
 set_config:
   name: Actualizar configuración runtime
-  description: Actualiza opciones de la integración sin reiniciar Home Assistant.
+  description: Actualiza opciones permitidas de la integración sin reiniciar Home Assistant (solo administradores).
   fields:
     auto_volume:
       name: Auto Volumen

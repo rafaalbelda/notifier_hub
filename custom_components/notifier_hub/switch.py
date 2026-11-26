@@ -50,7 +50,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 class NotifierHubSwitch(NotifierHubEntity, SwitchEntity):
     def __init__(self, coordinator, key: str, name: str, default: bool, icon: str) -> None:
-        super().__init__(coordinator, key, name)
+        super().__init__(coordinator, key, translation_key=key)
         self.default = default
         self._attr_icon = icon
 

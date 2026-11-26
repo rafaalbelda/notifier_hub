@@ -49,20 +49,27 @@ The official Home Assistant Alexa Devices integration uses a different notificat
 
 ### HACS
 
-You can install Notifier Hub from HACS as a custom repository:
-
 [![Open your Home Assistant instance and open this repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=rafaalbelda&repository=notifier_hub&category=integration)
 
-1. Open HACS in Home Assistant.
-2. Select the three dots in the top-right corner and open **Custom repositories**.
-3. Add `https://github.com/rafaalbelda/notifier_hub`.
-4. Select the **Integration** category.
-5. Install **Notifier Hub** and restart Home Assistant.
-6. Add the integration from:
+#### Recommended (HACS default repository)
+
+1. Open **HACS** in Home Assistant.
+2. Search for **Notifier Hub** and open it.
+3. Click **Download** and restart Home Assistant.
+4. Add the integration from:
 
 ```text
 Settings > Devices & services > Add integration > Notifier Hub
 ```
+
+#### Alternative (Custom repository)
+
+If **Notifier Hub** does not appear in HACS search yet, you can add it manually as a custom repository:
+
+1. Open **HACS** in Home Assistant.
+2. Select the three dots in the top-right corner and open **Custom repositories**.
+3. Add `https://github.com/rafaalbelda/notifier_hub` and select the **Integration** category.
+4. Download **Notifier Hub**, restart Home Assistant, and add the integration under **Settings > Devices & services > Add integration > Notifier Hub**.
 
 ### Manual installation
 
@@ -140,7 +147,6 @@ notifier_hub:
   guest_mode_entity: switch.notifier_hub_guest_mode
   priority_message_entity: switch.notifier_hub_priority_message
   location_tracker: group.notifier_location_tracker
-  install_dashboard: true
 ```
 
 ### Precedence order
@@ -840,15 +846,17 @@ If `switch.notifier_hub_night_dnd` is enabled, the `Night` and `Late night` peri
 
 The integration ships a Lovelace panel with status, TTS activity, test buttons, channels, and Auto Volume controls, available in English (`notifier_hub_dashboard.en.yaml`), Spanish (`notifier_hub_dashboard.es.yaml`), European Portuguese (`notifier_hub_dashboard.pt.yaml`) and Brazilian Portuguese (`notifier_hub_dashboard.pt-BR.yaml`).
 
-The `install_dashboard` option automatically picks the file matching your Home Assistant instance language (`hass.config.language`, falling back to English if there is no match) and copies it to:
+To add the dashboard to Home Assistant, you have two options:
 
-```text
-/config/notifier_hub_dashboard.yaml
-```
+### Option 1: UI Dashboard (Recommended)
+1. In Home Assistant, navigate to **Settings -> Dashboards**.
+2. Click **Add Dashboard** (e.g. Title: "Notifier Hub", Icon: `mdi:bell-ring`, URL: `notifier-hub`).
+3. Open the newly created dashboard, click the three dots in the top right, and choose **Edit Dashboard**.
+4. Click the three dots again and select **Raw configuration editor**.
+5. Copy the contents of the bundled file matching your language from `custom_components/notifier_hub/` (e.g. `notifier_hub_dashboard.en.yaml`), paste it replacing the editor contents, and click **Save**.
 
-Be careful if you edit `/config/notifier_hub_dashboard.yaml` manually. When `install_dashboard` is enabled, Notifier Hub may overwrite that file after configuration changes. Keep custom dashboard edits in a separate file, or disable `install_dashboard` after the initial copy.
-
-It also creates a persistent notification, in the same language, with the block you need to add to `configuration.yaml`:
+### Option 2: YAML Mode Dashboard
+Copy your preferred `notifier_hub_dashboard.<lang>.yaml` to `/config/notifier_hub_dashboard.yaml` and add the following block to your `configuration.yaml`:
 
 ```yaml
 lovelace:
@@ -860,8 +868,6 @@ lovelace:
       show_in_sidebar: true
       filename: notifier_hub_dashboard.yaml
 ```
-
-If you do not use `install_dashboard`, you can manually copy one of the `notifier_hub_dashboard.<lang>.yaml` files to `/config/notifier_hub_dashboard.yaml` and register the same block.
 
 ### Compact Card Example
 

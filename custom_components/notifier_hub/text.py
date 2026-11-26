@@ -22,7 +22,7 @@ class NotifierHubDashboardMessageText(NotifierHubEntity, TextEntity):
         super().__init__(
             coordinator,
             STATE_DASHBOARD_MESSAGE,
-            "Notifier Hub Dashboard Message",
+            translation_key=STATE_DASHBOARD_MESSAGE,
         )
 
     @property

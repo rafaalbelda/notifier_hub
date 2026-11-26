@@ -17,7 +17,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 class NotifierHubBinarySensor(NotifierHubEntity, BinarySensorEntity):
     def __init__(self, coordinator, key: str, name: str, state_key: str, attr_key: str) -> None:
-        super().__init__(coordinator, key, name)
+        super().__init__(coordinator, key, translation_key=key)
         self.state_key = state_key
         self.attr_key = attr_key
 
@@ -34,7 +34,7 @@ class NotifierHubHomeOccupiedBinarySensor(NotifierHubEntity, BinarySensorEntity)
     _attr_device_class = BinarySensorDeviceClass.OCCUPANCY
 
     def __init__(self, coordinator) -> None:
-        super().__init__(coordinator, "home_occupied", "Notifier Hub Home Occupied")
+        super().__init__(coordinator, "home_occupied", translation_key="home_occupied")
 
     @property
     def is_on(self):
